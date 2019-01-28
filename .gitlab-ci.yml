@@ -1,0 +1,7 @@
+stages:
+        - build
+
+job 1:
+        stage: build
+        script: "make"
+
