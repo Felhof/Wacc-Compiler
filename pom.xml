@@ -21,6 +21,7 @@
       <version>4.12</version>
       <scope>test</scope>
     </dependency>
+
   </dependencies>
 
   <build>
@@ -32,8 +33,11 @@
         <dependencies>
           <dependency>
             <groupId>org.apache.maven.surefire</groupId>
-            <artifactId>surefire-junit47</artifactId>
-            <version>2.12.2</version>
+            <artifactId>surefire-logger-api</artifactId>
+            <version>2.21.0</version>
+            <!-- to get around bug https://github.com/junit-team/junit5/issues/1367 -->
+            <scope>test</scope>
+            <optional>true</optional>
           </dependency>
         </dependencies>
       </plugin>
