@@ -30,11 +30,17 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>3.0.0-M3</version>
+        <configuration>
+          <forkCount>1</forkCount>
+          <reuseForks>false</reuseForks>
+          <groups>Basic</groups>
+        </configuration>
         <dependencies>
           <dependency>
             <groupId>org.apache.maven.surefire</groupId>
             <artifactId>surefire-logger-api</artifactId>
             <version>2.21.0</version>
+
             <!-- to get around bug https://github.com/junit-team/junit5/issues/1367 -->
             <optional>true</optional>
           </dependency>
