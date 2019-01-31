@@ -2,7 +2,7 @@
 bin
 src/main/java/antlr
 .idea/
-target/
+
 
 #ignore Java class files
 *.class
