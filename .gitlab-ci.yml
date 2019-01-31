@@ -13,4 +13,4 @@ job 2:
           - make
           - mvn test -Dgroups="Basic"
         only:
-          - $CI_COMMIT_MESSAGE == "testing automation feature"
+          - $CI_COMMIT_MESSAGE =~ /\[test basic\]/i
