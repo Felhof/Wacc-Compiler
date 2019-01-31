@@ -1,24 +1,23 @@
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import org.junit.experimental.categories.Category;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 public class UnitTests {
 
   interface Basic {}
 
-  @Category(Basic.class)
-  public static class BasicUnitTests {
+//  @Category(Basic.class)
+//  public static class BasicUnitTests {
 
     @Test
-    void basicWACCProgram() {
+    public void basicWACCProgram() {
       assertTrue(true);
     }
-  }
+//  }
 
   @Test
-  void mediumWACCProgram() {
+  public void mediumWACCProgram() {
     assertFalse(false);
   }
 }
