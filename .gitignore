@@ -1,6 +1,9 @@
 #ignore generated binary files and auto-generated ANTLR code
 bin
-src/java/antlr
+src/main/java/antlr
+.idea/
+
 
 #ignore Java class files
 *.class
+
