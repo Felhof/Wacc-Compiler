@@ -13,4 +13,4 @@ job 2:
           - make
           - mvn test -Dgroups="Basic"
         only:
-          - 2-set-yml-file-to-automate-test-pipeline
+          - addingGrammar
