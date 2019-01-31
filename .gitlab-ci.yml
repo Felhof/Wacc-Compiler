@@ -12,5 +12,5 @@ job 2:
         script:
           - make
           - mvn test -Dgroups="Basic"
-        except:
-          - $CI_COMMIT_MESSAGE =~ /\[test basic\]/i
+        only:
+          - 2-set-yml-file-to-automate-test-pipeline
