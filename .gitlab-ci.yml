@@ -11,5 +11,5 @@ job 2:
         stage: test
         script:
           - make
-          - mvn test
+          - mvn test -Dgroups="Basic"
 
