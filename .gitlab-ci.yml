@@ -13,4 +13,4 @@ job 2:
           - make
           - mvn test -Dgroups="Basic"
         only:
-          - addingGrammar
+          - basic
