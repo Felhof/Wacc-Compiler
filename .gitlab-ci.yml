@@ -13,5 +13,4 @@ job 2:
           - make
           - mvn test -Dgroups="Basic"
           only:
-            variables:
-              - $CI_COMMIT_MESSAGE =~ /\[Basic\]/i
+            variables: $CI_COMMIT_MESSAGE =~ /\[Basic\]/i
