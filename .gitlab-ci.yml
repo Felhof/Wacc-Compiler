@@ -14,4 +14,4 @@ job 2:
           - mvn test -Dgroups="Basic"
         only:
           variables:
-            - $CI_COMMIT_MESSAGE =~ "testing automation feature"
+            - $CI_COMMIT_MESSAGE == "testing automation feature"
