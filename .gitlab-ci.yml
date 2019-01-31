@@ -11,4 +11,6 @@ job 2:
         stage: test
         script:
           - make
-          - mvn test -Dgroups="Basic"
+          - mvn test -Dgroups="Arithmetic"
+        only:
+          - lexer
