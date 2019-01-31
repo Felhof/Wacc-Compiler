@@ -10,5 +10,5 @@ job 1:
 job 2:
         stage: test
         script:
-          - mvn test -Dgroups="Basic, Advanced"
-
+          - make
+          - mvn test -Dgroups="Basic"
