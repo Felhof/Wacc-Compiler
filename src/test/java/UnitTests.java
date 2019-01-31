@@ -21,7 +21,7 @@ public class UnitTests {
     assertTrue(true);
   }
 
-  @Category(Advanced.class)
+  @Category(Medium.class)
     @Test
     public void mediumWACCProgram() {
     assertFalse(false);
