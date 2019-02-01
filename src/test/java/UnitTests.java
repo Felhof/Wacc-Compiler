@@ -21,5 +21,10 @@ public class UnitTests {
     assertTrue(true);
   }
 
+  @Category(Medium.class)
+    @Test
+    public void mediumWACCProgram() {
+    assertFalse(false);
+  }
 }
 
