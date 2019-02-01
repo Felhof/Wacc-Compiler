@@ -1,9 +1,10 @@
 #ignore generated binary files and auto-generated ANTLR code
 bin
 src/main/java/antlr
-.idea/
-
+target
+antlr_config/BasicLexer.tokens
 
 #ignore Java class files
 *.class
+
 
