@@ -21,6 +21,7 @@ public class Main {
     }
 
     BasicLexer lexer = new BasicLexer(input);
+
     return lexer.getAllTokens();
   }
 

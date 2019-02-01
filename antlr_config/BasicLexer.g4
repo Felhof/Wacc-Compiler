@@ -13,6 +13,10 @@ fragment DIGIT: '0'..'9' ;
 
 INTEGER: DIGIT+ ;
 
+//Ignore Whitespace and Newline
+WHITESPACE : ' ' -> skip ;
+NEWLINE : '\n' -> skip ;
+
 
 
 
