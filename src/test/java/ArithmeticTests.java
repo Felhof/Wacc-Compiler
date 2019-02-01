@@ -58,6 +58,9 @@ public class ArithmeticTests {
       String actualToken = tokens.get(i).toString();
       Matcher matcher = pattern.matcher(actualToken);
 
+      System.out.println("Expected Token: " + expectedTokens[i] + "\n");
+      System.out.println("Actual Token: " + actualToken + "\n");
+
       assertTrue(matcher.matches());
     }
   }

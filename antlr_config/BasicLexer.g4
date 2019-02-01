@@ -111,3 +111,7 @@ WS: ' ' -> channel(HIDDEN) ;
 COMMENT: HASH .*? EOL -> channel(HIDDEN) ;
 
 EOL: ('\n' | '\r' | '\n\r' | '\r\n') -> skip;
+
+//Ignore Whitespace and Newline
+WHITESPACE : ' ' -> skip ;
+NEWLINE : '\n' -> skip ;
