@@ -2,6 +2,7 @@
 bin
 src/java/antlr
 target
+antlr_config/BasicLexer.tokens
 
 #ignore Java class files
 *.class
