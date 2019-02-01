@@ -15,7 +15,7 @@ interface Arithmetic {}
 @Category(Arithmetic.class)
 public class ArithmeticTests {
 
-  final String examplesPath = "examples/arithmetic/";
+  final String examplesPath = "src/test/examples/arithmetic/";
 
   final String number = "'[0-9]+',<[0-9]+>";
   final String plus = "'\\+',<[0-9]+>";
