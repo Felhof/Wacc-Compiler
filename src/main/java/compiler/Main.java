@@ -1,6 +1,8 @@
 package compiler;
 
 import java.io.IOException;
+import java.nio.file.Paths;
+
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -19,6 +21,17 @@ public class Main {
     CharStream input = null;
     try {
       input = CharStreams.fromFileName("hello.wacc");
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+
+    return new BasicLexer(input);
+  }
+
+  public static BasicLexer lexer(String filename) {
+    CharStream input = null;
+    try {
+      input = CharStreams.fromFileName(filename);
     } catch (IOException e) {
       e.printStackTrace();
     }

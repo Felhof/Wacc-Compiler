@@ -31,7 +31,7 @@ public class ArithmeticTests {
 
     String[] expectedTokens = new String[] {number , plus, number, eof};
 
-    List<? extends Token> tokens = Main.lexer(examplesPath + "simpleAddition.wacc");
+    List<? extends Token> tokens = Main.lexer(examplesPath + "simpleAddition.wacc").getAllTokens();
 
     for (int i = 0; i < tokens.size(); i++){
       Pattern pattern = CreatePattern(expectedTokens[i]);
@@ -48,7 +48,7 @@ public class ArithmeticTests {
 
     String[] expectedTokens = new String[] {number, minus, number, eof};
 
-    List<? extends Token> tokens = Main.lexer(examplesPath + "simpleSubtraction.wacc");
+    List<? extends Token> tokens = Main.lexer(examplesPath + "simpleSubtraction.wacc").getAllTokens();
 
     System.out.println("Tokens: " + tokens.toString());
 
@@ -66,7 +66,7 @@ public class ArithmeticTests {
   public void BracketTest(){
     String[] expectedTokens = new String[] {open, number , plus, number, close, plus, number, eof};
 
-    List<? extends Token> tokens = Main.lexer(examplesPath + "brackets.wacc");
+    List<? extends Token> tokens = Main.lexer(examplesPath + "brackets.wacc").getAllTokens();
 
     System.out.println("Tokens: " + tokens.toString());
 
