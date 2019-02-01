@@ -1,7 +1,7 @@
 lexer grammar BasicLexer;
 
 //program keywords
-BEG: 'begin' ;
+BEG: 'begin';
 END: 'end' ;
 
 //function keywords
@@ -106,9 +106,8 @@ FALSE: 'false' ;
 //pair-liter
 NULL: 'null' ;
 
-//EOL
-EOL: '\n' | '\r' | '\n\r' | '\r\n';
+WS: ' ' -> channel(HIDDEN) ;
 
-WHITESPACE: ' ' -> skip ;
+COMMENT: HASH .*? EOL -> channel(HIDDEN) ;
 
-ENDOFLINE: '\n' -> skip ;
+EOL: ('\n' | '\r' | '\n\r' | '\r\n') -> skip;

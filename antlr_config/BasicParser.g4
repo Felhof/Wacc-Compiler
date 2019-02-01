@@ -4,7 +4,7 @@ options {
   tokenVocab=BasicLexer;
 }
 
-prog: BEG (func)* stat END EOF ;
+prog: BEG (func)* stat END EOF;
 
 func:
       type IDENT OPEN param_list CLOSE IS stat END ;
@@ -28,7 +28,7 @@ stat:
     | IF expr THEN stat ELSE stat FI
     | WHILE expr DO stat DONE
     | BEG stat END
-    | stat SEMICOL stat ;
+    | stat SEMICOL stat;
 
 assign_lhs:
       IDENT
@@ -128,9 +128,4 @@ array_liter:
 pair_liter:
       NULL ;
 
-//comment:
-//      HASH ~(EOL)* EOL ;
 
-
-// EOF indicates that the program must consume to the end of the input.
-// prog: (expr)*  EOF ;
