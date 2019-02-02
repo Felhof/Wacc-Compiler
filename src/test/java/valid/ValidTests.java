@@ -14,13 +14,13 @@ import org.junit.experimental.categories.Category;
 
 interface basicAndVariables {}
 interface ifAndPairs{}
+interface sequenceAndScope{}
+interface arrayAndWhile{}
 
 public class ValidTests {
 
-  @Category(basicAndVariables.class)
-  @Test
-  public void BasicAndVariables(){
-    try(BufferedReader br = new BufferedReader(new FileReader("src/test/java/valid/basicAndVariables.txt"))) {
+  public static void checkCompilation(String filenames) {
+    try(BufferedReader br = new BufferedReader(new FileReader(filenames))) {
       for(String line; (line = br.readLine()) != null; ) {
         System.out.println("Compile.. " + line);
         final ByteArrayOutputStream errStream = new ByteArrayOutputStream();
@@ -31,23 +31,35 @@ public class ValidTests {
     } catch (IOException e) {
       e.printStackTrace();
     }
+  }
+
+  @Category(basicAndVariables.class)
+  @Test
+  public void BasicAndVariables(){
+    checkCompilation("src/test/java/valid/basicAndVariables.txt");
   }
 
   @Category(ifAndPairs.class)
   @Test
   public void IfAndPairs() {
-    try(BufferedReader br = new BufferedReader(new FileReader("src/test/java/valid/ifAndPairs.txt"))) {
-      for(String line; (line = br.readLine()) != null; ) {
-        System.out.println("Compile.. " + line);
-        final ByteArrayOutputStream errStream = new ByteArrayOutputStream();
-        System.setErr(new PrintStream(errStream));
-        Main.compileProg(line);
-        assertThat(errStream.toString(), is(""));
-      }
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
+    checkCompilation("src/test/java/valid/ifAndPairs.txt");
   }
+
+  @Category(sequenceAndScope.class)
+  @Test
+  public void SequenceAndScope() {
+    checkCompilation("src/test/java/valid/sequenceAndScope.txt");
+  }
+
+  @Category(arrayAndWhile.class)
+  @Test
+  public void ArrayAndWhile() {
+    checkCompilation("src/test/java/valid/arrayAndWhile.txt");
+  }
+
+
+
+
 
 
 

@@ -61,7 +61,9 @@ base_type:
     | STRING ;
 
 array_type:
-      OPENSQ type CLOSESQ ;
+      base_type OPENSQ CLOSESQ
+    | array_type OPENSQ CLOSESQ
+    | pair_type OPENSQ CLOSESQ;
 
 pair_type:
       PAIR OPEN pair_elem_type COMMA pair_elem_type CLOSE ;

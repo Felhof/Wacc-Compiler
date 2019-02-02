@@ -15,6 +15,8 @@ APOS: '\'' ;
 QUOT: '"' ;
 BACKSLASH: '\\' ;
 HASH: '#' ;
+DOT: '.' ;
+QMARK: '?' ;
 
 //statement keywords
 SKP: 'skip' ;
