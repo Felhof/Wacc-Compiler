@@ -16,6 +16,7 @@ interface basicAndVariables {}
 interface ifAndPairs{}
 interface sequenceAndScope{}
 interface arrayAndWhile{}
+interface functions{}
 
 public class ValidTests {
 
@@ -56,6 +57,12 @@ public class ValidTests {
   public void ArrayAndWhile() {
     checkCompilation("src/test/java/valid/arrayAndWhile.txt");
   }
+
+//  @Category(functions.class)
+//  @Test
+//  public void Functions() {
+//    checkCompilation("src/test/java/valid/functions.txt");
+//  }
 
 
 

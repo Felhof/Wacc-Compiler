@@ -17,6 +17,7 @@ BACKSLASH: '\\' ;
 HASH: '#' ;
 DOT: '.' ;
 QMARK: '?' ;
+BAR: '|' ;
 
 //statement keywords
 SKP: 'skip' ;
