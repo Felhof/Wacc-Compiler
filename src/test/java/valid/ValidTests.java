@@ -12,11 +12,12 @@ import java.io.PrintStream;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
-interface BasicAndVariables{}
+interface basicAndVariables {}
+interface ifAndPairs{}
 
 public class ValidTests {
 
-  @Category(BasicAndVariables.class)
+  @Category(basicAndVariables.class)
   @Test
   public void BasicAndVariables(){
     try(BufferedReader br = new BufferedReader(new FileReader("src/test/java/valid/basicAndVariables.txt"))) {
@@ -30,9 +31,28 @@ public class ValidTests {
     } catch (IOException e) {
       e.printStackTrace();
     }
-
-
   }
+
+  @Category(ifAndPairs.class)
+  @Test
+  public void IfAndPairs() {
+    try(BufferedReader br = new BufferedReader(new FileReader("src/test/java/valid/ifAndPairs.txt"))) {
+      for(String line; (line = br.readLine()) != null; ) {
+        System.out.println("Compile.. " + line);
+        final ByteArrayOutputStream errStream = new ByteArrayOutputStream();
+        System.setErr(new PrintStream(errStream));
+        Main.compileProg(line);
+        assertThat(errStream.toString(), is(""));
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+
+
+
+
 
 
 }

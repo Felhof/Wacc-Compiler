@@ -120,7 +120,7 @@ str_liter:
       QUOT (character)* QUOT ;
 
 character:
-      ~(CHAR_EXC)|BACKSLASH ESCAPED_CHAR ;
+      ~(CHAR_EXC) | ESCAPED_CHAR ;
 
 array_liter:
       OPENSQ (expr (COMMA expr)*)? CLOSESQ ;

@@ -10,6 +10,7 @@ IS: 'is' ;
 //misc
 COMMA: ',' ;
 SEMICOL: ';' ;
+COL: ':' ;
 APOS: '\'' ;
 QUOT: '"' ;
 BACKSLASH: '\\' ;
@@ -81,9 +82,12 @@ CLOSE: ')' ;
 OPENSQ: '[' ;
 CLOSESQ: ']' ;
 
+OPENC: '{' ;
+CLOSEC: '}' ;
+
 //characters
 
-CHAR_EXC: '\\'| '\'' | '"' ;
+CHAR_EXC: BACKSLASH| APOS | QUOT ;
 
 //letters
 
@@ -97,7 +101,7 @@ INT_SIGN: PLUS | MINUS ;
 
 INTEGER: (INT_SIGN)?(DIGIT)+ ;
 
-ESCAPED_CHAR: '0' | 'b' | 't' | 'n' | 'f' | 'r' | '"' | '\'' | '\\' ;
+ESCAPED_CHAR: BACKSLASH ('0' | 'b' | 't' | 'n' | 'f' | 'r' | QUOT | APOS | BACKSLASH) ;
 
 //bool-liter
 TRUE: 'true' ;
@@ -106,8 +110,8 @@ FALSE: 'false' ;
 //pair-liter
 NULL: 'null' ;
 
-WS: ' ' -> channel(HIDDEN) ;
+WS: [ \t\r\n]+ -> channel(HIDDEN) ;
 
 COMMENT: HASH .*? EOL -> channel(HIDDEN) ;
 
-EOL: ('\n' | '\r' | '\n\r' | '\r\n') -> skip;
+EOL: ('\n' | '\r' | '\n\r' | '\r\n' |'\t') -> skip;
