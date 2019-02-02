@@ -85,8 +85,6 @@ CLOSESQ: ']' ;
 
 CHAR_EXC: '\\'| '\'' | '"' ;
 
-ESCAPED_CHAR: '0' | 'b' | 't' | 'n' | 'f' | 'r' | '"' | '\'' | '\\' ;
-
 //letters
 
 fragment LOWER: 'a'..'z' ;
@@ -98,6 +96,8 @@ fragment DIGIT: '0'..'9' ;
 INT_SIGN: PLUS | MINUS ;
 
 INTEGER: (INT_SIGN)?(DIGIT)+ ;
+
+ESCAPED_CHAR: '0' | 'b' | 't' | 'n' | 'f' | 'r' | '"' | '\'' | '\\' ;
 
 //bool-liter
 TRUE: 'true' ;

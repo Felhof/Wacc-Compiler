@@ -16,7 +16,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 public class Main {
 
   public static void main(String[] args) {
-
+    compileProg("test.wacc");
   }
 
   public static BasicLexer lexFile(String filename) {
@@ -44,13 +44,12 @@ public class Main {
     parser.removeErrorListeners();
     parser.addErrorListener(new VerboseListener());
     ParseTree tree = parser.prog();
-
-    System.out.println(tree.toStringTree(parser));
+    // System.out.println(tree.toStringTree(parser));
     return tree;
   }
 
   public static String compileProg(String filename) {
-    BasicLexer lexer = lexFile("src/test/invalid/syntaxErr/basic/badComment.wacc");
+    BasicLexer lexer = lexFile(filename);
     CommonTokenStream tokenStream = new CommonTokenStream(lexer);
     ParseTree tree = parser(tokenStream);
     return null;
@@ -71,7 +70,6 @@ public class Main {
           offendingSymbol+": "+msg);
     }
   }
-
 
 }
 
