@@ -13,4 +13,4 @@ job 2:
           - make
           - mvn test # mvn test -Dgroups="<Test Category>"
         only:
-          - 7-test-advanced-valid-programs  # only or except: - <name of branch>
+          - master  # only or except: - <name of branch>
