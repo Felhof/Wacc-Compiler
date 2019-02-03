@@ -13,4 +13,4 @@ job 2:
           - make
           - mvn test # mvn test -Dgroups="<Test Category>"
         only:
-          - lexer_tests # only or except: - <name of branch>
+          - 6-test-runtime-error-programs # only or except: - <name of branch>

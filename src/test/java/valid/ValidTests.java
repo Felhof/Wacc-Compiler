@@ -19,6 +19,7 @@ interface arrayAndWhile{}
 interface functions{}
 interface expressions{}
 interface io{}
+interface runtimeErr{}
 
 public class ValidTests {
 
@@ -77,6 +78,13 @@ public class ValidTests {
 //  public void IO() {
 //    checkCompilation("src/test/java/valid/io.txt");
 //  }
+  @Category(runtimeErr.class)
+  @Test
+  public void RuntimeErr(){
+    checkCompilation("src/test/java/valid/runtimeErr.txt");
+  }
+
+
 
 
 
