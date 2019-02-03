@@ -20,6 +20,7 @@ interface functions{}
 interface expressions{}
 interface io{}
 interface runtimeErr{}
+interface advanced{}
 
 public class ValidTests {
 
@@ -78,10 +79,17 @@ public class ValidTests {
 //  public void IO() {
 //    checkCompilation("src/test/java/valid/io.txt");
 //  }
+
   @Category(runtimeErr.class)
   @Test
   public void RuntimeErr(){
     checkCompilation("src/test/java/valid/runtimeErr.txt");
+  }
+
+  @Category(advanced.class)
+  @Test
+  public void Advanced() {
+    checkCompilation("src/test/java/valid/advanced.txt");
   }
 
 

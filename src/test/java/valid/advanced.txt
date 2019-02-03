@@ -1,0 +1,3 @@
+src/test/valid/advanced/binarySortTree.wacc
+src/test/valid/advanced/hashTable.wacc
+src/test/valid/advanced/ticTacToe.wacc
