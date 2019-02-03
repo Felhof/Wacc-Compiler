@@ -13,4 +13,4 @@ job 2:
           - make
           - mvn test # mvn test -Dgroups="<Test Category>"
         only:
-          - 6-test-runtime-error-programs # only or except: - <name of branch>
+          - master # only or except: - <name of branch>
