@@ -92,10 +92,6 @@ CLOSESQ: ']' ;
 OPENC: '{' ;
 CLOSEC: '}' ;
 
-//characters
-
-CHAR_EXC: BACKSLASH | APOS | QUOT ;
-
 //letters
 
 fragment LOWER: 'a'..'z' ;
@@ -109,8 +105,6 @@ INT_SIGN: PLUS | MINUS ;
 //INTEGER: (INT_SIGN)?(DIGIT)+ ;
 INTEGER: (DIGIT)+ ;
 
-ESCAPED_CHAR: BACKSLASH ('0' | 'b' | 't' | 'n' | 'f' | 'r' | QUOT | APOS | BACKSLASH) ;
-
 //bool-liter
 TRUE: 'true' ;
 FALSE: 'false' ;
@@ -123,3 +117,16 @@ WS: (' ' | '\t' | '\n')+ -> channel(WHITESPACE) ;
 COMMENT: HASH .*? EOL -> channel(COMMENTS) ;
 
 EOL: ('\n' | '\r' | '\n\r' | '\r\n' |'\t' | '\n\n') -> skip;
+
+//Strings & chars
+
+STRING_LITER: QUOT (CHARACTER)* QUOT;
+
+CHAR_LITER: APOS (CHARACTER)? APOS;
+
+ESCAPED_CHAR: BACKSLASH ('0' | 'b' | 't' | 'n' | 'f' | 'r' | '"' | '\'' | '\\') ;
+
+fragment CHARACTER: (ASCII | ESCAPED_CHAR);
+
+fragment ASCII: ('\u0000'..'\u0021' | '\u0023'..'\u0026' | '\u0028'..'\u005b' |'\u005d'..'\u007f');
+

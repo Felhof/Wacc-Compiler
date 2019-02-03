@@ -117,13 +117,13 @@ bool_liter:
     | FALSE ;
 
 char_liter:
-      APOS (character)? APOS ;
+      CHAR_LITER;
 
 str_liter:
-      QUOT (character)* QUOT ;
+      STRING_LITER;
 
-character:
-      ~(CHAR_EXC) | ESCAPED_CHAR | WS ;
+ character:
+        CHAR_LITER | ESCAPED_CHAR ;
 
 array_liter:
       OPENSQ (expr (COMMA expr)*)? CLOSESQ ;
