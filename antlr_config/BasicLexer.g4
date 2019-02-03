@@ -1,5 +1,9 @@
 lexer grammar BasicLexer;
 
+channels {
+WHITESPACE, COMMENTS
+}
+
 //program keywords
 BEG: 'begin';
 END: 'end' ;
@@ -114,8 +118,8 @@ FALSE: 'false' ;
 //pair-liter
 NULL: 'null' ;
 
-WS: (' ')+ -> skip ;
+WS: (' ' | '\t' | '\n')+ -> channel(WHITESPACE) ;
 
-COMMENT: HASH .*? EOL -> channel(HIDDEN) ;
+COMMENT: HASH .*? EOL -> channel(COMMENTS) ;
 
 EOL: ('\n' | '\r' | '\n\r' | '\r\n' |'\t' | '\n\n') -> skip;

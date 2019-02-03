@@ -18,6 +18,7 @@ interface sequenceAndScope{}
 interface arrayAndWhile{}
 interface functions{}
 interface expressions{}
+interface io{}
 
 public class ValidTests {
 
@@ -70,6 +71,13 @@ public class ValidTests {
   public void Expressions() {
     checkCompilation("src/test/java/valid/expressions.txt");
   }
+
+//  @Category(io.class)
+//  @Test
+//  public void IO() {
+//    checkCompilation("src/test/java/valid/io.txt");
+//  }
+
 
 
 
