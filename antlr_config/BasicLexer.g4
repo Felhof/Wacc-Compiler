@@ -102,7 +102,8 @@ fragment DIGIT: '0'..'9' ;
 
 INT_SIGN: PLUS | MINUS ;
 
-INTEGER: (INT_SIGN)?(DIGIT)+ ;
+//INTEGER: (INT_SIGN)?(DIGIT)+ ;
+INTEGER: (DIGIT)+ ;
 
 ESCAPED_CHAR: BACKSLASH ('0' | 'b' | 't' | 'n' | 'f' | 'r' | QUOT | APOS | BACKSLASH) ;
 

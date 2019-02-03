@@ -17,6 +17,7 @@ interface ifAndPairs{}
 interface sequenceAndScope{}
 interface arrayAndWhile{}
 interface functions{}
+interface expressions{}
 
 public class ValidTests {
 
@@ -64,6 +65,11 @@ public class ValidTests {
     checkCompilation("src/test/java/valid/functions.txt");
   }
 
+  @Category(expressions.class)
+  @Test
+  public void Expressions() {
+    checkCompilation("src/test/java/valid/expressions.txt");
+  }
 
 
 
