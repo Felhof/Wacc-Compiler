@@ -17,6 +17,7 @@ public class Main {
 
   public static void main(String[] args) {
     compileProg("test.wacc");
+    //compileProg("src/test/valid/function/simple_functions/asciiTable.wacc");
   }
 
   public static BasicLexer lexFile(String filename) {
@@ -29,16 +30,6 @@ public class Main {
     return new BasicLexer(input);
   }
 
-//  public static List<? extends Token> lexer(String filename) {
-//    CharStream input = null;
-//    try {
-//      input = CharStreams.fromFileName(filename);
-//    } catch (IOException e) {
-//      e.printStackTrace();
-//    }
-//    return new BasicLexer(input).getAllTokens();
-//  }
-
   public static ParseTree parser(CommonTokenStream stream) {
     BasicParser parser = new BasicParser(stream);
     parser.removeErrorListeners();
@@ -50,6 +41,11 @@ public class Main {
 
   public static String compileProg(String filename) {
     BasicLexer lexer = lexFile(filename);
+//    for (Token tok: lexer.getAllTokens()
+//    ) {
+//      System.out.println(tok.toString());
+//
+//    }
     CommonTokenStream tokenStream = new CommonTokenStream(lexer);
     ParseTree tree = parser(tokenStream);
     return null;
@@ -65,9 +61,9 @@ public class Main {
     {
       List<String> stack = ((Parser)recognizer).getRuleInvocationStack();
       Collections.reverse(stack);
-      System.err.println("rule stack: "+stack);
-      System.err.println("line "+line+":"+charPositionInLine+" at "+
-          offendingSymbol+": "+msg);
+      System.err.println("rule stack: " + stack);
+      System.err.println("line " + line + ":" + charPositionInLine + " at " +
+          offendingSymbol + ": " + msg);
     }
   }
 

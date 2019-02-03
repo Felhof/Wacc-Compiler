@@ -90,7 +90,7 @@ CLOSEC: '}' ;
 
 //characters
 
-CHAR_EXC: BACKSLASH| APOS | QUOT ;
+CHAR_EXC: BACKSLASH | APOS | QUOT ;
 
 //letters
 
@@ -113,8 +113,8 @@ FALSE: 'false' ;
 //pair-liter
 NULL: 'null' ;
 
-WS: [ \t\r\n]+ -> channel(HIDDEN) ;
+WS: (' ')+ -> skip ;
 
 COMMENT: HASH .*? EOL -> channel(HIDDEN) ;
 
-EOL: ('\n' | '\r' | '\n\r' | '\r\n' |'\t') -> skip;
+EOL: ('\n' | '\r' | '\n\r' | '\r\n' |'\t' | '\n\n') -> skip;

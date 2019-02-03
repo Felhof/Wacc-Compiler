@@ -7,7 +7,7 @@ options {
 prog: BEG (func)* stat END EOF;
 
 func:
-      type IDENT OPEN param_list CLOSE IS stat END ;
+      type IDENT OPEN (param_list)? CLOSE IS stat END ;
 
 param_list:
       param (COMMA param)* ;
@@ -116,13 +116,13 @@ bool_liter:
     | FALSE ;
 
 char_liter:
-      APOS character APOS ;
+      APOS (character)? APOS ;
 
 str_liter:
       QUOT (character)* QUOT ;
 
 character:
-      ~(CHAR_EXC) | ESCAPED_CHAR ;
+      ~(CHAR_EXC) | ESCAPED_CHAR | WS ;
 
 array_liter:
       OPENSQ (expr (COMMA expr)*)? CLOSESQ ;
