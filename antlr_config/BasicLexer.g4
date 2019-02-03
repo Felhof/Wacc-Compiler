@@ -1,5 +1,9 @@
 lexer grammar BasicLexer;
 
+channels {
+WHITESPACE, COMMENTS
+}
+
 //program keywords
 BEG: 'begin';
 END: 'end' ;
@@ -10,10 +14,14 @@ IS: 'is' ;
 //misc
 COMMA: ',' ;
 SEMICOL: ';' ;
+COL: ':' ;
 APOS: '\'' ;
 QUOT: '"' ;
 BACKSLASH: '\\' ;
 HASH: '#' ;
+DOT: '.' ;
+QMARK: '?' ;
+BAR: '|' ;
 
 //statement keywords
 SKP: 'skip' ;
@@ -81,11 +89,12 @@ CLOSE: ')' ;
 OPENSQ: '[' ;
 CLOSESQ: ']' ;
 
+OPENC: '{' ;
+CLOSEC: '}' ;
+
 //characters
 
-CHAR_EXC: '\\'| '\'' | '"' ;
-
-ESCAPED_CHAR: '0' | 'b' | 't' | 'n' | 'f' | 'r' | '"' | '\'' | '\\' ;
+CHAR_EXC: BACKSLASH | APOS | QUOT ;
 
 //letters
 
@@ -97,7 +106,10 @@ fragment DIGIT: '0'..'9' ;
 
 INT_SIGN: PLUS | MINUS ;
 
-INTEGER: (INT_SIGN)?(DIGIT)+ ;
+//INTEGER: (INT_SIGN)?(DIGIT)+ ;
+INTEGER: (DIGIT)+ ;
+
+ESCAPED_CHAR: BACKSLASH ('0' | 'b' | 't' | 'n' | 'f' | 'r' | QUOT | APOS | BACKSLASH) ;
 
 //bool-liter
 TRUE: 'true' ;
@@ -106,12 +118,8 @@ FALSE: 'false' ;
 //pair-liter
 NULL: 'null' ;
 
-WS: ' ' -> channel(HIDDEN) ;
+WS: (' ' | '\t' | '\n')+ -> channel(WHITESPACE) ;
 
-COMMENT: HASH .*? EOL -> channel(HIDDEN) ;
+COMMENT: HASH .*? EOL -> channel(COMMENTS) ;
 
-EOL: ('\n' | '\r' | '\n\r' | '\r\n') -> skip;
-
-//Ignore Whitespace and Newline
-WHITESPACE : ' ' -> skip ;
-NEWLINE : '\n' -> skip ;
+EOL: ('\n' | '\r' | '\n\r' | '\r\n' |'\t' | '\n\n') -> skip;
