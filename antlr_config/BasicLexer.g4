@@ -127,5 +127,5 @@ CHAR_LITER: APOS CHARACTER APOS;
 
 ESCAPED_CHAR: BACKSLASH ('0' | 'b' | 't' | 'n' | 'f' | 'r' | '"' | '\'' | '\\') ;
 
-CHARACTER: (('"' | '\'' | '\\') | ESCAPED_CHAR);
+CHARACTER: (~('"' | '\'' | '\\') | ESCAPED_CHAR);
 
