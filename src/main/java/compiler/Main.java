@@ -17,9 +17,9 @@ public class Main {
 
   public static void main(String[] args) {
 
-    int nbSyntaxErrors = compileProg(args[0]);
+    //int nbSyntaxErrors = compileProg(args[0]);
     //compileProg("test.wacc");
-    //int nbSyntaxErrors = compileProg("src/test/invalid/syntaxErr/expressions/missingOperand1.wacc");
+    int nbSyntaxErrors = compileProg("src/test/invalid/syntaxErr/function/functionJunkAfterReturn.wacc");
     //compileProg("src/test/valid/function/simple_functions/asciiTable.wacc");
     if (nbSyntaxErrors > 0) {
       System.err.println(nbSyntaxErrors +" syntax error(s)");
