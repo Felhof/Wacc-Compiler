@@ -123,10 +123,9 @@ EOL: ('\n' | '\r' | '\n\r' | '\r\n' |'\t' | '\n\n') -> skip;
 
 STRING_LITER: QUOT (CHARACTER)* QUOT;
 
-
-CHAR_LITER: APOS (CHARACTER)? APOS;
+CHAR_LITER: APOS CHARACTER APOS;
 
 ESCAPED_CHAR: BACKSLASH ('0' | 'b' | 't' | 'n' | 'f' | 'r' | '"' | '\'' | '\\') ;
 
-fragment CHARACTER: (~('"' | '\'' | '\\') | ESCAPED_CHAR);
+CHARACTER: (('"' | '\'' | '\\') | ESCAPED_CHAR);
 
