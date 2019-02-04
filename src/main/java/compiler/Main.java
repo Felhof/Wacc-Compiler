@@ -30,6 +30,17 @@ public class Main {
     return new BasicLexer(input);
   }
 
+  public static BasicLexer lexer(String filename) {
+    CharStream input = null;
+    try {
+      input = CharStreams.fromFileName(filename);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+
+    return new BasicLexer(input);
+  }
+
   public static ParseTree parser(CommonTokenStream stream) {
     BasicParser parser = new BasicParser(stream);
     parser.removeErrorListeners();
