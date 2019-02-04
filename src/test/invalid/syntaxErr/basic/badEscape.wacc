@@ -9,5 +9,5 @@
 # Program:
 
 begin
-  char a = '\H'
+  char a = '\s'
 end

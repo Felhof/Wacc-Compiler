@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import antlr.*;
-import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
@@ -17,9 +16,10 @@ import org.antlr.v4.runtime.tree.ParseTree;
 public class Main {
 
   public static void main(String[] args) {
-    compileProg(args[0]);
+
+    //compileProg(args[0]);
     //compileProg("test.wacc");
-    //compileProg("src/test/valid/function/simple_functions/asciiTable.wacc");
+    compileProg("src/test/invalid/syntaxErr/expressions/missingOperand1.wacc");
     //compileProg("src/test/valid/function/simple_functions/asciiTable.wacc");
   }
 
@@ -50,6 +50,7 @@ public class Main {
   }
 
   public static class VerboseListener extends BaseErrorListener {
+
     @Override
     public void syntaxError(Recognizer<?, ?> recognizer,
         Object offendingSymbol,
@@ -59,9 +60,9 @@ public class Main {
     {
       List<String> stack = ((Parser)recognizer).getRuleInvocationStack();
       Collections.reverse(stack);
-      System.err.println("rule stack: " + stack);
-      System.err.println("line " + line + ":" + charPositionInLine + " at " +
-          offendingSymbol + ": " + msg);
+      System.err.println("Syntactic Error during compilation, line " + line + ":" + charPositionInLine+ ":");
+      System.err.println(msg);
+      System.err.println("Error code 100 returned.\n");
     }
   }
 
