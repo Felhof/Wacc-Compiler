@@ -86,8 +86,7 @@ expr:
     | OPEN expr CLOSE ;
 
 unary_oper:
-      PLUS
-    | NEG
+      NEG
     | MINUS
     | LEN
     | ORD
