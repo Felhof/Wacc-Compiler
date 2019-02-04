@@ -74,11 +74,11 @@ public class ValidTests {
     checkCompilation("src/test/java/valid/expressions.txt");
   }
 
-//  @Category(io.class)
-//  @Test
-//  public void IO() {
-//    checkCompilation("src/test/java/valid/io.txt");
-//  }
+  @Category(io.class)
+  @Test
+  public void IO() {
+    checkCompilation("src/test/java/valid/io.txt");
+  }
 
   @Category(runtimeErr.class)
   @Test
@@ -91,17 +91,4 @@ public class ValidTests {
   public void Advanced() {
     checkCompilation("src/test/java/valid/advanced.txt");
   }
-
-
-
-
-
-
-
-
-
-
-
-
-
 }

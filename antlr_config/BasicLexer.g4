@@ -126,7 +126,5 @@ CHAR_LITER: APOS (CHARACTER)? APOS;
 
 ESCAPED_CHAR: BACKSLASH ('0' | 'b' | 't' | 'n' | 'f' | 'r' | '"' | '\'' | '\\') ;
 
-fragment CHARACTER: (ASCII | ESCAPED_CHAR);
-
-fragment ASCII: ('\u0000'..'\u0021' | '\u0023'..'\u0026' | '\u0028'..'\u005b' |'\u005d'..'\u007f');
+fragment CHARACTER: (~('"' | '\'' | '\\') | ESCAPED_CHAR);
 
