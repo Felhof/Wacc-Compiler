@@ -64,12 +64,13 @@ LEN: 'len' ;
 ORD: 'ord' ;
 CHR: 'chr' ;
 
+MINUS: '-' ;
+
 //binary operators
 MUL: '*' ;
 DIV: '/' ;
 MOD: '%' ;
 PLUS: '+' ;
-MINUS: '-' ;
 GT: '>' ;
 GE: '>=' ;
 LT: '<' ;
@@ -121,6 +122,7 @@ EOL: ('\n' | '\r' | '\n\r' | '\r\n' |'\t' | '\n\n') -> skip;
 //Strings & chars
 
 STRING_LITER: QUOT (CHARACTER)* QUOT;
+
 
 CHAR_LITER: APOS (CHARACTER)? APOS;
 
