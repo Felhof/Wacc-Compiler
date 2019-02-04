@@ -17,10 +17,15 @@ public class Main {
 
   public static void main(String[] args) {
 
-    //compileProg(args[0]);
+    int nbSyntaxErrors = compileProg(args[0]);
     //compileProg("test.wacc");
-    compileProg("src/test/invalid/syntaxErr/expressions/missingOperand1.wacc");
+    //int nbSyntaxErrors = compileProg("src/test/invalid/syntaxErr/expressions/missingOperand1.wacc");
     //compileProg("src/test/valid/function/simple_functions/asciiTable.wacc");
+    if (nbSyntaxErrors > 0) {
+      System.err.println(nbSyntaxErrors +" syntax error(s)");
+      System.out.println("Exit code 100 returned");
+      System.exit(100);
+    }
   }
 
   public static BasicLexer lexFile(String filename) {
@@ -33,23 +38,29 @@ public class Main {
     return new BasicLexer(input);
   }
 
-  public static ParseTree parser(CommonTokenStream stream) {
+  public static int parser(CommonTokenStream stream) {
     BasicParser parser = new BasicParser(stream);
+
     parser.removeErrorListeners();
-    parser.addErrorListener(new VerboseListener());
+    VerboseListener errorListener = new VerboseListener();
+    parser.addErrorListener(errorListener);
+
     ParseTree tree = parser.prog();
-    //System.out.println(tree.toStringTree(parser));
-    return tree;
+    int nbSyntaxErrors = errorListener.getNbSyntaxErrors();
+    // System.out.println(tree.toStringTree(parser));
+    return nbSyntaxErrors;
   }
 
-  public static String compileProg(String filename) {
+  public static int compileProg(String filename) {
     BasicLexer lexer = lexFile(filename);
     CommonTokenStream tokenStream = new CommonTokenStream(lexer);
-    ParseTree tree = parser(tokenStream);
-    return null;
+    int nbSyntaxError= parser(tokenStream);
+    return nbSyntaxError;
   }
 
   public static class VerboseListener extends BaseErrorListener {
+
+    int nbSyntaxErrors = 0;
 
     @Override
     public void syntaxError(Recognizer<?, ?> recognizer,
@@ -62,7 +73,11 @@ public class Main {
       Collections.reverse(stack);
       System.err.println("Syntactic Error during compilation, line " + line + ":" + charPositionInLine+ ":");
       System.err.println(msg);
-      System.err.println("Error code 100 returned.\n");
+      nbSyntaxErrors++;
+    }
+
+    public int getNbSyntaxErrors() {
+      return nbSyntaxErrors;
     }
   }
 
