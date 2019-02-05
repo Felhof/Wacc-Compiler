@@ -1,10 +1,13 @@
 package compiler;
 
 import antlr.*;
-import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.TerminalNode;
+import antlr.BasicParser.ExitStatContext;
+import antlr.BasicParser.IfStatContext;
+import antlr.BasicParser.RecursiveStatContext;
+import antlr.BasicParser.ReturnStatContext;
+import antlr.BasicParser.WhileStatContext;
 
-public class Visitor extends BasicParserBaseVisitor<Void>{
+public class Visitor extends BasicParserBaseVisitor<Boolean>{
 
   private BasicParser parser;
 
@@ -13,14 +16,36 @@ public class Visitor extends BasicParserBaseVisitor<Void>{
   }
 
   @Override
-  public Void visitFunc(BasicParser.FuncContext ctx) {
-    int lastChildIndex = ctx.getChildCount() - 2;
-    ParseTree lastChild = ctx.getChild(lastChildIndex);
-    TerminalNode returnToken = (TerminalNode) lastChild.getChild(0);
-    if(returnToken.getSymbol().getType() != BasicLexer.RETURN) {
+  public Boolean visitFunc(BasicParser.FuncContext ctx) {
+    if(visit(ctx.stat()) == null) {
       parser.notifyErrorListeners("No return statement");
     }
     return null;
+  }
+
+  @Override
+  public Boolean visitIfStat(IfStatContext ctx) {
+    return (visit(ctx.getChild(3)) != null) && (visit(ctx.getChild(5)) != null);
+  }
+
+  @Override
+  public Boolean visitWhileStat(WhileStatContext ctx) {
+    return visit(ctx.getChild(3));
+  }
+
+  @Override
+  public Boolean visitRecursiveStat(RecursiveStatContext ctx) {
+    return visit(ctx.getChild(2));
+  }
+
+  @Override
+  public Boolean visitReturnStat(ReturnStatContext ctx) {
+    return true;
+  }
+
+  @Override
+  public Boolean visitExitStat(ExitStatContext ctx) {
+    return true;
   }
 
 }
