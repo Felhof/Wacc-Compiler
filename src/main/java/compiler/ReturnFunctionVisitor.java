@@ -7,11 +7,11 @@ import antlr.BasicParser.RecursiveStatContext;
 import antlr.BasicParser.ReturnStatContext;
 import antlr.BasicParser.WhileStatContext;
 
-public class Visitor extends BasicParserBaseVisitor<Boolean>{
+public class ReturnFunctionVisitor extends BasicParserBaseVisitor<Boolean>{
 
   private BasicParser parser;
 
-  public Visitor(BasicParser parser) {
+  public ReturnFunctionVisitor(BasicParser parser) {
     this.parser = parser;
   }
 
