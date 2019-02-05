@@ -15,26 +15,28 @@ param_list:
 param:
       type IDENT ;
 
-//func_stat:
-//        (stat SEMICOL)? RETURN expr
-//      | (stat SEMICOL)? EXIT expr
-//      | (stat SEMICOL)? IF expr THEN func_stat ELSE func_stat FI
-//      | (stat SEMICOL)? WHILE expr DO func_stat DONE ;
+/*
+func_stat:
+        (stat SEMICOL)? RETURN expr
+      | (stat SEMICOL)? EXIT expr
+      | (stat SEMICOL)? IF expr THEN func_stat ELSE func_stat FI
+      | (stat SEMICOL)? WHILE expr DO func_stat DONE ;
+*/
 
 stat:
-      SKP
-    | type IDENT ASS assign_rhs
-    | assign_lhs ASS assign_rhs
-    | READ assign_lhs
-    | FREE expr
-    | RETURN expr
-    | EXIT expr
-    | PRINT expr
-    | PRINTLN expr
-    | IF expr THEN stat ELSE stat FI
-    | WHILE expr DO stat DONE
-    | BEG stat END
-    | stat SEMICOL stat;
+      SKP #todo
+    | type IDENT ASS assign_rhs #todo
+    | assign_lhs ASS assign_rhs #todo
+    | READ assign_lhs #todo
+    | FREE expr #todo
+    | RETURN expr #returnStat
+    | EXIT expr #exitStat
+    | PRINT expr #todo
+    | PRINTLN expr #todo
+    | IF expr THEN stat ELSE stat FI #ifStat
+    | WHILE expr DO stat DONE #whileStat
+    | BEG stat END #todo
+    | stat SEMICOL stat #recursiveStat ;
 
 assign_lhs:
       IDENT

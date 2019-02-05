@@ -47,8 +47,10 @@ public class Main {
     int nbSyntaxErrors = errorListener.getNbSyntaxErrors();
     // System.out.println(tree.toStringTree(parser));
 
-    Visitor visitor = new Visitor(parser);
-    visitor.visit(tree);
+    // Syntactic check if all functions have a return statement according to
+    // the wacc rules
+    ReturnFunctionVisitor returnFunctionVisitor = new ReturnFunctionVisitor(parser);
+    returnFunctionVisitor.visit(tree);
 
     return nbSyntaxErrors;
   }
