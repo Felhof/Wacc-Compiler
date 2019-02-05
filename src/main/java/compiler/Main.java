@@ -50,7 +50,7 @@ public class Main {
     // System.out.println(tree.toStringTree(parser));
 
     System.out.println("=================");
-    Visitor visitor = new Visitor(parser);
+    SyntaxVisitor visitor = new SyntaxVisitor(parser);
     visitor.visit(tree);
     System.out.println("=================");
 
