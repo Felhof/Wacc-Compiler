@@ -1,0 +1,16 @@
+src/test/invalid/syntaxErr/function/badlyNamed.wacc
+src/test/invalid/syntaxErr/function/badlyPlaced.wacc
+src/test/invalid/syntaxErr/function/funcExpr.wacc
+src/test/invalid/syntaxErr/function/funcExpr2.wacc
+src/test/invalid/syntaxErr/function/functionConditionalNoReturn.wacc
+src/test/invalid/syntaxErr/function/functionJunkAfterReturn.wacc
+src/test/invalid/syntaxErr/function/functionLateDefine.wacc
+src/test/invalid/syntaxErr/function/functionMissingCall.wacc
+src/test/invalid/syntaxErr/function/functionMissingParam.wacc
+src/test/invalid/syntaxErr/function/functionMissingPType.wacc
+src/test/invalid/syntaxErr/function/functionMissingType.wacc
+src/test/invalid/syntaxErr/function/functionNoReturn.wacc
+src/test/invalid/syntaxErr/function/functionScopeDef.wacc
+src/test/invalid/syntaxErr/function/mutualRecursionNoReturn.wacc
+src/test/invalid/syntaxErr/function/noBodyAfterFuncs.wacc
+src/test/invalid/syntaxErr/function/thisIsNotC.wacc

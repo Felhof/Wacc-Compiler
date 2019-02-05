@@ -1,0 +1,3 @@
+src/test/invalid/syntaxErr/expressions/missingOperand1.wacc
+src/test/invalid/syntaxErr/expressions/missingOperand2.wacc
+src/test/invalid/syntaxErr/expressions/printlnConcat.wacc
