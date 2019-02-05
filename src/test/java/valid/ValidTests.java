@@ -12,15 +12,15 @@ import java.io.PrintStream;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
-interface basicAndVariables {}
-interface ifAndPairs{}
-interface sequenceAndScope{}
-interface arrayAndWhile{}
-interface functions{}
-interface expressions{}
-interface io{}
-interface runtimeErr{}
-interface advanced{}
+interface basicAndVariablesVal {}
+interface ifAndPairsVal{}
+interface sequenceAndScopeVal{}
+interface arrayAndWhileVal{}
+interface functionsVal{}
+interface expressionsVal{}
+interface ioVal{}
+interface runtimeErrVal{}
+interface advancedVal{}
 
 public class ValidTests {
 
@@ -38,55 +38,55 @@ public class ValidTests {
     }
   }
 
-  @Category(basicAndVariables.class)
+  @Category(basicAndVariablesVal.class)
   @Test
   public void BasicAndVariables(){
     checkCompilation("src/test/java/valid/basicAndVariables.txt");
   }
 
-  @Category(ifAndPairs.class)
+  @Category(ifAndPairsVal.class)
   @Test
   public void IfAndPairs() {
     checkCompilation("src/test/java/valid/ifAndPairs.txt");
   }
 
-  @Category(sequenceAndScope.class)
+  @Category(sequenceAndScopeVal.class)
   @Test
   public void SequenceAndScope() {
     checkCompilation("src/test/java/valid/sequenceAndScope.txt");
   }
 
-  @Category(arrayAndWhile.class)
+  @Category(arrayAndWhileVal.class)
   @Test
   public void ArrayAndWhile() {
     checkCompilation("src/test/java/valid/arrayAndWhile.txt");
   }
 
-  @Category(functions.class)
+  @Category(functionsVal.class)
   @Test
   public void Functions() {
     checkCompilation("src/test/java/valid/functions.txt");
   }
 
-  @Category(expressions.class)
+  @Category(expressionsVal.class)
   @Test
   public void Expressions() {
     checkCompilation("src/test/java/valid/expressions.txt");
   }
 
-  @Category(io.class)
+  @Category(ioVal.class)
   @Test
   public void IO() {
     checkCompilation("src/test/java/valid/io.txt");
   }
 
-  @Category(runtimeErr.class)
+  @Category(runtimeErrVal.class)
   @Test
   public void RuntimeErr(){
     checkCompilation("src/test/java/valid/runtimeErr.txt");
   }
 
-  @Category(advanced.class)
+  @Category(advancedVal.class)
   @Test
   public void Advanced() {
     checkCompilation("src/test/java/valid/advanced.txt");

@@ -9,6 +9,6 @@ job 2:
         stage: test
         script:
           - make
-          - mvn test # mvn test -Dgroups="<Test Category>"
+          - mvn test -Dtest=ValidTests # mvn test -Dgroups="<Test Category>"
         only:
           - master  # only or except: - <name of branch>
