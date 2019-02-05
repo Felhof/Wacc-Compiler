@@ -57,14 +57,20 @@ public class SyntaxVisitor extends BasicParserBaseVisitor<Void>{
   @Override
   public Void visitUnary_oper(BasicParser.Unary_operContext ctx){
 
+    String operatorText = ctx.getText();
+
     BasicParser.ExprContext expr = (BasicParser.ExprContext) ctx.getParent().getChild(1);
 
     String childText = expr.getText();
 
     char c = childText.charAt(0);
 
-   if(c == '"' || c == '\'' || c == '(' || c == ')'){
+    switch (operatorText){
+      case "+":
+        if(c == '"' || c == '\'' || c == '(' || c == ')'){
           parser.notifyErrorListeners("Missmatched Input '" + c + "'. Expecting Integer");
+        }
+        break;
     }
 
     return null;

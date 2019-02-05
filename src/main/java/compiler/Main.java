@@ -19,7 +19,7 @@ public class Main {
 
     //int nbSyntaxErrors = compileProg(args[0]);
     //compileProg("test.wacc");
-    int nbSyntaxErrors = compileProg("src/test/invalid/syntaxErr/expressions/printlnConcat.wacc");
+    int nbSyntaxErrors = compileProg("src/test/valid/runtimeErr/integerOverflow/intnegateOverflow2.wacc");
     //compileProg("src/test/valid/function/simple_functions/asciiTable.wacc");
     if (nbSyntaxErrors > 0) {
       System.err.println(nbSyntaxErrors +" syntax error(s)");
