@@ -7,7 +7,7 @@ options {
 prog: BEG (func)* stat END EOF;
 
 func:
-      type IDENT OPEN (param_list)? CLOSE IS func_stat END ;
+      type IDENT OPEN (param_list)? CLOSE IS stat END ;
 
 param_list:
       param (COMMA param)* ;
@@ -15,11 +15,13 @@ param_list:
 param:
       type IDENT ;
 
+/*
 func_stat:
         (stat SEMICOL)? RETURN expr
       | (stat SEMICOL)? EXIT expr
       | (stat SEMICOL)? IF expr THEN func_stat ELSE func_stat FI
       | (stat SEMICOL)? WHILE expr DO func_stat DONE ;
+*/
 
 stat:
       SKP
