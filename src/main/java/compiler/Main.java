@@ -19,7 +19,7 @@ public class Main {
 
     //int nbSyntaxErrors = compileProg(args[0]);
     //compileProg("test.wacc");
-    int nbSyntaxErrors = compileProg("src/test/invalid/syntaxErr/function/functionJunkAfterReturn.wacc");
+    int nbSyntaxErrors = compileProg("src/test/invalid/syntaxErr/variables/bigIntAssignment.wacc");
     //compileProg("src/test/valid/function/simple_functions/asciiTable.wacc");
     if (nbSyntaxErrors > 0) {
       System.err.println(nbSyntaxErrors +" syntax error(s)");
@@ -48,6 +48,13 @@ public class Main {
     ParseTree tree = parser.prog();
     int nbSyntaxErrors = errorListener.getNbSyntaxErrors();
     // System.out.println(tree.toStringTree(parser));
+
+    System.out.println("=================");
+    Visitor visitor = new Visitor(parser);
+    visitor.visit(tree);
+    System.out.println("=================");
+
+
     return nbSyntaxErrors;
   }
 
