@@ -17,8 +17,8 @@ public class Main {
 
   public static void main(String[] args) {
 
-    int nbSyntaxErrors = compileProg(args[0]);
-    //int nbSyntaxErrors = compileProg("src/test/invalid/syntaxErr/expressions/printlnConcat.wacc");
+    //int nbSyntaxErrors = compileProg(args[0]);
+    int nbSyntaxErrors = compileProg("src/test/invalid/syntaxErr/function/functionConditionalNoReturn.wacc");
     if (nbSyntaxErrors > 0) {
       System.err.println(nbSyntaxErrors +" syntax error(s)");
       System.out.println("Exit code 100 returned");

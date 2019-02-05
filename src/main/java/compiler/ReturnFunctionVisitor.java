@@ -17,7 +17,7 @@ public class ReturnFunctionVisitor extends BasicParserBaseVisitor<Boolean>{
 
   @Override
   public Boolean visitFunc(BasicParser.FuncContext ctx) {
-    if(visit(ctx.stat()) == null) {
+    if(visit(ctx.stat()) == null  || !visit(ctx.stat())) {
       parser.notifyErrorListeners("No return statement");
     }
     return null;
