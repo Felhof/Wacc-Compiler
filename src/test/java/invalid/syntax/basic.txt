@@ -1,0 +1,9 @@
+src/test/invalid/syntaxErr/basic/badComment.wacc
+src/test/invalid/syntaxErr/basic/badComment2.wacc
+src/test/invalid/syntaxErr/basic/badEscape.wacc
+src/test/invalid/syntaxErr/basic/beginNoend.wacc
+src/test/invalid/syntaxErr/basic/bgnErr.wacc
+src/test/invalid/syntaxErr/basic/multipleBegins.wacc
+src/test/invalid/syntaxErr/basic/noBody.wacc
+src/test/invalid/syntaxErr/basic/skpErr.wacc
+src/test/invalid/syntaxErr/basic/unescapedChar.wacc

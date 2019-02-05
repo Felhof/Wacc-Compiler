@@ -101,9 +101,7 @@ fragment UPPER: 'A'..'Z' ;
 //numbers
 fragment DIGIT: '0'..'9' ;
 
-INT_SIGN: PLUS | MINUS ;
 
-//INTEGER: (INT_SIGN)?(DIGIT)+ ;
 INTEGER: (DIGIT)+ ;
 
 //bool-liter

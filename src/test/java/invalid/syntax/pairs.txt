@@ -1,0 +1,2 @@
+src/test/invalid/syntaxErr/pairs/badLookup01.wacc
+src/test/invalid/syntaxErr/pairs/badLookup02.wacc
