@@ -1,0 +1,5 @@
+src/test/invalid/syntaxErr/while/donoErr.wacc
+src/test/invalid/syntaxErr/while/dooErr.wacc
+src/test/invalid/syntaxErr/while/whileNodo.wacc
+src/test/invalid/syntaxErr/while/whileNodone.wacc
+src/test/invalid/syntaxErr/while/whilErr.wacc
