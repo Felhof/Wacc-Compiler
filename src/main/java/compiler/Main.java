@@ -17,10 +17,8 @@ public class Main {
 
   public static void main(String[] args) {
 
-    //int nbSyntaxErrors = compileProg(args[0]);
-    //compileProg("test.wacc");
-    int nbSyntaxErrors = compileProg("src/test/invalid/syntaxErr/expressions/printlnConcat.wacc");
-    //compileProg("src/test/valid/function/simple_functions/asciiTable.wacc");
+    int nbSyntaxErrors = compileProg(args[0]);
+    //int nbSyntaxErrors = compileProg("src/test/invalid/syntaxErr/expressions/printlnConcat.wacc");
     if (nbSyntaxErrors > 0) {
       System.err.println(nbSyntaxErrors +" syntax error(s)");
       System.out.println("Exit code 100 returned");
@@ -49,11 +47,8 @@ public class Main {
     int nbSyntaxErrors = errorListener.getNbSyntaxErrors();
     // System.out.println(tree.toStringTree(parser));
 
-    System.out.println("=================");
     Visitor visitor = new Visitor(parser);
     visitor.visit(tree);
-    System.out.println("=================");
-
 
     return nbSyntaxErrors;
   }
@@ -61,8 +56,7 @@ public class Main {
   public static int compileProg(String filename) {
     BasicLexer lexer = lexFile(filename);
     CommonTokenStream tokenStream = new CommonTokenStream(lexer);
-    int nbSyntaxError= parser(tokenStream);
-    return nbSyntaxError;
+    return parser(tokenStream);
   }
 
   public static class VerboseListener extends BaseErrorListener {

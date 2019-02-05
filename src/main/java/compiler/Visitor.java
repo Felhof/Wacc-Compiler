@@ -1,6 +1,4 @@
 package compiler;import antlr.*;
-import org.antlr.v4.runtime.CommonToken;
-import org.antlr.v4.runtime.tree.ParseTree;
 
 public class Visitor extends BasicParserBaseVisitor<Void>{
 
@@ -12,11 +10,6 @@ public class Visitor extends BasicParserBaseVisitor<Void>{
 
   @Override
   public Void visitFunc(BasicParser.FuncContext ctx) {
-    int lastToken = ctx.getChildCount() - 2;
-    ParseTree node = ctx.getChild(lastToken);    System.out.println(ctx.type());
-    //== BasicParser.RETURN
-    CommonToken t;
-    //parser.notifyErrorListeners("No return/exit statement");
     return null;
   }
 

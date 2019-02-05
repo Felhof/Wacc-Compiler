@@ -4,12 +4,19 @@ import compiler.Main;
 import org.junit.Test;
 
 import java.io.*;
+import org.junit.experimental.categories.Category;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNot.not;
 
-interface BasicAndVariables {}
+interface array {}
+interface basic {}
+interface expression {}
+interface function {}
+interface ifI {}
+interface sequence {}
+interface variables {}
+interface whileI {}
 
 public class InvalidTests {
 
@@ -28,45 +35,51 @@ public class InvalidTests {
     }
   }
 
+  @Category(array.class)
   @Test
-  public void array() {
+  public void Array() {
     checkCompilationFails("src/test/java/invalid/syntax/array.txt");
   }
 
+  @Category(basic.class)
   @Test
-  public void basic() {
+  public void Basic() {
     checkCompilationFails("src/test/java/invalid/syntax/basic.txt");
   }
 
+  @Category(expression.class)
   @Test
-  public void expression() {
+  public void Expression() {
     checkCompilationFails("src/test/java/invalid/syntax/expressions.txt");
   }
 
+  @Category(function.class)
   @Test
-  public void function() {
+  public void Function() {
     checkCompilationFails("src/test/java/invalid/syntax/function.txt");
   }
 
+  @Category(ifI.class)
   @Test
-  public void ifs() {
+  public void If() {
     checkCompilationFails("src/test/java/invalid/syntax/if.txt");
   }
 
+  @Category(sequence.class)
   @Test
-  public void sequence() {
+  public void Sequence() {
     checkCompilationFails("src/test/java/invalid/syntax/sequence.txt");
   }
 
+  @Category(variables.class)
   @Test
-  public void variables() {
+  public void Variables() {
     checkCompilationFails("src/test/java/invalid/syntax/variables.txt");
   }
 
+  @Category(whileI.class)
   @Test
-  public void whiles() {
+  public void While() {
     checkCompilationFails("src/test/java/invalid/syntax/while.txt");
   }
-
-
 }
