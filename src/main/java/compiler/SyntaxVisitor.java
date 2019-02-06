@@ -11,47 +11,28 @@ public class SyntaxVisitor extends BasicParserBaseVisitor<Void>{
   }
 
 
-  @Override
-  public Void visitBinary_oper(BasicParser.Binary_operContext ctx){
-    return null;
-  }
 
   @Override
   public Void visitExpr(BasicParser.ExprContext ctx) {
 
 
+    String op = ctx.getParent().getChild(0).getText();
+
+    String value = ctx.getText();
+
+    if(op.equals("-")){
+      value = "-" + value;
+    }
+
     if(ctx.INTEGER() != null){
 
-      CheckInteger(ctx.getText());
+      CheckInteger(value);
     }
 
     visitChildren(ctx);
 
     return null;
   }
-
-/*
-
-  @Override
-  public Void visitFunc(BasicParser.FuncContext ctx) {
-    int lastToken = ctx.getChildCount() - 2;
-    ParseTree node = ctx.getChild(lastToken);    System.out.println(ctx.type());
-    //== BasicParser.RETURN
-    CommonToken t;
-    //parser.notifyErrorListeners("No return/exit statement");
-    return null;
-  }
-
-  @Override
-  public Void visitStat(BasicParser.StatContext ctx){
-    return null;
-  }
-
-
-  @Override
-  public Void visitStr_liter(BasicParser.Str_literContext ctx){
-    return null;
-  }*/
 
 
   @Override
