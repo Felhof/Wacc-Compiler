@@ -10,5 +10,5 @@ job 2:
         script:
           - make
           - mvn test '-Dtest=!InvalidTests#Expression+Variables' # mvn test -Dgroups="<Test Category>"
-        only:
-          - master  # only or except: - <name of branch>
+        #only:
+        #  - master  # only or except: - <name of branch>
