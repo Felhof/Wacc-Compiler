@@ -55,11 +55,11 @@ public class Visitor extends BasicParserBaseVisitor<Void>{
     return null;
   }
 
-  @Override
+  /*@Override
   public Void visitBinary_oper(BasicParser.Binary_operContext ctx){
 
     return null;
-  }
+  }*/
 
   public void CheckInteger(String value){
 

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import antlr.*;
+import compiler.visitors.SyntaxVisitor;
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
@@ -52,6 +53,9 @@ public class Main {
     // the wacc rules
     ReturnFunctionVisitor returnFunctionVisitor = new ReturnFunctionVisitor(parser);
     returnFunctionVisitor.visit(tree);
+
+    SyntaxVisitor syntaxVisitor = new SyntaxVisitor(parser);
+    syntaxVisitor.visit(tree);
 
     return nbSyntaxErrors;
   }
