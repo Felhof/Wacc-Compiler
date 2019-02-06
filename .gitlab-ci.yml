@@ -9,6 +9,8 @@ job 2:
         stage: test
         script:
           - make
-          - mvn test '-Dtest=!InvalidTests#Expression+Variables' # mvn test -Dgroups="<Test Category>"
-        only:
-          - master  # only or except: - <name of branch>
+          #- mvn test '-Dtest=!InvalidTests#Expression+Variables' # mvn test
+          #      -Dgroups="<Test Category>"
+          - mvn test '-Dtest=SymbolTableUnitTests'
+        #only:
+        #  - master  # only or except: - <name of branch>
