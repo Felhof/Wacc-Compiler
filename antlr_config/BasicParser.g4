@@ -25,7 +25,7 @@ func_stat:
 
 stat:
       SKP #todo
-    | type IDENT ASS assign_rhs #todo
+    | type IDENT ASS assign_rhs #varDeclarationStat
     | assign_lhs ASS assign_rhs #todo
     | READ assign_lhs #todo
     | FREE expr #todo

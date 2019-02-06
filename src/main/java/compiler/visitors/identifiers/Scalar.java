@@ -1,6 +1,6 @@
 package compiler.visitors.identifiers;
 
-class Scalar extends Type {
+public class Scalar extends Type {
 
   private final int min;
   private final int max;

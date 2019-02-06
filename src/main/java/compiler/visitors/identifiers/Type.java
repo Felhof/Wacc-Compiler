@@ -1,5 +1,5 @@
 package compiler.visitors.identifiers;
 
-class Type implements Identifier {
+public class Type implements Identifier {
 
 }
