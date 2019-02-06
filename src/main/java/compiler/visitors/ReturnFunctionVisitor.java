@@ -1,4 +1,4 @@
-package compiler;
+package compiler.visitors;
 
 import antlr.*;
 import antlr.BasicParser.ExitStatContext;
