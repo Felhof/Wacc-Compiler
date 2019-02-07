@@ -1,0 +1,2 @@
+src/test/java/invalid/syntax/errorMessages/pairs/badLookup01.txt
+src/test/java/invalid/syntax/errorMessages/pairs/badLookup02.txt

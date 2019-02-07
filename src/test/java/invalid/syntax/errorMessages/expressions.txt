@@ -1,0 +1,3 @@
+src/test/java/invalid/syntax/errorMessages/expressions/missingOperand1.txt
+src/test/java/invalid/syntax/errorMessages/expressions/missingOperand2.txt
+src/test/java/invalid/syntax/errorMessages/expressions/printlnConcat.txt

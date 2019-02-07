@@ -79,8 +79,9 @@ public class Main {
     {
       List<String> stack = ((Parser)recognizer).getRuleInvocationStack();
       Collections.reverse(stack);
-      System.err.println("Syntactic Error during compilation, line " + line + ":" + charPositionInLine+ ":");
-      System.err.println(msg);
+      System.err.println("Errors detected during compilation! Exit code 100 returned.\n" +
+              "Syntactic Error at " + line + ":" + charPositionInLine+ " -- " + msg);
+      //.err.println(msg);
       nbSyntaxErrors++;
     }
 

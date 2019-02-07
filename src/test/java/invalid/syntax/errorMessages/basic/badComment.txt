@@ -1,0 +1,26 @@
+badComment.wacc~
+calling the reference compiler on badComment.wacc~
+-- Test: badComment.wacc~
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# simple print statement
+
+# Output:
+# #syntax_error#
+
+# Exit:
+# 100
+
+# Program:
+
+begin
+  oops, this is supposed to be a comment
+  print "Hello World!\n"
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+--Error: Malicious filename detected.
+--Warning: This incident has been logged.
+
