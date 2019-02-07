@@ -1,7 +1,7 @@
 src/test/java/invalid/syntax/errorMessages/function/badlyNamed.txt
 src/test/java/invalid/syntax/errorMessages/function/badlyPlaced.txt
-src/test/java/invalid/syntax/errorMessages/function/funcExpr2.txt
 src/test/java/invalid/syntax/errorMessages/function/funcExpr.txt
+src/test/java/invalid/syntax/errorMessages/function/funcExpr2.txt
 src/test/java/invalid/syntax/errorMessages/function/functionConditionalNoReturn.txt
 src/test/java/invalid/syntax/errorMessages/function/functionJunkAfterReturn.txt
 src/test/java/invalid/syntax/errorMessages/function/functionLateDefine.txt

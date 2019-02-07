@@ -126,7 +126,6 @@ public class InvalidTests {
   @Test
   public void Function() {
     checkCompilationFails("src/test/java/invalid/syntax/function.txt");
-    checkCorrectError("function.txt");
   }
 
   @Category(ifInv.class)
@@ -154,7 +153,6 @@ public class InvalidTests {
   @Test
   public void While() {
     checkCompilationFails("src/test/java/invalid/syntax/while.txt");
-    checkCorrectError("while.txt");
   }
 
   @Category(pairInv.class)

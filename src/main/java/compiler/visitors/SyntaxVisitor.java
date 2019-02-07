@@ -40,6 +40,10 @@ public class SyntaxVisitor extends BasicParserBaseVisitor<Void>{
 
     String operatorText = ctx.getText();
 
+    System.out.println("StartLine: " + ctx.start.getLine());
+    System.out.println("StopLine: " + ctx.stop.getLine());
+
+
     BasicParser.ExprContext expr = (BasicParser.ExprContext) ctx.getParent().getChild(1);
 
     String childText = expr.getText();
