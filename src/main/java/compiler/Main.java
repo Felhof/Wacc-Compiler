@@ -20,7 +20,8 @@ public class Main {
   public static void main(String[] args) {
 
     //int nbSyntaxErrors = compileProg(args[0]); // uncomment for labTS test
-    int nbSyntaxErrors = compileProg("src/test/invalid/semanticErr/variables/doubleDeclare.wacc");
+    int nbSyntaxErrors = compileProg("src/test/invalid/syntaxErr/variables"
+        + "/clashNameWithType.wacc");
     if (nbSyntaxErrors > 0) {
       System.err.println(nbSyntaxErrors +" syntax error(s)");
       System.out.println("Exit code 100 returned");

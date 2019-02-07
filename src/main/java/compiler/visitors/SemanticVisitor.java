@@ -1,5 +1,6 @@
 package compiler.visitors;
 
+import antlr.BasicParser.ProgContext;
 import antlr.BasicParser.VarDeclarationStatContext;
 import antlr.BasicParserBaseVisitor;
 import compiler.visitors.identifiers.Identifier;
@@ -7,12 +8,13 @@ import compiler.visitors.identifiers.Scalar;
 import compiler.visitors.identifiers.Type;
 import compiler.visitors.identifiers.Variable;
 
-public class SemanticVisitor extends BasicParserBaseVisitor<Void> {
+public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
 
   private static final int ASCII_MAX_VAL = 127; // extended also ?
 
   // Need top symbol table ?
   private SymbolTable currentST;
+  private ASTNode currentASTNode;
 
   public SemanticVisitor() {
     currentST = new SymbolTable(null);
@@ -23,7 +25,15 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Void> {
   }
 
   @Override
-  public Void visitVarDeclarationStat(VarDeclarationStatContext ctx) {
+  public Returnable visitProg(ProgContext ctx) {
+    currentASTNode = new ASTNode();
+    ctx.func().forEach(this::visitFunc);
+    visit(ctx.stat());
+    return currentASTNode;
+  }
+
+  @Override
+  public Returnable visitVarDeclarationStat(VarDeclarationStatContext ctx) {
     String typeName = ctx.type().getText();
     String varName = ctx.IDENT().getText();
 
@@ -52,4 +62,6 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Void> {
 
     return null; // what to return ?
   }
+
+
 }
