@@ -63,12 +63,15 @@ public class InvalidTests {
 
         try {
 
-          String ourError = compilerOutput.substring(compilerOutput.indexOf(errorToken));
-          String actualError = errStream.toString();
-          actualError = actualError.substring(actualError.indexOf(errorToken));
+          String theirError = compilerOutput.substring(compilerOutput.indexOf(errorToken));
+          String OurError = errStream.toString();
+          OurError = OurError.substring(OurError.indexOf(errorToken));
 
-          int ourErrorLine = Integer.parseInt(ourError.substring(errorToken.length(),ourError.indexOf(":")));
-          int theirErrorLine = Integer.parseInt(actualError.substring(errorToken.length(),actualError.indexOf(":")));
+          System.out.println("\nTheir Error: " + theirError);
+          System.out.println("Our Error: " + OurError);
+
+          int ourErrorLine = Integer.parseInt(theirError.substring(errorToken.length(),theirError.indexOf(":")));
+          int theirErrorLine = Integer.parseInt(OurError.substring(errorToken.length(),OurError.indexOf(":")));
 
 
           /*
@@ -86,7 +89,7 @@ public class InvalidTests {
 
           assertThat(ourErrorLine, is(theirErrorLine));
 
-          System.out.println("Success!");
+          System.out.println("Success!\n");
 
         }
         catch (StringIndexOutOfBoundsException e){
