@@ -1,5 +1,6 @@
 package compiler;
 
+import compiler.visitors.Nodes.ParentNode;
 import compiler.visitors.ReturnFunctionVisitor;
 import compiler.visitors.SemanticVisitor;
 import java.io.IOException;
@@ -20,8 +21,7 @@ public class Main {
   public static void main(String[] args) {
 
     //int nbSyntaxErrors = compileProg(args[0]); // uncomment for labTS test
-    int nbSyntaxErrors = compileProg("src/test/invalid/syntaxErr/variables"
-        + "/clashNameWithType.wacc");
+    int nbSyntaxErrors = compileProg("src/test/valid/variables/boolDeclaration.wacc");
     if (nbSyntaxErrors > 0) {
       System.err.println(nbSyntaxErrors +" syntax error(s)");
       System.out.println("Exit code 100 returned");
@@ -57,7 +57,8 @@ public class Main {
 
     // refactor: move to appropriate place
     SemanticVisitor semanticVisitor = new SemanticVisitor();
-    semanticVisitor.visit(tree);
+    ParentNode ast = (ParentNode) semanticVisitor.visit(tree);
+    System.out.println(ast.toString());
 
     return nbSyntaxErrors;
   }

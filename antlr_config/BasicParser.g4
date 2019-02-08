@@ -15,14 +15,6 @@ param_list:
 param:
       type IDENT ;
 
-/*
-func_stat:
-        (stat SEMICOL)? RETURN expr
-      | (stat SEMICOL)? EXIT expr
-      | (stat SEMICOL)? IF expr THEN func_stat ELSE func_stat FI
-      | (stat SEMICOL)? WHILE expr DO func_stat DONE ;
-*/
-
 stat:
       SKP #todo
     | type IDENT ASS assign_rhs #varDeclarationStat
@@ -44,11 +36,11 @@ assign_lhs:
     | pair_elem ;
 
 assign_rhs:
-      expr
-    | array_liter
-    | NEWPAIR OPEN expr COMMA expr CLOSE
-    | pair_elem
-    | CALL IDENT OPEN (arg_list)? CLOSE ;
+      expr #assignExp
+    | array_liter #todoA
+    | NEWPAIR OPEN expr COMMA expr CLOSE #todoA
+    | pair_elem #todoA
+    | CALL IDENT OPEN (arg_list)? CLOSE #todoA ;
 
 arg_list:
     expr (COMMA expr)* ;
@@ -82,16 +74,16 @@ pair_elem_type:
     | PAIR ;
 
 expr:
-      INTEGER
-    | bool_liter
-    | char_liter
-    | str_liter
-    | pair_liter
-    | IDENT
-    | array_elem
-    | unary_oper expr
-    | expr binary_oper expr
-    | OPEN expr CLOSE ;
+      INTEGER #intExp
+    | bool_liter #boolExp
+    | char_liter #charExp
+    | str_liter #strExp
+    | pair_liter #pairExp
+    | IDENT #identExp
+    | array_elem #arrayExp
+    | unary_oper expr #unaryExp
+    | expr binary_oper expr #binaryExp
+    | OPEN expr CLOSE  #bracketExp ;
 
 unary_oper:
       PLUS
@@ -138,5 +130,4 @@ array_liter:
 
 pair_liter:
       NULL ;
-
 

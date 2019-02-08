@@ -1,52 +1,49 @@
 package compiler.visitors;
 
-import antlr.BasicParser.IfStatContext;
+import antlr.BasicParser.BinaryExpContext;
+import antlr.BasicParser.BoolExpContext;
+import antlr.BasicParser.IdentExpContext;
 import antlr.BasicParser.ProgContext;
 import antlr.BasicParser.RecursiveStatContext;
 import antlr.BasicParser.VarDeclarationStatContext;
 import antlr.BasicParserBaseVisitor;
+import compiler.visitors.Nodes.ParentNode;
+import compiler.visitors.Nodes.VarDeclareNode;
+import compiler.visitors.identifiers.BinExpr;
+import compiler.visitors.identifiers.BoolExpr;
+import compiler.visitors.identifiers.Expr;
 import compiler.visitors.identifiers.Identifier;
-import compiler.visitors.identifiers.Type;
+import compiler.visitors.identifiers.TYPE;
 import compiler.visitors.identifiers.Variable;
-import java.util.Stack;
 
-public class SemanticVisitor extends BasicParserBaseVisitor<ASTNode> {
+public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
 
-  private static final int ASCII_MAX_VAL = 127; // extended also ?
-
-  // Need top symbol table ?
   private SymbolTable currentST;
-  private ASTNode currentASTNode;
-  private Stack<Identifier> stack;
+  private ParentNode currentASTNode;
 
   public SemanticVisitor() {
     currentST = new SymbolTable(null);
-    stack = new Stack<>();
-
-    // Add basic types to to symbol table
-//    currentST.add("int", new Scalar(Integer.MIN_VALUE, Integer.MAX_VALUE));
-//    currentST.add("char", new Scalar(0, ASCII_MAX_VAL));
-//    currentST.add("bool", new Scalar(0, 1));
   }
 
   @Override
-  public ASTNode visitProg(ProgContext ctx) {
-    currentASTNode = new ASTNode();
-    ctx.func().forEach(this::visitFunc);
-    visit(ctx.stat());
+  public ParentNode visitProg(ProgContext ctx) {
+    currentASTNode = new ParentNode();
+//    ctx.func().forEach(this::visitFunc);
+    visit(ctx.stat(0));
     return currentASTNode;
   }
 
   @Override
-  public ASTNode visitRecursiveStat(RecursiveStatContext ctx) {
+  public ParentNode visitRecursiveStat(RecursiveStatContext ctx) {
     visit(ctx.stat(0));
     visit(ctx.stat(1));
     return null;
   }
 
+  /*
   @Override
-  public ASTNode visitIfStat(IfStatContext ctx) {
-    ASTNode parentASTNode = enterScope(); // new ST and AST node
+  public ParentNode visitIfStat(IfStatContext ctx) {
+    ParentNode parentASTNode = enterScope(); // new ST and AST node
 
     // Semantic checks
     visit(ctx.expr());
@@ -60,58 +57,68 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTNode> {
 
     exitScope(parentASTNode); // back to enclosing ST and parent AST node
     return null;
-  }
-
-  private void checkBoolExp(Identifier pop) {
-    // TODO
-  }
-
-  private ASTNode enterScope() {
-    currentST = new SymbolTable(currentST);
-    ASTNode parentASTNode = currentASTNode;
-    currentASTNode = new ASTNode();
-    return parentASTNode;
-  }
-
-  private void exitScope(ASTNode parentASTNode) {
-    currentST = currentST.getEncSymTable();
-    currentASTNode = parentASTNode;
-  }
-
-
+  }*/
 
   @Override
-  public ASTNode visitVarDeclarationStat(VarDeclarationStatContext ctx) {
-    String typeName = ctx.type().getText();
+  public ParentNode visitVarDeclarationStat(VarDeclarationStatContext ctx) {
     String varName = ctx.IDENT().getText();
 
-    Identifier type = currentST.lookUpAll(typeName);
-    Identifier var = currentST.lookUpScope(varName);
-    // More identifiers ..
+    TYPE varType = TYPE.get(ctx.type().getText());
 
-    if (type == null) {
-      // notify error listener: "unknown type " + typeName
-      System.out.println("unknown type " + typeName);
-    }
-    else if (!(type instanceof Type)) {
-      // notify error listener: typeName + " is not a type"
-      System.out.println(typeName + " is not a type");
-    }
-    else if (var != null) { // can be replaced by if but issue with final else
-      // notify error listener: varName + " is already declared in scope"
-      System.out.println(varName + " is already declared in scope");
-    }
-    // check assignment ...
+    Variable var = (Variable) currentST.lookUpScope(varName);
 
+    Expr rhs = (Expr) visit(ctx.assign_rhs()); // simple case
+
+    if(rhs.type() != varType) {
+      System.out.println("Semantic error at line " + ctx.start.getLine()
+          + ". Type mismatch");
+    }
+    if (var != null) {
+      System.out.println("Semantic error at line " + ctx.start.getLine()
+          + ". Variable name is already declared in scope");
+    }
     else {
-      // legal declaration: add to symbol table
-      currentST.add(varName, new Variable((Type) type));
-
-      currentASTNode.add(new ASTNode(/* what to add ? */));
+      currentST.add(varName, new Variable(varType));
+      currentASTNode.add(new VarDeclareNode(varName, rhs));
     }
-
     return null;
   }
 
+  @Override
+  public Returnable visitBoolExp(BoolExpContext ctx) {
+    return new BoolExpr(ctx.bool_liter().getText().equals("true"));
+  }
+
+  /*
+  private ParentNode enterScope() {
+    currentST = new SymbolTable(currentST);
+    ParentNode parentASTNode = currentASTNode;
+    currentASTNode = new ParentNode();
+    return parentASTNode;
+  }
+
+  private void exitScope(ParentNode parentASTNode) {
+    currentST = currentST.getEncSymTable();
+    currentASTNode = parentASTNode;
+  }*/
+
+
+  @Override
+  public Returnable visitBinaryExp(BinaryExpContext ctx) {
+    Expr lhs = (Expr) visit(ctx.expr(0));
+    Expr rhs = (Expr) visit(ctx.expr(1));
+    return new BinExpr(lhs, ctx.binary_oper().getText(), rhs);
+  }
+
+
+  @Override
+  public Returnable visitIdentExp(IdentExpContext ctx) {
+    String varName = ctx.IDENT().getText();
+    Identifier variable = currentST.lookUpAll(varName);
+    if (variable == null) {
+      System.out.println("Semantic error at line: " + ctx.start.getLine());
+    }
+    return (Returnable) variable;
+  }
 
 }

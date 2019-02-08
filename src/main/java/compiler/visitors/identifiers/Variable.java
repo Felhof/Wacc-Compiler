@@ -1,9 +1,13 @@
 package compiler.visitors.identifiers;
 
 public class Variable implements Identifier {
-  private Type type;
+  private TYPE type;
 
-  public Variable(Type type) {
+  public Variable(TYPE type) {
     this.type = type;
+  }
+
+  public TYPE type() {
+    return type;
   }
 }

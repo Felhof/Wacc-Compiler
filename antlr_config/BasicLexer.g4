@@ -80,9 +80,6 @@ NOTEQUAL: '!=' ;
 AND: '&&' ;
 OR: '||' ;
 
-//ident
-IDENT: ('_' | LOWER | UPPER) ('_' | LOWER | UPPER | DIGIT)*;
-
 //brackets
 OPEN: '(' ;
 CLOSE: ')' ;
@@ -119,6 +116,8 @@ EOL: ('\n' | '\r' | '\n\r' | '\r\n' |'\t' | '\n\n') -> skip;
 
 //Strings & chars
 
+IDENT: ('_' | LOWER | UPPER) ('_' | LOWER | UPPER | DIGIT)*;
+
 STRING_LITER: QUOT (CHARACTER)* QUOT;
 
 CHAR_LITER: APOS CHARACTER APOS;
@@ -126,4 +125,5 @@ CHAR_LITER: APOS CHARACTER APOS;
 ESCAPED_CHAR: BACKSLASH ('0' | 'b' | 't' | 'n' | 'f' | 'r' | '"' | '\'' | '\\') ;
 
 CHARACTER: (~('"' | '\'' | '\\') | ESCAPED_CHAR);
+
 
