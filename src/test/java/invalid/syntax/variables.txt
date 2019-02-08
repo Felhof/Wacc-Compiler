@@ -1,3 +1,4 @@
 src/test/invalid/syntaxErr/variables/badintAssignments.wacc
 src/test/invalid/syntaxErr/variables/bigIntAssignment.wacc
 src/test/invalid/syntaxErr/variables/varNoName.wacc
+src/test/invalid/syntaxErr/variables/varNameIsInt.wacc

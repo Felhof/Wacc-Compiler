@@ -1,6 +1,8 @@
 package compiler;
 
+import compiler.visitors.Nodes.ParentNode;
 import compiler.visitors.ReturnFunctionVisitor;
+import compiler.visitors.SemanticVisitor;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
@@ -19,8 +21,8 @@ public class Main {
 
   public static void main(String[] args) {
 
-    //int nbSyntaxErrors = compileProg(args[0]);
-    int nbSyntaxErrors = compileProg("src/test/invalid/syntaxErr/function/functionConditionalNoReturn.wacc");
+    int nbSyntaxErrors = compileProg(args[0]); // uncomment for labTS test
+    //int nbSyntaxErrors = compileProg("src/test/valid/variables/boolDeclaration.wacc");
     if (nbSyntaxErrors > 0) {
       System.err.println(nbSyntaxErrors +" syntax error(s)");
       System.out.println("Exit code 100 returned");
@@ -54,8 +56,13 @@ public class Main {
     ReturnFunctionVisitor returnFunctionVisitor = new ReturnFunctionVisitor(parser);
     returnFunctionVisitor.visit(tree);
 
-    SyntaxVisitor syntaxVisitor = new SyntaxVisitor(parser);
-    syntaxVisitor.visit(tree);
+    // refactor: move to appropriate place
+    SemanticVisitor semanticVisitor = new SemanticVisitor();
+    ParentNode ast = (ParentNode) semanticVisitor.visit(tree);
+    //System.out.println(ast.toString());
+    
+    //SyntaxVisitor syntaxVisitor = new SyntaxVisitor(parser);
+    //syntaxVisitor.visit(tree);
 
     return nbSyntaxErrors;
   }

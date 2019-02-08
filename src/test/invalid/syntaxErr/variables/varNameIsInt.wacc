@@ -1,0 +1,14 @@
+# variable declaration cannot be int
+
+# Output:
+# #syntax_error#
+
+# Exit:
+# 100
+
+
+# Program:
+
+begin
+  int int = 42
+end

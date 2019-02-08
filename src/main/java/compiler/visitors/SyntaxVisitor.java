@@ -11,7 +11,7 @@ public class SyntaxVisitor extends BasicParserBaseVisitor<Void>{
   }
 
 
-
+/*
   @Override
   public Void visitExpr(BasicParser.ExprContext ctx) {
 
@@ -33,7 +33,7 @@ public class SyntaxVisitor extends BasicParserBaseVisitor<Void>{
 
     return null;
   }
-
+*/
 
   @Override
   public Void visitUnary_oper(BasicParser.Unary_operContext ctx){
