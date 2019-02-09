@@ -15,8 +15,10 @@ import antlr.BasicParser.PairElemPairTypeContext;
 import antlr.BasicParser.PairTypeContext;
 import antlr.BasicParser.ProgContext;
 import antlr.BasicParser.RecursiveStatContext;
+import antlr.BasicParser.StatContext;
 import antlr.BasicParser.StrExpContext;
 import antlr.BasicParser.VarDeclarationStatContext;
+import antlr.BasicParser.WhileStatContext;
 import antlr.BasicParserBaseVisitor;
 import compiler.visitors.NodeElements.AssignRHS;
 import compiler.visitors.NodeElements.BasicType;
@@ -36,6 +38,7 @@ import compiler.visitors.NodeElements.IntExpr;
 import compiler.visitors.NodeElements.StringExpr;
 import compiler.visitors.NodeElements.TYPE;
 import compiler.visitors.Identifiers.Variable;
+import compiler.visitors.Nodes.WhileNode;
 
 public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
 
@@ -65,21 +68,28 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
 
   @Override
   public Returnable visitIfStat(IfStatContext ctx) {
+
     Expr condition = (Expr) visit(ctx.expr());
-    if(!condition.type().equals(new BasicType(TYPE.BOOL))) {
-      parser.notifyErrorListeners(
-          "Semantic error at line " + ctx.start.getLine()
-              + ": if condition must evaluate to a boolean");    }
+    checkBoolExpr(ctx, condition);
 
-    ASTNode ASTNode = enterScope();
-    visit(ctx.stat(0));
-    ASTNode thenStat = exitScope(ASTNode);
+    ScopeData thenStat = visitStatInNewScope(ctx.stat(0));
+    ScopeData elseStat = visitStatInNewScope(ctx.stat(1));
 
-    enterScope();
-    visit(ctx.stat(1));
-    ASTNode elseStat = exitScope(ASTNode);
+    currentASTNode.add(new IfElseNode(condition, thenStat.astNode(),
+        thenStat.symbolTable(), elseStat.astNode(), elseStat.symbolTable()));
+    return null;
+  }
 
-    currentASTNode.add(new IfElseNode(condition, thenStat, elseStat));
+  @Override
+  public Returnable visitWhileStat(WhileStatContext ctx) {
+
+    Expr condition = (Expr) visit(ctx.expr());
+    checkBoolExpr(ctx, condition);
+
+    ScopeData stat = visitStatInNewScope(ctx.stat());
+
+    currentASTNode.add(new WhileNode(condition, stat.astNode(), stat.symbolTable()));
+
     return null;
   }
 
@@ -127,21 +137,6 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
     return new StringExpr(ctx.str_liter().getText());
   }
 
-  private ASTNode enterScope() {
-    currentST = new SymbolTable(currentST);
-    ASTNode parentASTNode = currentASTNode;
-    currentASTNode = new ASTNode();
-    return parentASTNode;
-  }
-
-  private ASTNode exitScope(ASTNode parentASTNode) {
-    currentST = currentST.getEncSymTable();
-    ASTNode currentNode = currentASTNode;
-    currentASTNode = parentASTNode;
-    return currentNode;
-
-  }
-
   @Override
   public Returnable visitBinaryExp(BinaryExpContext ctx) {
     Expr lhs = (Expr) visit(ctx.expr(0));
@@ -162,7 +157,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
     if (variable == null) {
       parser.notifyErrorListeners(
           "Semantic error at line: " + ctx.start.getLine() + " : variable "
-              + varName + " doesn't exist");
+              + varName + " is not defined in this scope");
       variable = new Variable(new BasicType(TYPE.RECOVERY));
     }
     return new IdentExpr(variable.type());
@@ -201,6 +196,52 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
   @Override
   public Returnable visitPairElemPairType(PairElemPairTypeContext ctx) {
     return new PairType(null, null);
+  }
+
+  public ScopeData visitStatInNewScope(StatContext stat) {
+    ASTNode ASTNode = enterScope();
+    visit(stat);
+    return exitScope(ASTNode);
+  }
+
+  private ASTNode enterScope() {
+    currentST = new SymbolTable(currentST);
+    ASTNode parentASTNode = currentASTNode;
+    currentASTNode = new ASTNode();
+    return parentASTNode;
+  }
+
+  private ScopeData exitScope(ASTNode parentASTNode) {
+    ScopeData scopeData = new ScopeData(currentASTNode, currentST);
+    currentST = currentST.getEncSymTable();
+    currentASTNode = parentASTNode;
+    return scopeData;
+
+  }
+
+  private void checkBoolExpr(StatContext ctx, Expr condition) {
+    if(!condition.type().equals(new BasicType(TYPE.BOOL))) {
+      parser.notifyErrorListeners(
+          "Semantic error at line " + ctx.start.getLine()
+              + ": if condition must evaluate to a boolean");    }
+  }
+
+  public class ScopeData {
+    private ASTNode astNode;
+    private SymbolTable symbolTable;
+
+    public ScopeData(ASTNode astNode, SymbolTable symbolTable) {
+      this.astNode = astNode;
+      this.symbolTable = symbolTable;
+    }
+
+    public ASTNode astNode() {
+      return astNode;
+    }
+
+    public SymbolTable symbolTable() {
+      return symbolTable;
+    }
   }
 
 
