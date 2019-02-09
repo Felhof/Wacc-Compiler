@@ -122,7 +122,7 @@ char_liter:
 str_liter:
       STRING_LITER;
 
- character:
+character:
         CHAR_LITER | ESCAPED_CHAR ;
 
 array_liter:
