@@ -1,4 +1,4 @@
-package compiler.visitors.identifiers;
+package compiler.visitors.NodeElements;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,6 +15,10 @@ public enum TYPE {
 
   public String value() {
     return value;
+  }
+
+  public boolean equals(TYPE type) {
+    return this == type;
   }
 
   static {

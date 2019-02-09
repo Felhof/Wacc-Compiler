@@ -1,10 +1,10 @@
-package compiler.visitors.identifiers;
+package compiler.visitors.NodeElements;
 
 public class BoolExpr extends Expr {
   private boolean value;
 
   public BoolExpr(String value) {
-    super(TYPE.BOOL);
+    super(new BasicType(TYPE.BOOL));
     this.value = value.equals("true");
   }
 
@@ -15,5 +15,9 @@ public class BoolExpr extends Expr {
   @Override
   public String toString() {
     return "BoolExpr(" + value + ")";
+  }
+
+  @Override
+  public void setType() {
   }
 }

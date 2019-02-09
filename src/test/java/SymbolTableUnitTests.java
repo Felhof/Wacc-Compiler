@@ -1,4 +1,4 @@
-import compiler.visitors.identifiers.Identifier;
+import compiler.visitors.Identifiers.Identifier;
 import compiler.visitors.SymbolTable;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.Rule;

@@ -1,11 +1,11 @@
-package compiler.visitors.identifiers;
+package compiler.visitors.NodeElements;
 
 public class StringExpr extends Expr {
 
   private final String value;
 
   public StringExpr(String value) {
-    super(TYPE.STRING);
+    super(new BasicType(TYPE.STRING));
     this.value = value;
   }
 
@@ -16,5 +16,10 @@ public class StringExpr extends Expr {
   @Override
   public String toString() {
     return "StringExpr(" + value + ')';
+  }
+
+  @Override
+  public void setType() {
+
   }
 }
