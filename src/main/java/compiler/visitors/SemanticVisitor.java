@@ -3,13 +3,16 @@ package compiler.visitors;
 import antlr.BasicParser.BinaryExpContext;
 import antlr.BasicParser.BoolExpContext;
 import antlr.BasicParser.IdentExpContext;
+import antlr.BasicParser.IfStatContext;
 import antlr.BasicParser.ProgContext;
 import antlr.BasicParser.RecursiveStatContext;
 import antlr.BasicParser.VarDeclarationStatContext;
 import antlr.BasicParserBaseVisitor;
+import compiler.visitors.Nodes.IfElseNode;
 import compiler.visitors.Nodes.ParentNode;
 import compiler.visitors.Nodes.VarDeclareNode;
 import compiler.visitors.identifiers.BinExpr;
+import compiler.visitors.identifiers.BinExpr.BINOP;
 import compiler.visitors.identifiers.BoolExpr;
 import compiler.visitors.identifiers.Expr;
 import compiler.visitors.identifiers.Identifier;
@@ -40,24 +43,24 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
     return null;
   }
 
-  /*
   @Override
-  public ParentNode visitIfStat(IfStatContext ctx) {
-    ParentNode parentASTNode = enterScope(); // new ST and AST node
+  public Returnable visitIfStat(IfStatContext ctx) {
+    Expr condition = (Expr) visit(ctx.expr());
+    if(condition.type() != TYPE.BOOL) {
+      System.out.println("Semantic error at line " + ctx.start.getLine() + ": if condition must evaluate to a boolean");
+    }
 
-    // Semantic checks
-    visit(ctx.expr());
-    Identifier conditionalExp = stack.pop(); // put this in AST node
-    checkBoolExp(conditionalExp);
-
-    // AST tree
-
+    ParentNode parentNode = enterScope();
     visit(ctx.stat(0));
-    visit(ctx.stat(1));
+    ParentNode thenStat = exitScope(parentNode);
 
-    exitScope(parentASTNode); // back to enclosing ST and parent AST node
+    enterScope();
+    visit(ctx.stat(1));
+    ParentNode elseStat = exitScope(parentNode);
+
+    currentASTNode.add(new IfElseNode(condition, thenStat, elseStat));
     return null;
-  }*/
+  }
 
   @Override
   public ParentNode visitVarDeclarationStat(VarDeclarationStatContext ctx) {
@@ -89,7 +92,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
     return new BoolExpr(ctx.bool_liter().getText().equals("true"));
   }
 
-  /*
+
   private ParentNode enterScope() {
     currentST = new SymbolTable(currentST);
     ParentNode parentASTNode = currentASTNode;
@@ -97,28 +100,36 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
     return parentASTNode;
   }
 
-  private void exitScope(ParentNode parentASTNode) {
+  private ParentNode exitScope(ParentNode parentASTNode) {
     currentST = currentST.getEncSymTable();
+    ParentNode currentNode = currentASTNode;
     currentASTNode = parentASTNode;
-  }*/
+    return currentNode;
+
+  }
 
 
   @Override
   public Returnable visitBinaryExp(BinaryExpContext ctx) {
     Expr lhs = (Expr) visit(ctx.expr(0));
     Expr rhs = (Expr) visit(ctx.expr(1));
-    return new BinExpr(lhs, ctx.binary_oper().getText(), rhs);
+    BinExpr binExpr = new BinExpr(lhs, BINOP.get(ctx.binary_oper().getText()), rhs);
+    if (!binExpr.isTypeCompatible()) {
+      System.out.println("Semantic error at line: " + ctx.start.getLine()
+          + ": type mismatch in binary expression");
+    }
+    return binExpr;
   }
 
 
   @Override
   public Returnable visitIdentExp(IdentExpContext ctx) {
     String varName = ctx.IDENT().getText();
-    Identifier variable = currentST.lookUpAll(varName);
+    Variable variable = (Variable) currentST.lookUpAll(varName);
     if (variable == null) {
       System.out.println("Semantic error at line: " + ctx.start.getLine());
     }
-    return (Returnable) variable;
+    return new Expr(variable.type());
   }
 
 }

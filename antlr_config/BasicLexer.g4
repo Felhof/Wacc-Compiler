@@ -49,13 +49,13 @@ CALL: 'call' ;
 FST: 'fst' ;
 SND: 'snd' ;
 
-//base-type keywords
+//base-returnType keywords
 INT: 'int' ;
 BOOL: 'bool' ;
 CHAR: 'char' ;
 STRING: 'string' ;
 
-//pair-type keywords
+//pair-returnType keywords
 PAIR: 'pair' ;
 
 //unary operators

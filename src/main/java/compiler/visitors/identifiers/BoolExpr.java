@@ -4,8 +4,8 @@ public class BoolExpr extends Expr {
   private boolean value;
 
   public BoolExpr(boolean value) {
+    super(TYPE.BOOL);
     this.value = value;
-    super.type = TYPE.BOOL;
   }
 
   public boolean value() {

@@ -1,36 +1,75 @@
 package compiler.visitors.identifiers;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class BinExpr extends Expr {
+
+  private final static List<TYPE> typesInt = Arrays.asList(TYPE.INT);
+  private final static List<TYPE> typesIntChar = Arrays.asList(TYPE.INT, TYPE.CHAR);
+  private final static List<TYPE> typesBool = Arrays.asList(TYPE.BOOL);
+  private final static List<TYPE> typesAny = Arrays.asList(TYPE.values());
+
   private BINOP operator;
   private Expr lhs;
   private Expr rhs;
 
-  public BinExpr(Expr lhs, String operator, Expr rhs) {
-    this.operator = BINOP.valueOf(operator);
+  public BinExpr(Expr lhs, BINOP operator, Expr rhs) {
+    super(operator.returnType());
+    this.operator = operator;
     this.lhs = lhs;
     this.rhs = rhs;
-    super.type = this.operator.type();
   }
 
-  enum BINOP {
-    MUL("*", TYPE.INT), DIV("/", TYPE.INT), MOD("%", TYPE.INT), PLUS("+", TYPE.INT),
-    MINUS("-", TYPE.INT), GT(">", TYPE.BOOL), GE(">=", TYPE.BOOL), LT("<", TYPE.BOOL),
-    LE("<=", TYPE.BOOL), EQUAL("==", TYPE.BOOL), NOTEQUAL("!=", TYPE.BOOL),
-    AND("&&", TYPE.BOOL), OR("||", TYPE.BOOL);
+  public boolean isTypeCompatible() {
+    return lhs.type() == rhs.type() && operator.argTypes().contains(lhs.type());
+  }
+
+  public enum BINOP {
+    MUL("*", typesInt, TYPE.INT), DIV("/", typesInt, TYPE.INT),
+    MOD("%", typesInt, TYPE.INT), PLUS("+", typesInt, TYPE.INT),
+    MINUS("-", typesInt, TYPE.INT), GT(">", typesIntChar, TYPE.BOOL),
+    GE(">=", typesIntChar, TYPE.BOOL), LT("<", typesIntChar, TYPE.BOOL),
+    LE("<=", typesIntChar, TYPE.BOOL), EQUAL("==", typesAny, TYPE.BOOL),
+    NOTEQUAL("!=", typesAny, TYPE.BOOL), AND("&&", typesBool, TYPE.BOOL),
+    OR("||", typesBool, TYPE.BOOL);
 
     private String op;
-    private TYPE type;
+    private List<TYPE> argTypes;
+    private TYPE returnType;
+    private static Map<String, BINOP> map;
 
-    BINOP(String op, TYPE type) {
+    BINOP(String op,
+        List<TYPE> argTypes,
+        TYPE returnType) {
       this.op = op;
-      this.type = type;
+      this.argTypes = argTypes;
+      this.returnType = returnType;
+
     }
 
     public String op() {
       return op;
     }
 
-    public TYPE type() { return type; }
+    public List<TYPE> argTypes() {
+      return argTypes;
+    }
+
+    public TYPE returnType() { return returnType; }
+
+    static {
+      map = new HashMap<>();
+      for(BINOP t : BINOP.values()) {
+        map.put(t.op(), t);
+      }
+    }
+
+    public static BINOP get(String string) {
+      return map.get(string);
+    }
   }
 }
 

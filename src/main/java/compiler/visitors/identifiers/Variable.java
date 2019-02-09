@@ -1,6 +1,8 @@
 package compiler.visitors.identifiers;
 
-public class Variable implements Identifier {
+import compiler.visitors.Returnable;
+
+public class Variable implements Identifier, Returnable {
   private TYPE type;
 
   public Variable(TYPE type) {
