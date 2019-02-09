@@ -6,6 +6,7 @@ import antlr.BasicParser.BinaryExpContext;
 import antlr.BasicParser.BoolExpContext;
 import antlr.BasicParser.CharExpContext;
 import antlr.BasicParser.DefPairTypeContext;
+import antlr.BasicParser.ExprContext;
 import antlr.BasicParser.IdentExpContext;
 import antlr.BasicParser.IfStatContext;
 import antlr.BasicParser.IntExpContext;
@@ -70,7 +71,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
   public Returnable visitIfStat(IfStatContext ctx) {
 
     Expr condition = (Expr) visit(ctx.expr());
-    checkBoolExpr(ctx, condition);
+    checkBoolExpr(ctx.expr(), condition);
 
     ScopeData thenStat = visitStatInNewScope(ctx.stat(0));
     ScopeData elseStat = visitStatInNewScope(ctx.stat(1));
@@ -84,7 +85,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
   public Returnable visitWhileStat(WhileStatContext ctx) {
 
     Expr condition = (Expr) visit(ctx.expr());
-    checkBoolExpr(ctx, condition);
+    checkBoolExpr(ctx.expr(), condition);
 
     ScopeData stat = visitStatInNewScope(ctx.stat());
 
@@ -219,11 +220,13 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
 
   }
 
-  private void checkBoolExpr(StatContext ctx, Expr condition) {
+  private void checkBoolExpr(ExprContext ctx, Expr condition) {
     if(!condition.type().equals(new BasicType(TYPE.BOOL))) {
       parser.notifyErrorListeners(
           "Semantic error at line " + ctx.start.getLine()
-              + ": if condition must evaluate to a boolean");    }
+              + ": Incompatible type at " + ctx.getText() + " (expected: "
+              + "BOOL, actual:" +  condition.type().toString() + ")");
+    }
   }
 
   public class ScopeData {

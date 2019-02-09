@@ -7,43 +7,54 @@ import java.util.Map;
 
 public class BinExpr extends Expr {
 
-  private final static List<TYPE> typesInt = Arrays.asList(TYPE.INT);
-  private final static List<TYPE> typesIntChar = Arrays.asList(TYPE.INT, TYPE.CHAR);
-  private final static List<TYPE> typesBool = Arrays.asList(TYPE.BOOL);
-  private final static List<TYPE> typesAny = Arrays.asList(TYPE.values());
+  private final static Type intType = new BasicType(TYPE.INT);
+  private final static Type charType = new BasicType(TYPE.CHAR);
+  private final static Type boolType = new BasicType(TYPE.BOOL);
+  private final static Type stringType = new BasicType(TYPE.STRING);
+
+  private final static List<Type> typesInt = Arrays.asList(intType);
+  private final static List<Type> typesIntChar =
+      Arrays.asList(intType, charType);
+  private final static List<Type> typesBool = Arrays.asList(boolType);
+  private final static List<Type> typesAny =
+      Arrays.asList(intType, charType, boolType, stringType);
 
   private BINOP operator;
   private Expr lhs;
   private Expr rhs;
 
   public BinExpr(Expr lhs, BINOP operator, Expr rhs) {
-    super(new BasicType(operator.returnType()));
+    super(operator.returnType());
     this.operator = operator;
     this.lhs = lhs;
     this.rhs = rhs;
   }
 
   public boolean isTypeCompatible() {
-    return lhs.type().equals(rhs.type()) && operator.argTypes().contains(lhs.type());
+    return lhs.type().equals(rhs.type()) && contains(operator.argTypes(), lhs.type());
+  }
+
+  private boolean contains(List<Type> argTypes, Type type) {
+    return argTypes.stream().filter(t -> t.equals(type)).toArray().length > 0;
   }
 
   public enum BINOP {
-    MUL("*", typesInt, TYPE.INT), DIV("/", typesInt, TYPE.INT),
-    MOD("%", typesInt, TYPE.INT), PLUS("+", typesInt, TYPE.INT),
-    MINUS("-", typesInt, TYPE.INT), GT(">", typesIntChar, TYPE.BOOL),
-    GE(">=", typesIntChar, TYPE.BOOL), LT("<", typesIntChar, TYPE.BOOL),
-    LE("<=", typesIntChar, TYPE.BOOL), EQUAL("==", typesAny, TYPE.BOOL),
-    NOTEQUAL("!=", typesAny, TYPE.BOOL), AND("&&", typesBool, TYPE.BOOL),
-    OR("||", typesBool, TYPE.BOOL);
+    MUL("*", typesInt, intType), DIV("/", typesInt, intType),
+    MOD("%", typesInt, intType), PLUS("+", typesInt, intType),
+    MINUS("-", typesInt, intType), GT(">", typesIntChar, boolType),
+    GE(">=", typesIntChar, boolType), LT("<", typesIntChar, boolType),
+    LE("<=", typesIntChar, boolType), EQUAL("==", typesAny, boolType),
+    NOTEQUAL("!=", typesAny, boolType), AND("&&", typesBool, boolType),
+    OR("||", typesBool, boolType);
 
     private String op;
-    private List<TYPE> argTypes;
-    private TYPE returnType;
+    private List<Type> argTypes;
+    private Type returnType;
     private static Map<String, BINOP> map;
 
     BINOP(String op,
-        List<TYPE> argTypes,
-        TYPE returnType) {
+        List<Type> argTypes,
+        Type returnType) {
       this.op = op;
       this.argTypes = argTypes;
       this.returnType = returnType;
@@ -54,11 +65,11 @@ public class BinExpr extends Expr {
       return op;
     }
 
-    public List<TYPE> argTypes() {
+    public List<Type> argTypes() {
       return argTypes;
     }
 
-    public TYPE returnType() { return returnType; }
+    public Type returnType() { return returnType; }
 
     static {
       map = new HashMap<>();
