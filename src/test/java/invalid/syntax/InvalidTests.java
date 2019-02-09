@@ -1,13 +1,15 @@
 package invalid.syntax;
 
 import compiler.Main;
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.PrintStream;
+import org.junit.Rule;
 import org.junit.Test;
-
-import java.io.*;
+import org.junit.contrib.java.lang.system.ExpectedSystemExit;
 import org.junit.experimental.categories.Category;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.IsNot.not;
 
 interface arrayInv {}
 interface basicInv {}
@@ -20,15 +22,18 @@ interface whileInv {}
 
 public class InvalidTests {
 
+  @Rule
+  public final ExpectedSystemExit exit = ExpectedSystemExit.none();
 
-  public static void checkCompilationFails(String filenames) {
+
+  public void checkCompilationFails(String filenames) {
     try(BufferedReader br = new BufferedReader(new FileReader(filenames))) {
       for(String line; (line = br.readLine()) != null; ) {
         System.out.println("Compile.. " + line);
         final ByteArrayOutputStream errStream = new ByteArrayOutputStream();
         System.setErr(new PrintStream(errStream));
+        exit.expectSystemExitWithStatus(100);
         Main.compileProg(line);
-        assertThat(errStream.toString(), not(""));
       }
     } catch (IOException e) {
       e.printStackTrace();
@@ -38,13 +43,13 @@ public class InvalidTests {
   @Category(arrayInv.class)
   @Test
   public void Array() {
-    checkCompilationFails("src/test/java/invalid/syntax/arrayInv.txt");
+    checkCompilationFails("src/test/java/invalid/syntax/array.txt");
   }
 
   @Category(basicInv.class)
   @Test
   public void Basic() {
-    checkCompilationFails("src/test/java/invalid/syntax/basicInv.txt");
+    checkCompilationFails("src/test/java/invalid/syntax/basic.txt");
   }
 
   @Category(expressionInv.class)

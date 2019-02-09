@@ -1,0 +1,5 @@
+src/test/invalid/semanticErr/multiple/funcMess.wacc
+src/test/invalid/semanticErr/multiple/ifAndWhileErrs.wacc
+src/test/invalid/semanticErr/multiple/messyExpr.wacc
+src/test/invalid/semanticErr/multiple/multiCaseSensitivity.wacc
+src/test/invalid/semanticErr/multiple/multiTypeErrs.wacc
