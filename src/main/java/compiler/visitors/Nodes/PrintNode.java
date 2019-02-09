@@ -1,7 +1,5 @@
 package compiler.visitors.Nodes;
 
-import compiler.visitors.identifiers.Identifier;
-
 public class PrintNode {
 
   boolean newLine;

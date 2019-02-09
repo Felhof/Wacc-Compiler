@@ -1,6 +1,6 @@
 package compiler.visitors;
 
-import compiler.visitors.identifiers.Identifier;
+import compiler.visitors.Identifiers.Identifier;
 import java.util.HashMap;
 
 public class SymbolTable {

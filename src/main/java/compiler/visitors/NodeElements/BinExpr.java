@@ -1,4 +1,4 @@
-package compiler.visitors.identifiers;
+package compiler.visitors.NodeElements;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -17,7 +17,7 @@ public class BinExpr extends Expr {
   private Expr rhs;
 
   public BinExpr(Expr lhs, BINOP operator, Expr rhs) {
-    super(operator.returnType());
+    super(new BasicType(operator.returnType()));
     this.operator = operator;
     this.lhs = lhs;
     this.rhs = rhs;
@@ -25,6 +25,10 @@ public class BinExpr extends Expr {
 
   public boolean isTypeCompatible() {
     return lhs.type() == rhs.type() && operator.argTypes().contains(lhs.type());
+  }
+
+  @Override
+  public void setType() {
   }
 
   public enum BINOP {

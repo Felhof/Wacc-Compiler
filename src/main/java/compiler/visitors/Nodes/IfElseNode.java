@@ -1,6 +1,6 @@
 package compiler.visitors.Nodes;
 
-import compiler.visitors.identifiers.Expr;
+import compiler.visitors.NodeElements.Expr;
 
 public class IfElseNode implements Node {
   private Expr condition;

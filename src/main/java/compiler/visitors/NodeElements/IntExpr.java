@@ -1,10 +1,10 @@
-package compiler.visitors.identifiers;
+package compiler.visitors.NodeElements;
 
 public class IntExpr extends Expr {
   private int value;
 
   public IntExpr(String value) {
-    super(TYPE.INT);
+    super(new BasicType(TYPE.INT));
     this.value = Integer.parseInt(value);
   }
 
@@ -15,5 +15,9 @@ public class IntExpr extends Expr {
   @Override
   public String toString() {
     return "IntExpr(" + value + ')';
+  }
+
+  @Override
+  public void setType() {
   }
 }
