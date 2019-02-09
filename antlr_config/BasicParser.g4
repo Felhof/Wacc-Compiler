@@ -38,9 +38,9 @@ assign_lhs:
 assign_rhs:
       expr #assignExp
     | array_liter #todoA
-    | NEWPAIR OPEN expr COMMA expr CLOSE #todoA
-    | pair_elem #todoA
-    | CALL IDENT OPEN (arg_list)? CLOSE #todoA ;
+    | NEWPAIR OPEN expr COMMA expr CLOSE #newPair
+    | pair_elem #todoB
+    | CALL IDENT OPEN (arg_list)? CLOSE #todoC ;
 
 arg_list:
     expr (COMMA expr)* ;
@@ -50,9 +50,9 @@ pair_elem:
     | SND expr ;
 
 type:
-      base_type
-    | array_type
-    | pair_type ;
+      base_type #baseType
+    | array_type #todoP
+    | pair_type #pairType;
 
 base_type:
       INT
@@ -66,12 +66,12 @@ array_type:
     | pair_type OPENSQ CLOSESQ;
 
 pair_type:
-      PAIR OPEN pair_elem_type COMMA pair_elem_type CLOSE ;
+      PAIR OPEN pair_elem_type COMMA pair_elem_type CLOSE #defPairType;
 
 pair_elem_type:
-      base_type
-    | array_type
-    | PAIR ;
+      base_type  #pairElemBaseType
+    | array_type #pairElemArrayType
+    | PAIR       #pairElemPairType ;
 
 expr:
       INTEGER #intExp
@@ -130,4 +130,3 @@ array_liter:
 
 pair_liter:
       NULL ;
-
