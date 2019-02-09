@@ -29,7 +29,14 @@ public class InvalidTests {
   private static final String path = "src/test/java/invalid/syntax/";
   private static final String messageDirectory = "errorMessages/";
 
-  private static final String errorToken = "Syntactic Error at ";
+  //Every Error Message begins with this
+  private static final String errorMessageToken = "Exit code 100 returned.";
+
+  //The linenumber will be after the first occurence of one of these in the message
+  private static final String lineNumberToken1 = "Syntactic Error at ";
+  private static final String lineNumberToken2 = "on line ";
+  private static final String afterLineNumber1 = ":";
+  private static final String afterLineNumber2 = " is ";
 
   public static void checkCompilationFails(String filenames) {
     try(BufferedReader br = new BufferedReader(new FileReader(filenames))) {
@@ -63,29 +70,34 @@ public class InvalidTests {
 
         try {
 
-          String theirError = compilerOutput.substring(compilerOutput.indexOf(errorToken));
+          String theirError = compilerOutput.substring(compilerOutput.indexOf(errorMessageToken) + errorMessageToken.length());
           String OurError = errStream.toString();
-          OurError = OurError.substring(OurError.indexOf(errorToken));
+          OurError = OurError.substring(OurError.indexOf(errorMessageToken) + errorMessageToken.length());
 
           System.out.println("\nTheir Error: " + theirError);
           System.out.println("Our Error: " + OurError);
 
-          int ourErrorLine = Integer.parseInt(theirError.substring(errorToken.length(),theirError.indexOf(":")));
-          int theirErrorLine = Integer.parseInt(OurError.substring(errorToken.length(),OurError.indexOf(":")));
+          int lineToken1Index = theirError.indexOf(lineNumberToken1);
+          int lineToken2Index = theirError.indexOf(lineNumberToken2);
+          int lineNumberIndex;
+          String afterLineNumberString;
 
+          assertThat(lineToken1Index >= 0 || lineToken2Index >= 0, is(true));
 
-          /*
-          //Get String after first newline
-          String afterFirstNewline = ourError.substring(ourError.indexOf("\n") + 1);
+          if(lineToken1Index >= 0){
+            lineNumberIndex = lineToken1Index + lineNumberToken1.length();
+            afterLineNumberString = afterLineNumber1;
 
-          //index of secondnewline = length until first newline + length from first to second newline + 1
-          int secondNewlineIndex = ourError.substring(0, ourError.indexOf("\n")).length() +
-                  afterFirstNewline.substring(0, afterFirstNewline.indexOf("\n") + 1).length();
+          }
+          else {
+            lineNumberIndex = lineToken2Index + lineNumberToken2.length();
+            afterLineNumberString = afterLineNumber2;
+          }
 
-          //Trim message after second newline
-          ourError = ourError.substring(0, secondNewlineIndex + 1);
-          */
-
+          int theirErrorLine = Integer.parseInt(theirError.substring(lineNumberIndex,
+                                theirError.indexOf(afterLineNumberString)));
+          int ourErrorLine = Integer.parseInt(OurError.substring(OurError.indexOf(lineNumberToken1)
+                                + lineNumberToken1.length() ,OurError.indexOf(":")));
 
           assertThat(ourErrorLine, is(theirErrorLine));
 

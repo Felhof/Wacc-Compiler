@@ -53,7 +53,7 @@ public class SyntaxVisitor extends BasicParserBaseVisitor<Void>{
     switch (operatorText){
       case "+":
         if(c == '"' || c == '\'' || c == '(' || c == ')'){
-          parser.notifyErrorListeners("Missmatched Input '" + c + "'. Expecting Integer");
+          parser.notifyErrorListeners("Missmatched Input '" + c + "' expecting INTEGER");
         }
         break;
     }
