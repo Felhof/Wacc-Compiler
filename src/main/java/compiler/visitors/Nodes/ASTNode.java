@@ -4,11 +4,11 @@ import compiler.visitors.Returnable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ParentNode implements Returnable, Node {
+public class ASTNode implements Returnable, Node {
 
   private List<Node> children;
 
-  public ParentNode() {
+  public ASTNode() {
     children = new ArrayList<>();
   }
 

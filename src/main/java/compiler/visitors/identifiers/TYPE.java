@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public enum TYPE {
-  BOOL("bool"), INT("int"), CHAR("char"), STRING("string");
+  BOOL("bool"), INT("int"), CHAR("char"), STRING("string"), RECOVERY(null);
 
   private String value;
   private static Map<String, TYPE> map;
@@ -26,6 +26,10 @@ public enum TYPE {
 
   public static TYPE get(String string) {
     return map.get(string);
+  }
+
+  public boolean equals(TYPE o) {
+    return this == o || this == RECOVERY || o == RECOVERY;
   }
 
 }
