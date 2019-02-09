@@ -3,9 +3,9 @@ package compiler.visitors.identifiers;
 public class BoolExpr extends Expr {
   private boolean value;
 
-  public BoolExpr(boolean value) {
+  public BoolExpr(String value) {
     super(TYPE.BOOL);
-    this.value = value;
+    this.value = value.equals("true");
   }
 
   public boolean value() {

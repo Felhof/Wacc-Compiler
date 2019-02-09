@@ -6,14 +6,5 @@
 # Program:
 
 begin
-  bool b = false ;
-  if b
-  then
-    bool a = true ;
-    bool d = false ;
-    bool e = false ;
-    bool f = false
-  else
-    bool a = false
-  fi
+  bool b = true
 end

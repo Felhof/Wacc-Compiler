@@ -3,10 +3,13 @@ package compiler.visitors;
 import antlr.BasicParser;
 import antlr.BasicParser.BinaryExpContext;
 import antlr.BasicParser.BoolExpContext;
+import antlr.BasicParser.CharExpContext;
 import antlr.BasicParser.IdentExpContext;
 import antlr.BasicParser.IfStatContext;
+import antlr.BasicParser.IntExpContext;
 import antlr.BasicParser.ProgContext;
 import antlr.BasicParser.RecursiveStatContext;
+import antlr.BasicParser.StrExpContext;
 import antlr.BasicParser.VarDeclarationStatContext;
 import antlr.BasicParserBaseVisitor;
 import compiler.visitors.Nodes.ASTNode;
@@ -15,7 +18,11 @@ import compiler.visitors.Nodes.VarDeclareNode;
 import compiler.visitors.identifiers.BinExpr;
 import compiler.visitors.identifiers.BinExpr.BINOP;
 import compiler.visitors.identifiers.BoolExpr;
+import compiler.visitors.identifiers.CharExpr;
 import compiler.visitors.identifiers.Expr;
+import compiler.visitors.identifiers.Identifier;
+import compiler.visitors.identifiers.IntExpr;
+import compiler.visitors.identifiers.StringExpr;
 import compiler.visitors.identifiers.TYPE;
 import compiler.visitors.identifiers.Variable;
 
@@ -94,9 +101,23 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
 
   @Override
   public Returnable visitBoolExp(BoolExpContext ctx) {
-    return new BoolExpr(ctx.bool_liter().getText().equals("true"));
+    return new BoolExpr(ctx.bool_liter().getText());
   }
 
+  @Override
+  public Returnable visitIntExp(IntExpContext ctx) {
+    return new IntExpr(ctx.INTEGER().getText());
+  }
+
+  @Override
+  public Returnable visitCharExp(CharExpContext ctx) {
+    return new CharExpr(ctx.char_liter().getText());
+  }
+
+  @Override
+  public Returnable visitStrExp(StrExpContext ctx) {
+    return new StringExpr(ctx.str_liter().getText());
+  }
 
   private ASTNode enterScope() {
     currentST = new SymbolTable(currentST);
