@@ -14,8 +14,15 @@ public class PairType implements Type, Returnable {
 
   @Override
   public boolean equals(Type type) {
-    return type instanceof PairType
-        && ((PairType) type).fst.equals(this.fst)
-        && ((PairType) type).snd.equals(this.snd);
+    // If a pair has generic types it matches any other type that is a pair
+    if (type instanceof PairType
+        && this.fst.equals(new BasicType(TYPE.RECOVERY))
+        && this.snd.equals(new BasicType(TYPE.RECOVERY))) {
+      return true;
+    } else {
+      return type instanceof PairType
+          && this.fst.equals(((PairType) type).fst)
+          && this.snd.equals(((PairType) type).snd);
+    }
   }
 }
