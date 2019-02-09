@@ -7,5 +7,4 @@ public abstract class AssignRHS {
     return type;
   }
 
-  public abstract void setType();
 }

@@ -20,6 +20,7 @@ import antlr.BasicParser.VarDeclarationStatContext;
 import antlr.BasicParserBaseVisitor;
 import compiler.visitors.NodeElements.AssignRHS;
 import compiler.visitors.NodeElements.BasicType;
+import compiler.visitors.NodeElements.IdentExpr;
 import compiler.visitors.NodeElements.Pair;
 import compiler.visitors.NodeElements.PairType;
 import compiler.visitors.NodeElements.Type;
@@ -141,7 +142,6 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
 
   }
 
-
   @Override
   public Returnable visitBinaryExp(BinaryExpContext ctx) {
     Expr lhs = (Expr) visit(ctx.expr(0));
@@ -155,29 +155,18 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
     return binExpr;
   }
 
-
-//  @Override
-//  public Returnable visitIdentExp(IdentExpContext ctx) {
-//    String varName = ctx.IDENT().getText();
-//    Variable variable = (Variable) currentST.lookUpAll(varName);
-//    if (variable == null) {
-//      System.out.println("Semantic error at line: " + ctx.start.getLine());
-//    }
-//    return new Expr(variable.type());
-//  }
-
-  //  @Override
-//  public Returnable visitIdentExp(IdentExpContext ctx) {
-//    String varName = ctx.IDENT().getText();
-//    Variable variable = (Variable) currentST.lookUpAll(varName);
-//    if (variable == null) {
-//      parser.notifyErrorListeners(
-//          "Semantic error at line: " + ctx.start.getLine() + " : variable "
-//              + varName + " doesn't exist");
-//      variable = new Variable(TYPE.RECOVERY);
-//    }
-//    return new Expr(variable.type());
-//  }
+  @Override
+  public Returnable visitIdentExp(IdentExpContext ctx) {
+    String varName = ctx.IDENT().getText();
+    Variable variable = (Variable) currentST.lookUpAll(varName);
+    if (variable == null) {
+      parser.notifyErrorListeners(
+          "Semantic error at line: " + ctx.start.getLine() + " : variable "
+              + varName + " doesn't exist");
+      variable = new Variable(new BasicType(TYPE.RECOVERY));
+    }
+    return new IdentExpr(variable.type());
+  }
 
   @Override
   public Returnable visitNewPair(NewPairContext ctx) {

@@ -17,7 +17,4 @@ public class IntExpr extends Expr {
     return "IntExpr(" + value + ')';
   }
 
-  @Override
-  public void setType() {
-  }
 }

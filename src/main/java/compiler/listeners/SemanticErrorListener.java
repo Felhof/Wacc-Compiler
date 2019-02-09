@@ -14,7 +14,6 @@ public class SemanticErrorListener extends BaseErrorListener {
       String msg,
       RecognitionException e)
   {
-    System.err.println("Syntactic Error during compilation, line " + line + ":" + charPositionInLine+ ":");
     System.err.println(msg);
     nbSemanticErrors++;
   }

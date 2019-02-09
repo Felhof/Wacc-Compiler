@@ -19,7 +19,4 @@ public class CharExpr extends Expr {
     return "CharExpr(" + value + ')';
   }
 
-  @Override
-  public void setType() {
-  }
 }

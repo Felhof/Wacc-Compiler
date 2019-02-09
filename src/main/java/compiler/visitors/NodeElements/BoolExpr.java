@@ -17,7 +17,4 @@ public class BoolExpr extends Expr {
     return "BoolExpr(" + value + ")";
   }
 
-  @Override
-  public void setType() {
-  }
 }

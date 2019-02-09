@@ -24,11 +24,7 @@ public class BinExpr extends Expr {
   }
 
   public boolean isTypeCompatible() {
-    return lhs.type() == rhs.type() && operator.argTypes().contains(lhs.type());
-  }
-
-  @Override
-  public void setType() {
+    return lhs.type().equals(rhs.type()) && operator.argTypes().contains(lhs.type());
   }
 
   public enum BINOP {

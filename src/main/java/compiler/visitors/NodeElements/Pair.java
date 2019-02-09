@@ -10,11 +10,7 @@ public class Pair extends AssignRHS implements Returnable {
   public Pair(Expr fstExpr, Expr sndExpr) {
     this.fstExpr = fstExpr;
     this.sndExpr = sndExpr;
-    setType();
-  }
-
-  @Override
-  public void setType() {
     this.type = new PairType(fstExpr.type(), fstExpr.type());
   }
+
 }

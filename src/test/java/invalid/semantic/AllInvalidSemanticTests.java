@@ -16,7 +16,7 @@ import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 
 @RunWith(value = Parameterized.class)
-public class AllInvalidSyntacticTests {
+public class AllInvalidSemanticTests {
 
   @Rule
   public final ExpectedSystemExit exit = ExpectedSystemExit.none();

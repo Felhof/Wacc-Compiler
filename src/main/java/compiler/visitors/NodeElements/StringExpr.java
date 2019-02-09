@@ -18,8 +18,4 @@ public class StringExpr extends Expr {
     return "StringExpr(" + value + ')';
   }
 
-  @Override
-  public void setType() {
-
-  }
 }
