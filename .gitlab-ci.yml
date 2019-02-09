@@ -1,16 +1,17 @@
 stages:
-        - build
-        - test
+- build
+- test
 
 job 1:
-        stage: build
-        script: make
+  stage: build
+  script: make
 job 2:
-        stage: test
-        script:
-          - make
-          - mvn test -Dtest=SymbolTableUnitTests
-          #- mvn test '-Dtest=!InvalidTests#Expression+Variables' # mvn test
-          #      -Dgroups="<Test Category>"
-           #only:
-            #  - master  # only or except: - <name of branch>
+  stage: test
+  script:
+  - make
+  - mvn test -Dtest=SymbolTableUnitTests
+  - mvn test '-Dtest=SemanticInvalidTests#SemanticIf+SemanticScope+SemanticVariables+SemanticWhile'
+    #- mvn test '-Dtest=!InvalidTests#Expression+Variables' # mvn test
+    #      -Dgroups="<Test Category>"
+    #only:
+    #  - master  # only or except: - <name of branch>

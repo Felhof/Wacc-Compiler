@@ -12,6 +12,20 @@ public class BasicType implements Type, Returnable {
   @Override
   public boolean equals(Type type) {
     return type instanceof BasicType
-        && this.type.equals(((BasicType) type).type);
+        && this.type.equals(((BasicType) type).type());
+  }
+
+  public TYPE type() {
+    return type;
+  }
+
+  @Override
+  public int hashCode() {
+    return type.ordinal();
+  }
+
+  @Override
+  public String toString() {
+    return type.value().toUpperCase();
   }
 }

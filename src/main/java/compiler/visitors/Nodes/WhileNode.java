@@ -1,9 +1,24 @@
 package compiler.visitors.Nodes;
 
-import java.util.List;
+import compiler.visitors.NodeElements.Expr;
+import compiler.visitors.SymbolTable;
 
-public class WhileNode {
+public class WhileNode implements Node {
 
+  Expr condition;
+  ASTNode stat;
+  SymbolTable statST;
 
-  List<Node> children;
+  public WhileNode(Expr condition, ASTNode stat, SymbolTable statST) {
+    this.condition = condition;
+    this.stat = stat;
+    this.statST = statST;
+  }
+
+  @Override
+  public String toString() {
+    return "While (" + condition + ")" +
+        "\n {" + stat.toString() + '}';
+  }
+
 }
