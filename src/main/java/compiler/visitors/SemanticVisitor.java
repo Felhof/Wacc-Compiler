@@ -102,7 +102,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
     Variable var = (Variable) currentST.lookUpScope(varName);
     AssignRHS rhs = (AssignRHS) visit(ctx.assign_rhs()); // simple case
 
-    if(!rhs.type().equals(varType)) {
+    if(!varType.equals(rhs.type())) {
       parser
           .notifyErrorListeners("Semantic error at line " + ctx.start.getLine()
               + ". Type mismatch");
@@ -196,7 +196,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
 
   @Override
   public Returnable visitPairElemPairType(PairElemPairTypeContext ctx) {
-    return new PairType(null, null);
+    return new PairType(new BasicType(TYPE.RECOVERY), new BasicType(TYPE.RECOVERY));
   }
 
   public ScopeData visitStatInNewScope(StatContext stat) {
