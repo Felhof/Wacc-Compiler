@@ -4,11 +4,11 @@ import compiler.visitors.NodeElements.Expr;
 
 public class IfElseNode implements Node {
   private Expr condition;
-  private ParentNode thenStat;
-  private ParentNode elseStat;
+  private ASTNode thenStat;
+  private ASTNode elseStat;
 
-  public IfElseNode(Expr condition, ParentNode thenStat,
-      ParentNode elseStat) {
+  public IfElseNode(Expr condition, ASTNode thenStat,
+      ASTNode elseStat) {
     this.condition = condition;
     this.thenStat = thenStat;
     this.elseStat = elseStat;

@@ -1,0 +1,1 @@
+src/test/invalid/semanticErr/read/readTypeErr01.wacc
