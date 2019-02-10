@@ -6,6 +6,7 @@ import antlr.BasicParser.BinaryExpContext;
 import antlr.BasicParser.BoolExpContext;
 import antlr.BasicParser.CharExpContext;
 import antlr.BasicParser.DefPairTypeContext;
+import antlr.BasicParser.ExitStatContext;
 import antlr.BasicParser.ExprContext;
 import antlr.BasicParser.IdentExpContext;
 import antlr.BasicParser.IfStatContext;
@@ -28,6 +29,7 @@ import compiler.visitors.NodeElements.Pair;
 import compiler.visitors.NodeElements.PairType;
 import compiler.visitors.NodeElements.Type;
 import compiler.visitors.Nodes.ASTNode;
+import compiler.visitors.Nodes.ExitNode;
 import compiler.visitors.Nodes.IfElseNode;
 import compiler.visitors.Nodes.VarDeclareNode;
 import compiler.visitors.NodeElements.BinExpr;
@@ -199,6 +201,17 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
     return new PairType(new BasicType(TYPE.RECOVERY), new BasicType(TYPE.RECOVERY));
   }
 
+  @Override
+  public Returnable visitExitStat(ExitStatContext ctx) {
+    Expr expr = (Expr) visit(ctx.expr());
+    if (!expr.type().equals(new BasicType(TYPE.INT))) {
+      parser.notifyErrorListeners(
+          "Semantic error at line: " + ctx.start.getLine() + ", character:"+ ctx.expr().getStop().getCharPositionInLine() + ", exit statement requires int status");
+    }
+    currentASTNode.add(new ExitNode(expr));
+    return null;
+  }
+
   public ScopeData visitStatInNewScope(StatContext stat) {
     ASTNode ASTNode = enterScope();
     visit(stat);
@@ -246,6 +259,8 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
       return symbolTable;
     }
   }
+
+
 
 
 
