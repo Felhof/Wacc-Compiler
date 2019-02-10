@@ -3,11 +3,13 @@ package compiler.visitors;
 import antlr.BasicParser.ArrayTypeContext;
 import antlr.BasicParser.Array_literContext;
 import antlr.BasicParser.AssignArrayContext;
+import antlr.BasicParser.AssignLhsContext;
 import antlr.BasicParser.BaseTypeContext;
 import antlr.BasicParser;
 import antlr.BasicParser.BinaryExpContext;
 import antlr.BasicParser.BoolExpContext;
 import antlr.BasicParser.CharExpContext;
+import antlr.BasicParser.ExitStatContext;
 import antlr.BasicParser.ExprContext;
 import antlr.BasicParser.IdentExpContext;
 import antlr.BasicParser.IdentLhsContext;
@@ -351,7 +353,5 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
     return (rhs instanceof ArrayLiter && ((ArrayLiter) rhs).isEmpty())
         || varType.equals(rhs.type());
   }
-
-
 
 }
