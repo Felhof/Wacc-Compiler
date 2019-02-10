@@ -12,7 +12,9 @@ job 2:
   - mvn test -Dtest=SymbolTableUnitTests
   - mvn test '-Dtest=SemanticInvalidTests#SemanticArray
                                          +SemanticExit
+                                         +SemanticExpression
                                          +SemanticIf
+                                         +SemanticPrint
                                          +SemanticScope
                                          +SemanticVariables
                                          +SemanticWhile'

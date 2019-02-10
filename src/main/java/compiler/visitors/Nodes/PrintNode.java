@@ -1,10 +1,13 @@
 package compiler.visitors.Nodes;
 
-public class PrintNode {
+import compiler.visitors.NodeElements.Expr;
 
-  boolean newLine;
+public class PrintNode implements Node {
+  private boolean newLine;
+  private Expr expr;
 
-  public PrintNode(boolean newLine) {
+  public PrintNode(boolean newLine, Expr expr) {
     this.newLine = newLine;
+    this.expr = expr;
   }
 }
