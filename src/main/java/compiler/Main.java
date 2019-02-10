@@ -18,6 +18,7 @@ public class Main {
     //ASTNode ast = compileProg(args[0]); // uncomment for labTS test
     ASTNode ast = compileProg("src/test/invalid/semanticErr/array/differentElemtypeArray.wacc");
     System.out.println(ast.toString());
+    System.exit(0);
   }
 
   public static ASTNode compileProg(String filename) {

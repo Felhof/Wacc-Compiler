@@ -11,4 +11,8 @@ public class ArrayLiter extends AssignRHS implements Returnable {
     super(new ArrType(elemType));
     this.elems = elems;
   }
+
+  public boolean isEmpty() {
+    return elems.length == 0;
+  }
 }

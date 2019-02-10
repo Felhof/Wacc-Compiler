@@ -111,7 +111,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
     Variable var = (Variable) currentST.lookUpScope(varName);
     AssignRHS rhs = (AssignRHS) visit(ctx.assign_rhs());
 
-    if(!varType.equals(rhs.type())) {
+    if(!isAssignSameType(varType, rhs)) {
       parser
           .notifyErrorListeners("Semantic error at line " + ctx.start.getLine()
               + ". Type mismatch");
@@ -299,6 +299,9 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
     }
   }
 
-
+  private boolean isAssignSameType(Type varType, AssignRHS rhs) {
+    return (rhs instanceof ArrayLiter && ((ArrayLiter) rhs).isEmpty())
+        || varType.equals(rhs.type());
+  }
 
 }
