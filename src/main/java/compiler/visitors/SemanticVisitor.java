@@ -9,6 +9,7 @@ import antlr.BasicParser.CharExpContext;
 import antlr.BasicParser.DefPairTypeContext;
 import antlr.BasicParser.ExitStatContext;
 import antlr.BasicParser.ExprContext;
+import antlr.BasicParser.FuncContext;
 import antlr.BasicParser.IdentExpContext;
 import antlr.BasicParser.IdentLhsContext;
 import antlr.BasicParser.IfStatContext;
@@ -17,6 +18,8 @@ import antlr.BasicParser.NewPairContext;
 import antlr.BasicParser.PairElemBaseTypeContext;
 import antlr.BasicParser.PairElemPairTypeContext;
 import antlr.BasicParser.PairTypeContext;
+import antlr.BasicParser.ParamContext;
+import antlr.BasicParser.Param_listContext;
 import antlr.BasicParser.ProgContext;
 import antlr.BasicParser.RecursiveStatContext;
 import antlr.BasicParser.ReturnStatContext;
@@ -26,16 +29,19 @@ import antlr.BasicParser.UnaryExpContext;
 import antlr.BasicParser.VarDeclarationStatContext;
 import antlr.BasicParser.WhileStatContext;
 import antlr.BasicParserBaseVisitor;
+import compiler.visitors.Identifiers.Identifier;
 import compiler.visitors.NodeElements.AssignRHS;
 import compiler.visitors.NodeElements.BasicType;
 import compiler.visitors.NodeElements.IdentExpr;
 import compiler.visitors.NodeElements.Pair;
 import compiler.visitors.NodeElements.PairType;
+import compiler.visitors.NodeElements.ParamList;
 import compiler.visitors.NodeElements.Type;
 import compiler.visitors.NodeElements.UnaryExpr;
 import compiler.visitors.NodeElements.UnaryExpr.UNOP;
 import compiler.visitors.Nodes.ASTNode;
 import compiler.visitors.Nodes.ExitNode;
+import compiler.visitors.Nodes.FuncNode;
 import compiler.visitors.Nodes.IfElseNode;
 import compiler.visitors.Nodes.ReturnNode;
 import compiler.visitors.Nodes.VarDeclareNode;
@@ -64,9 +70,38 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
   @Override
   public ASTNode visitProg(ProgContext ctx) {
     currentASTNode = new ASTNode();
-//    ctx.func().forEach(this::visitFunc);
+    ctx.func().forEach(this::visitFunc);
     visit(ctx.stat(0));
     return currentASTNode;
+  }
+
+  @Override
+  public Returnable visitFunc(FuncContext ctx) {
+    Type funcReturnType = (Type) visit(ctx.type());
+
+    ScopeData funcStat = visitStatInNewScope(ctx.stat());
+    ParamList paramList = (ParamList) visit(ctx.param_list());
+
+    currentASTNode.add(new FuncNode(funcReturnType,
+        ctx.IDENT().getText(),
+        paramList, funcStat.astNode(),
+        funcStat.symbolTable()));
+
+    return null;
+  }
+
+  @Override
+  public Returnable visitParam_list(Param_listContext ctx) {
+    ParamList paramList = new ParamList();
+    ctx.param().forEach(p -> paramList.add((Type) visit(p)));
+    return paramList;
+  }
+
+  @Override
+  public Returnable visitParam(ParamContext ctx) {
+    Type paramType = (Type) visit(ctx.type());
+    currentST.add(ctx.IDENT().getText(), (Identifier) paramType);
+    return (Returnable) paramType;
   }
 
   @Override
@@ -284,7 +319,6 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
     currentST = currentST.getEncSymTable();
     currentASTNode = parentASTNode;
     return scopeData;
-
   }
 
   private void checkBoolExpr(ExprContext ctx, Expr condition) {
@@ -313,9 +347,4 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
       return symbolTable;
     }
   }
-
-
-
-
-
 }

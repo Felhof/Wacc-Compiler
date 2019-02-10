@@ -25,6 +25,9 @@ public class SymbolTable {
       if (ident != null) {
         return ident;
       }
+      if (currST.functionScope) {
+        return null;
+      }
       currST = currST.getEncSymTable();
     }
     return null;
