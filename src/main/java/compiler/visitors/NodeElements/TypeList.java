@@ -33,4 +33,11 @@ public class TypeList implements Returnable {
     }
   }
 
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder();
+    sb.append("TypeList = ");
+    listOfTypes.forEach(t -> sb.append(t.toString()).append(" "));
+    return sb.toString();
+  }
 }

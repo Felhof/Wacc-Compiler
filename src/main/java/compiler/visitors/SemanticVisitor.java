@@ -91,14 +91,20 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
   @Override
   public Returnable visitFunc(FuncContext ctx) {
     Type funcReturnType = (Type) visit(ctx.type());
-    ScopeData funcStat = visitFuncStatInNewScope(ctx.stat(), ctx.param_list());
+    if (currentST.lookUpAll(ctx.IDENT().getText()) != null) {
+      parser.notifyErrorListeners(
+          "Semantic error at line: " + ctx.start.getLine() + " : function "
+              + ctx.IDENT() + " has already been defined in this scope");
+    }
+
+    ScopeData funcStat = visitFuncStatInNewScope(ctx.stat(), ctx.param_list(), funcReturnType);
 
     currentASTNode.add(new FuncNode(funcReturnType,
         ctx.IDENT().getText(),
         funcStat.paramList(), funcStat.astNode(),
         funcStat.symbolTable()));
     currentST.add(ctx.IDENT().getText(),
-        (Identifier) new Function(funcStat.paramList(), funcReturnType));
+         new Function(funcStat.paramList(), funcReturnType));
 
     return null;
   }
@@ -319,7 +325,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
     Expr expr = (Expr) visit(ctx.expr());
     if (!expr.type().equals(new BasicType(TYPE.INT))) {
       parser.notifyErrorListeners(
-          "Semantic error at line: " + ctx.start.getLine() + ", character:"+ ctx.expr().getStop().getCharPositionInLine() + ", exit statement requires int status");
+          "Semantic error at line: " + ctx.start.getLine() + " at character: " + ctx.expr().getStop().getCharPositionInLine() + ", exit statement requires: INT, found: " + expr.type().toString());
     }
     currentASTNode.add(new ExitNode(expr));
     return null;
@@ -327,12 +333,24 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
 
   @Override
   public Returnable visitReturnStat(ReturnStatContext ctx) {
+    Expr expr = (Expr) visit(ctx.expr());
     if (!currentST.isInFunctionScope()) {
       parser.notifyErrorListeners(
           "Semantic error at line: " + ctx.start.getLine() + ", character:"+ ctx.expr().getStart().getCharPositionInLine() + ", return statement is not in a function");
       return null;
     }
-    Expr expr = (Expr) visit(ctx.expr());
+
+    Type funcDefinitionReturn = ((Variable) currentST.lookUpAll("return")).type();
+    Type exprType = expr.type();
+
+    if (!funcDefinitionReturn.equals(exprType)) {
+      parser.notifyErrorListeners(
+          "Semantic error at line: " + ctx.start.getLine() + ", character:"
+              + ctx.expr().getStart().getCharPositionInLine()
+              + ", type mismatch: " + " (expected: "
+              + funcDefinitionReturn.toString()
+              + ", actual: " + exprType.toString()+ ")");
+    }
     currentASTNode.add(new ReturnNode(expr));
     return null;
   }
@@ -382,7 +400,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
       if (!args.equals(params)) {
         parser.notifyErrorListeners(
             "Semantic error at line: " + ctx.start.getLine() + " : function "
-                + funcName + "  has conflicting parameters and arguments");
+                + funcName + " has conflicting parameters and arguments, " + "expected: " + params.toString() + ", " + "actual: " + args.toString());
       }
       return new FuncCall(funcName, args, function.getType());
     }
@@ -401,9 +419,12 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
     return exitScope(ASTNode);
   }
 
-  public ScopeData visitFuncStatInNewScope(StatContext stat, Param_listContext paramListContext ) {
+  public ScopeData visitFuncStatInNewScope(StatContext stat,
+      Param_listContext paramListContext,
+      Type funcReturnType) {
     ASTNode ASTNode = enterScope();
     currentST.setFunctionScope(true);
+    currentST.add("return", new Variable(funcReturnType));
     TypeList paramList = new TypeList();
     if (paramListContext!= null) {
     paramList = (TypeList) visit(paramListContext);
