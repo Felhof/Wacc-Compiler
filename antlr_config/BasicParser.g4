@@ -23,8 +23,8 @@ stat:
     | FREE expr #todo
     | RETURN expr #returnStat
     | EXIT expr #exitStat
-    | PRINT expr #todo
-    | PRINTLN expr #todo
+    | PRINT expr #printStat
+    | PRINTLN expr #printlnStat
     | IF expr THEN stat ELSE stat FI #ifStat
     | WHILE expr DO stat DONE #whileStat
     | BEG stat END #todo
@@ -90,7 +90,8 @@ unary_oper:
 
 
 binary_oper:
-      MUL
+      AND
+    | MUL
     | DIV
     | MOD
     | PLUS
@@ -101,7 +102,6 @@ binary_oper:
     | LE
     | EQUAL
     | NOTEQUAL
-    | AND
     | OR ;
 
 array_elem:

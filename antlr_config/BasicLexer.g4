@@ -67,6 +67,7 @@ CHR: 'chr' ;
 MINUS: '-' ;
 
 //binary operators
+AND: '&&' ;
 MUL: '*' ;
 DIV: '/' ;
 MOD: '%' ;
@@ -77,7 +78,6 @@ LT: '<' ;
 LE: '<=' ;
 EQUAL: '==' ;
 NOTEQUAL: '!=' ;
-AND: '&&' ;
 OR: '||' ;
 
 //brackets

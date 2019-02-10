@@ -26,6 +26,8 @@ import antlr.BasicParser.PairTypeContext;
 import antlr.BasicParser.ParamContext;
 import antlr.BasicParser.Param_listContext;
 import antlr.BasicParser.Pair_typeContext;
+import antlr.BasicParser.PrintStatContext;
+import antlr.BasicParser.PrintlnStatContext;
 import antlr.BasicParser.ProgContext;
 import antlr.BasicParser.RecursiveStatContext;
 import antlr.BasicParser.ReturnStatContext;
@@ -53,6 +55,7 @@ import compiler.visitors.Nodes.ASTNode;
 import compiler.visitors.Nodes.ExitNode;
 import compiler.visitors.Nodes.FuncNode;
 import compiler.visitors.Nodes.IfElseNode;
+import compiler.visitors.Nodes.PrintNode;
 import compiler.visitors.Nodes.ReturnNode;
 import compiler.visitors.Nodes.VarDeclareNode;
 import compiler.visitors.NodeElements.BinExpr;
@@ -65,7 +68,6 @@ import compiler.visitors.NodeElements.StringExpr;
 import compiler.visitors.NodeElements.Types.Type.TYPE;
 import compiler.visitors.Identifiers.Variable;
 import compiler.visitors.Nodes.WhileNode;
-import java.util.List;
 
 public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
 
@@ -114,13 +116,25 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
   public Returnable visitParam(ParamContext ctx) {
     Type paramType = (Type) visit(ctx.type());
     currentST.add(ctx.IDENT().getText(), new Variable(paramType));
-    return (Returnable) paramType;
+    return paramType;
   }
 
   @Override
   public ASTNode visitRecursiveStat(RecursiveStatContext ctx) {
     visit(ctx.stat(0));
     visit(ctx.stat(1));
+    return null;
+  }
+
+  @Override
+  public Returnable visitPrintStat(PrintStatContext ctx) {
+    currentASTNode.add(new PrintNode(false, (Expr) visit(ctx.expr())));
+    return null;
+  }
+
+  @Override
+  public Returnable visitPrintlnStat(PrintlnStatContext ctx) {
+    currentASTNode.add(new PrintNode(true, (Expr) visit(ctx.expr())));
     return null;
   }
 
