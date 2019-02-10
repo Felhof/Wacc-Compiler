@@ -89,6 +89,8 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
         ctx.IDENT().getText(),
         funcStat.paramList(), funcStat.astNode(),
         funcStat.symbolTable()));
+    currentST.add(ctx.IDENT().getText(),
+        (Identifier) new Function(funcStat.paramList(), funcReturnType));
 
     return null;
   }
@@ -96,6 +98,8 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
   @Override
   public Returnable visitParam_list(Param_listContext ctx) {
     TypeList paramList = new TypeList();
+    String txt = ctx.param(0).getText();
+    System.out.println(txt);
     ctx.param().forEach(p -> paramList.add((Type) visit(p)));
     return paramList;
   }
@@ -103,7 +107,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
   @Override
   public Returnable visitParam(ParamContext ctx) {
     Type paramType = (Type) visit(ctx.type());
-    currentST.add(ctx.IDENT().getText(), (Identifier) paramType);
+    currentST.add(ctx.IDENT().getText(), new Variable(paramType));
     return (Returnable) paramType;
   }
 
@@ -146,7 +150,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
     String varName = ctx.IDENT().getText();
 
     Type varType = (Type) visit(ctx.type());
-    Variable var = (Variable) currentST.lookUpScope(varName);
+    Identifier var = currentST.lookUpScope(varName);
     AssignRHS rhs = (AssignRHS) visit(ctx.assign_rhs()); // simple case
 
     if(!varType.equals(rhs.type())) {
@@ -154,6 +158,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
           .notifyErrorListeners("Semantic error at line " + ctx.start.getLine()
               + ". Type mismatch");
     }
+
     if (var != null) {
       parser
           .notifyErrorListeners("Semantic error at line " + ctx.start.getLine()
@@ -318,22 +323,26 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
       return null;
     } else {
 
-      TypeList args = (TypeList) visit(ctx.arg_list());
-      TypeList params = (TypeList) function.getParamList();
+      TypeList args = new TypeList();
+      if (ctx.arg_list() != null) {
+        args = (TypeList) visit(ctx.arg_list());
+      }
+
+      TypeList params = function.getParamList();
       if (!args.equals(params)) {
         parser.notifyErrorListeners(
             "Semantic error at line: " + ctx.start.getLine() + " : function "
                 + funcName + "  has conflicting parameters and arguments");
       }
-      return new FuncCall(funcName, args);
+      return new FuncCall(funcName, args, function.getType());
     }
   }
 
   @Override
   public Returnable visitArg_list(Arg_listContext ctx) {
     TypeList argsList = new TypeList();
-    ctx.expr().forEach(e -> argsList.add((Type) visit(e)));
-    return super.visitArg_list(ctx);
+    ctx.expr().forEach(e -> argsList.add(((Expr) visit(e)).type()));
+    return argsList;
   }
 
   public ScopeData visitStatInNewScope(StatContext stat) {
@@ -344,7 +353,11 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
 
   public ScopeData visitFuncStatInNewScope(StatContext stat, Param_listContext paramListContext ) {
     ASTNode ASTNode = enterScope();
-    TypeList paramList = (TypeList) visit(paramListContext);
+    currentST.setFunctionScope(true);
+    TypeList paramList = new TypeList();
+    if (paramListContext!= null) {
+    paramList = (TypeList) visit(paramListContext);
+    }
     visit(stat);
     ScopeData sd = exitScope(ASTNode);
     return new ScopeData(sd.astNode(), sd.symbolTable(), paramList);

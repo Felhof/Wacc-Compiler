@@ -1,19 +1,24 @@
 package compiler.visitors.Identifiers;
 
 import compiler.visitors.NodeElements.Type;
-import java.util.List;
+import compiler.visitors.NodeElements.TypeList;
+import compiler.visitors.Returnable;
 
-public class Function {
-  private List<Type> paramList;
+public class Function implements Identifier, Returnable {
+  private TypeList paramList;
   private Type returnType;
 
-  public Function(List<Type> paramList,
+  public Function(TypeList paramList,
       Type returnType) {
     this.paramList = paramList;
     this.returnType = returnType;
   }
 
-  public List<Type> getParamList() {
+  public TypeList getParamList() {
     return paramList;
+  }
+
+  public Type getType() {
+    return returnType;
   }
 }

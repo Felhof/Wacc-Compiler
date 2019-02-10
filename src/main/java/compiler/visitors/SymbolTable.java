@@ -51,4 +51,8 @@ public class SymbolTable {
     }
     return false;
   }
+
+  public void setFunctionScope(boolean functionScope) {
+    this.functionScope = functionScope;
+  }
 }
