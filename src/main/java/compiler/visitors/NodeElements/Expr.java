@@ -1,9 +1,8 @@
 package compiler.visitors.NodeElements;
 
 import compiler.visitors.NodeElements.Types.Type;
-import compiler.visitors.Returnable;
 
-public abstract class Expr extends AssignRHS implements Returnable {
+public abstract class Expr extends AssignRHS {
   protected boolean hasBrackets = false;
 
   public Expr(Type type) {
@@ -14,4 +13,7 @@ public abstract class Expr extends AssignRHS implements Returnable {
     this.hasBrackets = true;
   }
 
+  public Type type() {
+    return super.type();
+  }
 }

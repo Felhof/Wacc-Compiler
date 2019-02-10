@@ -1,5 +1,6 @@
 package compiler.visitors;
 
+import antlr.BasicParser.Arg_listContext;
 import antlr.BasicParser.ArrayTypeContext;
 import antlr.BasicParser.Array_literContext;
 import antlr.BasicParser.AssignArrayContext;
@@ -11,6 +12,8 @@ import antlr.BasicParser.BoolExpContext;
 import antlr.BasicParser.CharExpContext;
 import antlr.BasicParser.ExitStatContext;
 import antlr.BasicParser.ExprContext;
+import antlr.BasicParser.FuncCallContext;
+import antlr.BasicParser.FuncContext;
 import antlr.BasicParser.IdentExpContext;
 import antlr.BasicParser.IdentLhsContext;
 import antlr.BasicParser.IfStatContext;
@@ -20,6 +23,8 @@ import antlr.BasicParser.PairElemArrayTypeContext;
 import antlr.BasicParser.PairElemBaseTypeContext;
 import antlr.BasicParser.PairElemPairTypeContext;
 import antlr.BasicParser.PairTypeContext;
+import antlr.BasicParser.ParamContext;
+import antlr.BasicParser.Param_listContext;
 import antlr.BasicParser.Pair_typeContext;
 import antlr.BasicParser.ProgContext;
 import antlr.BasicParser.RecursiveStatContext;
@@ -30,18 +35,26 @@ import antlr.BasicParser.UnaryExpContext;
 import antlr.BasicParser.VarDeclarationStatContext;
 import antlr.BasicParser.WhileStatContext;
 import antlr.BasicParserBaseVisitor;
+import compiler.visitors.Identifiers.Function;
+import compiler.visitors.Identifiers.Identifier;
 import compiler.visitors.NodeElements.ArrayLiter;
 import compiler.visitors.NodeElements.AssignRHS;
+import compiler.visitors.NodeElements.BasicType;
+import compiler.visitors.NodeElements.FuncCall;
 import compiler.visitors.NodeElements.Types.ArrType;
 import compiler.visitors.NodeElements.Types.BasicType;
 import compiler.visitors.NodeElements.IdentExpr;
 import compiler.visitors.NodeElements.Pair;
+import compiler.visitors.NodeElements.PairType;
+import compiler.visitors.NodeElements.TypeList;
+import compiler.visitors.NodeElements.Type;
 import compiler.visitors.NodeElements.Types.PairType;
 import compiler.visitors.NodeElements.Types.Type;
 import compiler.visitors.NodeElements.UnaryExpr;
 import compiler.visitors.NodeElements.UnaryExpr.UNOP;
 import compiler.visitors.Nodes.ASTNode;
 import compiler.visitors.Nodes.ExitNode;
+import compiler.visitors.Nodes.FuncNode;
 import compiler.visitors.Nodes.IfElseNode;
 import compiler.visitors.Nodes.ReturnNode;
 import compiler.visitors.Nodes.VarDeclareNode;
@@ -55,6 +68,7 @@ import compiler.visitors.NodeElements.StringExpr;
 import compiler.visitors.NodeElements.Types.Type.TYPE;
 import compiler.visitors.Identifiers.Variable;
 import compiler.visitors.Nodes.WhileNode;
+import java.util.List;
 
 public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
 
@@ -70,9 +84,40 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
   @Override
   public ASTNode visitProg(ProgContext ctx) {
     currentASTNode = new ASTNode();
-//    ctx.func().forEach(this::visitFunc);
+    ctx.func().forEach(this::visitFunc);
     visit(ctx.stat(0));
     return currentASTNode;
+  }
+
+  @Override
+  public Returnable visitFunc(FuncContext ctx) {
+    Type funcReturnType = (Type) visit(ctx.type());
+    ScopeData funcStat = visitFuncStatInNewScope(ctx.stat(), ctx.param_list());
+
+    currentASTNode.add(new FuncNode(funcReturnType,
+        ctx.IDENT().getText(),
+        funcStat.paramList(), funcStat.astNode(),
+        funcStat.symbolTable()));
+    currentST.add(ctx.IDENT().getText(),
+        (Identifier) new Function(funcStat.paramList(), funcReturnType));
+
+    return null;
+  }
+
+  @Override
+  public Returnable visitParam_list(Param_listContext ctx) {
+    TypeList paramList = new TypeList();
+    String txt = ctx.param(0).getText();
+    System.out.println(txt);
+    ctx.param().forEach(p -> paramList.add((Type) visit(p)));
+    return paramList;
+  }
+
+  @Override
+  public Returnable visitParam(ParamContext ctx) {
+    Type paramType = (Type) visit(ctx.type());
+    currentST.add(ctx.IDENT().getText(), new Variable(paramType));
+    return (Returnable) paramType;
   }
 
   @Override
@@ -114,14 +159,15 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
     String varName = ctx.IDENT().getText();
 
     Type varType = (Type) visit(ctx.type());
-    Variable var = (Variable) currentST.lookUpScope(varName);
-    AssignRHS rhs = (AssignRHS) visit(ctx.assign_rhs());
+    Identifier var = currentST.lookUpScope(varName);
+    AssignRHS rhs = (AssignRHS) visit(ctx.assign_rhs()); // simple case
 
     if(!isAssignSameType(varType, rhs)) {
       parser
           .notifyErrorListeners("Semantic error at line " + ctx.start.getLine()
               + ". Type mismatch");
     }
+
     if (var != null) {
       parser
           .notifyErrorListeners("Semantic error at line " + ctx.start.getLine()
@@ -301,10 +347,58 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
     return new IdentExpr(variable.type());
   }
 
+  @Override
+  public Returnable visitFuncCall(FuncCallContext ctx) {
+    //return super.visitFuncCall(ctx);
+    String funcName = ctx.IDENT().getText();
+    Function function = (Function) currentST.lookUpAll(funcName);
+
+    if (function == null) {
+      parser.notifyErrorListeners(
+          "Semantic error at line: " + ctx.start.getLine() + " : function "
+              + funcName + " is not defined in this scope");
+      // variable = new Variable(new BasicType(TYPE.RECOVERY));
+      return null;
+    } else {
+
+      TypeList args = new TypeList();
+      if (ctx.arg_list() != null) {
+        args = (TypeList) visit(ctx.arg_list());
+      }
+
+      TypeList params = function.getParamList();
+      if (!args.equals(params)) {
+        parser.notifyErrorListeners(
+            "Semantic error at line: " + ctx.start.getLine() + " : function "
+                + funcName + "  has conflicting parameters and arguments");
+      }
+      return new FuncCall(funcName, args, function.getType());
+    }
+  }
+
+  @Override
+  public Returnable visitArg_list(Arg_listContext ctx) {
+    TypeList argsList = new TypeList();
+    ctx.expr().forEach(e -> argsList.add(((Expr) visit(e)).type()));
+    return argsList;
+  }
+
   public ScopeData visitStatInNewScope(StatContext stat) {
     ASTNode ASTNode = enterScope();
     visit(stat);
     return exitScope(ASTNode);
+  }
+
+  public ScopeData visitFuncStatInNewScope(StatContext stat, Param_listContext paramListContext ) {
+    ASTNode ASTNode = enterScope();
+    currentST.setFunctionScope(true);
+    TypeList paramList = new TypeList();
+    if (paramListContext!= null) {
+    paramList = (TypeList) visit(paramListContext);
+    }
+    visit(stat);
+    ScopeData sd = exitScope(ASTNode);
+    return new ScopeData(sd.astNode(), sd.symbolTable(), paramList);
   }
 
   private ASTNode enterScope() {
@@ -319,7 +413,6 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
     currentST = currentST.getEncSymTable();
     currentASTNode = parentASTNode;
     return scopeData;
-
   }
 
   private void checkBoolExpr(ExprContext ctx, Expr condition) {
@@ -334,10 +427,19 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
   public class ScopeData {
     private ASTNode astNode;
     private SymbolTable symbolTable;
+    private TypeList paramList;
 
     public ScopeData(ASTNode astNode, SymbolTable symbolTable) {
       this.astNode = astNode;
       this.symbolTable = symbolTable;
+      paramList = null;
+    }
+
+    public ScopeData(ASTNode astNode, SymbolTable symbolTable,
+        TypeList paramList) {
+      this.astNode = astNode;
+      this.symbolTable = symbolTable;
+      this.paramList = paramList;
     }
 
     public ASTNode astNode() {
@@ -347,6 +449,11 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
     public SymbolTable symbolTable() {
       return symbolTable;
     }
+
+    public TypeList paramList() {
+      return paramList;
+    }
+
   }
 
   private boolean isAssignSameType(Type varType, AssignRHS rhs) {

@@ -40,7 +40,7 @@ assign_rhs:
     | array_liter #assignArray
     | NEWPAIR OPEN expr COMMA expr CLOSE #newPair
     | pair_elem #todoB
-    | CALL IDENT OPEN (arg_list)? CLOSE #todoC ;
+    | CALL IDENT OPEN (arg_list)? CLOSE #funcCall ;
 
 arg_list:
     expr (COMMA expr)* ;

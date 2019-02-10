@@ -25,6 +25,9 @@ public class SymbolTable {
       if (ident != null) {
         return ident;
       }
+      if (currST.functionScope) {
+        return null;
+      }
       currST = currST.getEncSymTable();
     }
     return null;
@@ -47,5 +50,9 @@ public class SymbolTable {
       currST = currST.getEncSymTable();
     }
     return false;
+  }
+
+  public void setFunctionScope(boolean functionScope) {
+    this.functionScope = functionScope;
   }
 }
