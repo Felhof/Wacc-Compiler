@@ -10,7 +10,12 @@ job 2:
   script:
   - make
   - mvn test -Dtest=SymbolTableUnitTests
-  - mvn test '-Dtest=SemanticInvalidTests#SemanticIf+SemanticScope+SemanticVariables+SemanticWhile'
+  - mvn test '-Dtest=SemanticInvalidTests#SemanticArray
+                                         +SemanticExit
+                                         +SemanticIf
+                                         +SemanticScope
+                                         +SemanticVariables
+                                         +SemanticWhile'
     #- mvn test '-Dtest=!InvalidTests#Expression+Variables' # mvn test
     #      -Dgroups="<Test Category>"
     #only:

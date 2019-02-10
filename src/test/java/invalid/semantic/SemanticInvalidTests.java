@@ -31,6 +31,11 @@ public class SemanticInvalidTests {
   }
 
   @Test
+  public void SemanticArray() {
+    checkCompilationFails("src/test/java/invalid/semantic/array.txt");
+  }
+
+  @Test
   public void SemanticExit() {
     checkCompilationFails("src/test/java/invalid/semantic/exit.txt");
   }

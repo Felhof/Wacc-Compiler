@@ -16,8 +16,9 @@ public class Main {
 
   public static void main(String[] args) {
     //ASTNode ast = compileProg(args[0]); // uncomment for labTS test
-    ASTNode ast = compileProg("src/test/valid/variables/boolDeclaration.wacc");
+    ASTNode ast = compileProg("src/test/invalid/semanticErr/expressions/unaryOpTypeMismatch.wacc");
     System.out.println(ast.toString());
+    System.exit(0);
   }
 
   public static ASTNode compileProg(String filename) {

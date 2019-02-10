@@ -1,3 +1,4 @@
+src/test/invalid/semanticErr/array/differentElemtypeArray.wacc
 src/test/invalid/semanticErr/exit/badCharExit.wacc
 src/test/invalid/semanticErr/exit/exitNonInt.wacc
 src/test/invalid/semanticErr/exit/globalReturn.wacc

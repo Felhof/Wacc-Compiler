@@ -1,5 +1,8 @@
 package compiler.visitors.NodeElements;
 
+import compiler.visitors.NodeElements.Types.BasicType;
+import compiler.visitors.NodeElements.Types.Type.TYPE;
+
 public class IntExpr extends Expr {
   private int value;
 

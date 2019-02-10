@@ -37,7 +37,7 @@ assign_lhs:
 
 assign_rhs:
       expr #assignExp
-    | array_liter #todoA
+    | array_liter #assignArray
     | NEWPAIR OPEN expr COMMA expr CLOSE #newPair
     | pair_elem #todoB
     | CALL IDENT OPEN (arg_list)? CLOSE #todoC ;
@@ -51,7 +51,7 @@ pair_elem:
 
 type:
       base_type #baseType
-    | array_type #todoP
+    | type OPENSQ CLOSESQ #arrayType
     | pair_type #pairType;
 
 base_type:
@@ -60,18 +60,13 @@ base_type:
     | CHAR
     | STRING ;
 
-array_type:
-      base_type OPENSQ CLOSESQ
-    | array_type OPENSQ CLOSESQ
-    | pair_type OPENSQ CLOSESQ;
-
 pair_type:
-      PAIR OPEN pair_elem_type COMMA pair_elem_type CLOSE #defPairType;
+      PAIR OPEN pair_elem_type COMMA pair_elem_type CLOSE ;
 
 pair_elem_type:
       base_type  #pairElemBaseType
-    | array_type #pairElemArrayType
-    | PAIR       #pairElemPairType ;
+    | type OPENSQ CLOSESQ #pairElemArrayType
+    | PAIR #pairElemPairType ;
 
 expr:
       INTEGER #intExp

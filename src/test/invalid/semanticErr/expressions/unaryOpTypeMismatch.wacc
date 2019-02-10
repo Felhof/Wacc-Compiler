@@ -11,5 +11,6 @@ begin
   bool neg = ! 3 ;
   int minus = - false ;
   int ordinal = ord 4 ;
-  char character = chr 'a'
+  char character = chr 'a' ;
+  int length = len 4
 end
