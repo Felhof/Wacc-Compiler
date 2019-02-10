@@ -4,13 +4,14 @@ import compiler.visitors.Identifiers.Identifier;
 import java.util.HashMap;
 
 public class SymbolTable {
-
+  boolean functionScope;
   SymbolTable encSymTable;
   HashMap<String, Identifier> dict;
 
   public SymbolTable(SymbolTable encSymTable) {
     this.encSymTable = encSymTable;
     dict = new HashMap<>();
+    functionScope = false;
   }
 
   public void add(String name, Identifier ident) {
@@ -35,5 +36,16 @@ public class SymbolTable {
 
   public SymbolTable getEncSymTable() {
     return encSymTable;
+  }
+
+  public boolean isInFunctionScope() {
+    SymbolTable currST = this;
+    while (currST != null) {
+      if (currST.functionScope) {
+        return true;
+      }
+      currST = currST.getEncSymTable();
+    }
+    return false;
   }
 }

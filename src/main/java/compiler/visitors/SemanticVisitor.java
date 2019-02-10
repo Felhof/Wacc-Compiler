@@ -1,5 +1,6 @@
 package compiler.visitors;
 
+import antlr.BasicParser.AssignLhsContext;
 import antlr.BasicParser.BaseTypeContext;
 import antlr.BasicParser;
 import antlr.BasicParser.BinaryExpContext;
@@ -9,6 +10,7 @@ import antlr.BasicParser.DefPairTypeContext;
 import antlr.BasicParser.ExitStatContext;
 import antlr.BasicParser.ExprContext;
 import antlr.BasicParser.IdentExpContext;
+import antlr.BasicParser.IdentLhsContext;
 import antlr.BasicParser.IfStatContext;
 import antlr.BasicParser.IntExpContext;
 import antlr.BasicParser.NewPairContext;
@@ -17,6 +19,7 @@ import antlr.BasicParser.PairElemPairTypeContext;
 import antlr.BasicParser.PairTypeContext;
 import antlr.BasicParser.ProgContext;
 import antlr.BasicParser.RecursiveStatContext;
+import antlr.BasicParser.ReturnStatContext;
 import antlr.BasicParser.StatContext;
 import antlr.BasicParser.StrExpContext;
 import antlr.BasicParser.VarDeclarationStatContext;
@@ -31,6 +34,7 @@ import compiler.visitors.NodeElements.Type;
 import compiler.visitors.Nodes.ASTNode;
 import compiler.visitors.Nodes.ExitNode;
 import compiler.visitors.Nodes.IfElseNode;
+import compiler.visitors.Nodes.ReturnNode;
 import compiler.visitors.Nodes.VarDeclareNode;
 import compiler.visitors.NodeElements.BinExpr;
 import compiler.visitors.NodeElements.BinExpr.BINOP;
@@ -210,6 +214,39 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
     }
     currentASTNode.add(new ExitNode(expr));
     return null;
+  }
+
+  @Override
+  public Returnable visitReturnStat(ReturnStatContext ctx) {
+    if (!currentST.isInFunctionScope()) {
+      parser.notifyErrorListeners(
+          "Semantic error at line: " + ctx.start.getLine() + ", character:"+ ctx.expr().getStart().getCharPositionInLine() + ", return statement is not in a function");
+      return null;
+    }
+    Expr expr = (Expr) visit(ctx.expr());
+    currentASTNode.add(new ReturnNode(expr));
+    return null;
+  }
+
+  //TODO
+  @Override
+  public Returnable visitAssignLhs(AssignLhsContext ctx) {
+    visit(ctx.assign_lhs());
+    visit(ctx.assign_rhs());
+    return null ;
+  }
+
+  @Override
+  public Returnable visitIdentLhs(IdentLhsContext ctx) {
+    String varName = ctx.IDENT().getText();
+    Variable variable = (Variable) currentST.lookUpAll(varName);
+    if (variable == null) {
+      parser.notifyErrorListeners(
+          "Semantic error at line: " + ctx.start.getLine() + " : variable "
+              + varName + " is not defined in this scope");
+      variable = new Variable(new BasicType(TYPE.RECOVERY));
+    }
+    return new IdentExpr(variable.type());
   }
 
   public ScopeData visitStatInNewScope(StatContext stat) {
