@@ -1,5 +1,8 @@
 package compiler.visitors.NodeElements;
 
-public class FuncCall extends AssignRHS {
+import java.util.List;
 
+public class FuncCall extends AssignRHS {
+  private String funcName;
+  private List<Type> argsList;
 }

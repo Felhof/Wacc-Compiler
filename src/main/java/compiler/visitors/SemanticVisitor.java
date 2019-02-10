@@ -9,6 +9,7 @@ import antlr.BasicParser.CharExpContext;
 import antlr.BasicParser.DefPairTypeContext;
 import antlr.BasicParser.ExitStatContext;
 import antlr.BasicParser.ExprContext;
+import antlr.BasicParser.FuncCallContext;
 import antlr.BasicParser.FuncContext;
 import antlr.BasicParser.IdentExpContext;
 import antlr.BasicParser.IdentLhsContext;
@@ -78,13 +79,11 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
   @Override
   public Returnable visitFunc(FuncContext ctx) {
     Type funcReturnType = (Type) visit(ctx.type());
-
-    ScopeData funcStat = visitStatInNewScope(ctx.stat());
-    ParamList paramList = (ParamList) visit(ctx.param_list());
+    ScopeData funcStat = visitFuncStatInNewScope(ctx.stat(), ctx.param_list());
 
     currentASTNode.add(new FuncNode(funcReturnType,
         ctx.IDENT().getText(),
-        paramList, funcStat.astNode(),
+        funcStat.paramList(), funcStat.astNode(),
         funcStat.symbolTable()));
 
     return null;
@@ -301,10 +300,23 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
     return new IdentExpr(variable.type());
   }
 
+  @Override
+  public Returnable visitFuncCall(FuncCallContext ctx) {
+    return super.visitFuncCall(ctx);
+  }
+
   public ScopeData visitStatInNewScope(StatContext stat) {
     ASTNode ASTNode = enterScope();
     visit(stat);
     return exitScope(ASTNode);
+  }
+
+  public ScopeData visitFuncStatInNewScope(StatContext stat, Param_listContext paramListContext ) {
+    ASTNode ASTNode = enterScope();
+    ParamList paramList = (ParamList) visit(paramListContext);
+    visit(stat);
+    ScopeData sd = exitScope(ASTNode);
+    return new ScopeData(sd.astNode(), sd.symbolTable(), paramList);
   }
 
   private ASTNode enterScope() {
@@ -333,10 +345,19 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
   public class ScopeData {
     private ASTNode astNode;
     private SymbolTable symbolTable;
+    private ParamList paramList;
 
     public ScopeData(ASTNode astNode, SymbolTable symbolTable) {
       this.astNode = astNode;
       this.symbolTable = symbolTable;
+      paramList = null;
+    }
+
+    public ScopeData(ASTNode astNode, SymbolTable symbolTable,
+        ParamList paramList) {
+      this.astNode = astNode;
+      this.symbolTable = symbolTable;
+      this.paramList = paramList;
     }
 
     public ASTNode astNode() {
@@ -345,6 +366,10 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
 
     public SymbolTable symbolTable() {
       return symbolTable;
+    }
+
+    public ParamList paramList() {
+      return paramList;
     }
   }
 }
