@@ -325,7 +325,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
     Expr expr = (Expr) visit(ctx.expr());
     if (!expr.type().equals(new BasicType(TYPE.INT))) {
       parser.notifyErrorListeners(
-          "Semantic error at line: " + ctx.start.getLine() + ", character:"+ ctx.expr().getStop().getCharPositionInLine() + ", exit statement requires int status");
+          "Semantic error at line: " + ctx.start.getLine() + " at character: " + ctx.expr().getStop().getCharPositionInLine() + ", exit statement requires: INT, found: " + expr.type().toString());
     }
     currentASTNode.add(new ExitNode(expr));
     return null;
@@ -333,15 +333,23 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
 
   @Override
   public Returnable visitReturnStat(ReturnStatContext ctx) {
+    Expr expr = (Expr) visit(ctx.expr());
     if (!currentST.isInFunctionScope()) {
       parser.notifyErrorListeners(
           "Semantic error at line: " + ctx.start.getLine() + ", character:"+ ctx.expr().getStart().getCharPositionInLine() + ", return statement is not in a function");
       return null;
     }
-    Expr expr = (Expr) visit(ctx.expr());
-    if (!((Variable) currentST.lookUpAll("return")).type().equals(expr.type())) {
+
+    Type funcDefinitionReturn = ((Variable) currentST.lookUpAll("return")).type();
+    Type exprType = expr.type();
+
+    if (!funcDefinitionReturn.equals(exprType)) {
       parser.notifyErrorListeners(
-          "Semantic error at line: " + ctx.start.getLine() + ", character:"+ ctx.expr().getStart().getCharPositionInLine() + ", return statement has incorrect type");
+          "Semantic error at line: " + ctx.start.getLine() + ", character:"
+              + ctx.expr().getStart().getCharPositionInLine()
+              + ", type mismatch: " + " (expected: "
+              + funcDefinitionReturn.toString()
+              + ", actual: " + exprType.toString()+ ")");
     }
     currentASTNode.add(new ReturnNode(expr));
     return null;
@@ -392,7 +400,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
       if (!args.equals(params)) {
         parser.notifyErrorListeners(
             "Semantic error at line: " + ctx.start.getLine() + " : function "
-                + funcName + "  has conflicting parameters and arguments");
+                + funcName + " has conflicting parameters and arguments, " + "expected: " + params.toString() + ", " + "actual: " + args.toString());
       }
       return new FuncCall(funcName, args, function.getType());
     }
