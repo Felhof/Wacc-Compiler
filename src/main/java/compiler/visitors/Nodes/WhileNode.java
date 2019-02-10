@@ -1,6 +1,6 @@
 package compiler.visitors.Nodes;
 
-import compiler.visitors.NodeElements.Expr;
+import compiler.visitors.NodeElements.RHS.Expr;
 import compiler.visitors.SymbolTable;
 
 public class WhileNode implements Node {

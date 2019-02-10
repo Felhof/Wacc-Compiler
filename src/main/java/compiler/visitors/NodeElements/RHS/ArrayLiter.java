@@ -1,5 +1,7 @@
-package compiler.visitors.NodeElements;
+package compiler.visitors.NodeElements.RHS;
 
+import compiler.visitors.NodeElements.RHS.AssignRHS;
+import compiler.visitors.NodeElements.RHS.Expr;
 import compiler.visitors.NodeElements.Types.ArrType;
 import compiler.visitors.NodeElements.Types.Type;
 import compiler.visitors.Returnable;

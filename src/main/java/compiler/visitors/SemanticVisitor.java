@@ -39,32 +39,37 @@ import antlr.BasicParser.WhileStatContext;
 import antlr.BasicParserBaseVisitor;
 import compiler.visitors.Identifiers.Function;
 import compiler.visitors.Identifiers.Identifier;
-import compiler.visitors.NodeElements.ArrayLiter;
-import compiler.visitors.NodeElements.AssignRHS;
-import compiler.visitors.NodeElements.FuncCall;
+import compiler.visitors.NodeElements.LHS.GenericLHS;
+import compiler.visitors.NodeElements.RHS.ArrayLiter;
+import compiler.visitors.NodeElements.LHS.AssignLHS;
+import compiler.visitors.NodeElements.RHS.AssignRHS;
+import compiler.visitors.NodeElements.RHS.FuncCall;
+import compiler.visitors.NodeElements.LHS.IdentLHS;
 import compiler.visitors.NodeElements.Types.ArrType;
 import compiler.visitors.NodeElements.Types.BasicType;
-import compiler.visitors.NodeElements.IdentExpr;
-import compiler.visitors.NodeElements.Pair;
+import compiler.visitors.NodeElements.RHS.IdentExpr;
+import compiler.visitors.NodeElements.RHS.Pair;
 import compiler.visitors.NodeElements.TypeList;
+import compiler.visitors.NodeElements.Types.GenericType;
 import compiler.visitors.NodeElements.Types.PairType;
 import compiler.visitors.NodeElements.Types.Type;
-import compiler.visitors.NodeElements.UnaryExpr;
-import compiler.visitors.NodeElements.UnaryExpr.UNOP;
+import compiler.visitors.NodeElements.RHS.UnaryExpr;
+import compiler.visitors.NodeElements.RHS.UnaryExpr.UNOP;
 import compiler.visitors.Nodes.ASTNode;
 import compiler.visitors.Nodes.ExitNode;
 import compiler.visitors.Nodes.FuncNode;
 import compiler.visitors.Nodes.IfElseNode;
 import compiler.visitors.Nodes.PrintNode;
 import compiler.visitors.Nodes.ReturnNode;
+import compiler.visitors.Nodes.VarAssignNode;
 import compiler.visitors.Nodes.VarDeclareNode;
-import compiler.visitors.NodeElements.BinExpr;
-import compiler.visitors.NodeElements.BinExpr.BINOP;
-import compiler.visitors.NodeElements.BoolExpr;
-import compiler.visitors.NodeElements.CharExpr;
-import compiler.visitors.NodeElements.Expr;
-import compiler.visitors.NodeElements.IntExpr;
-import compiler.visitors.NodeElements.StringExpr;
+import compiler.visitors.NodeElements.RHS.BinExpr;
+import compiler.visitors.NodeElements.RHS.BinExpr.BINOP;
+import compiler.visitors.NodeElements.RHS.BoolExpr;
+import compiler.visitors.NodeElements.RHS.CharExpr;
+import compiler.visitors.NodeElements.RHS.Expr;
+import compiler.visitors.NodeElements.RHS.IntExpr;
+import compiler.visitors.NodeElements.RHS.StringExpr;
 import compiler.visitors.NodeElements.Types.Type.TYPE;
 import compiler.visitors.Identifiers.Variable;
 import compiler.visitors.Nodes.WhileNode;
@@ -358,8 +363,18 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
   //TODO
   @Override
   public Returnable visitAssignLhs(AssignLhsContext ctx) {
-    visit(ctx.assign_lhs());
-    visit(ctx.assign_rhs());
+    AssignLHS lhs = (AssignLHS) visit(ctx.assign_lhs());
+    AssignRHS rhs = (AssignRHS) visit(ctx.assign_rhs());
+    if (!lhs.type().equals(rhs.type())) {
+      parser.notifyErrorListeners(
+          "Semantic error at line: " + ctx.start.getLine() + ", character:"
+              + ctx.stop.getCharPositionInLine()
+              + ", type mismatch: " + " (expected: "
+              + lhs.type().toString()
+              + ", actual: " + rhs.type().toString()+ ")");
+    }
+
+    currentASTNode.add(new VarAssignNode(lhs, rhs));
     return null ;
   }
 
@@ -367,14 +382,17 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
   public Returnable visitIdentLhs(IdentLhsContext ctx) {
     // TODO fix for function assign
     String varName = ctx.IDENT().getText();
-    Variable variable = (Variable) currentST.lookUpAll(varName);
-    if (variable == null) {
+    Identifier identifier =  currentST.lookUpAll(varName);
+    if (identifier == null) {
       parser.notifyErrorListeners(
           "Semantic error at line: " + ctx.start.getLine() + " : variable "
               + varName + " is not defined in this scope");
-      variable = new Variable(new BasicType(TYPE.RECOVERY));
+      identifier = new Variable(new BasicType(TYPE.RECOVERY));
+    } else if (identifier instanceof Function) {
+      parser.notifyErrorListeners("Semantic error at line: " + ctx.start.getLine() + "Cannot assign right hand side statement to a function");
+      return new GenericLHS(new GenericType());
     }
-    return new IdentExpr(variable.type());
+    return new IdentLHS(((Variable) identifier).type());
   }
 
   @Override

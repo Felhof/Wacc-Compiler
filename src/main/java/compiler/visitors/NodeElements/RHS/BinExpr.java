@@ -1,4 +1,4 @@
-package compiler.visitors.NodeElements;
+package compiler.visitors.NodeElements.RHS;
 
 import compiler.visitors.NodeElements.Types.BasicType;
 import compiler.visitors.NodeElements.Types.Type.TYPE;
