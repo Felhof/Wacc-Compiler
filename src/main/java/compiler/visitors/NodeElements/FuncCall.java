@@ -4,5 +4,11 @@ import java.util.List;
 
 public class FuncCall extends AssignRHS {
   private String funcName;
-  private List<Type> argsList;
+  private TypeList argsList;
+
+  public FuncCall(String funcName,
+      TypeList argsList) {
+    this.funcName = funcName;
+    this.argsList = argsList;
+  }
 }

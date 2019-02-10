@@ -1,18 +1,18 @@
 package compiler.visitors.Nodes;
 
-import compiler.visitors.NodeElements.ParamList;
+import compiler.visitors.NodeElements.TypeList;
 import compiler.visitors.NodeElements.Type;
 import compiler.visitors.SymbolTable;
 
 public class FuncNode implements Node {
   private Type returnType;
   private String name;
-  private ParamList paramList;
+  private TypeList paramList;
   private ASTNode astNode;
   private SymbolTable ST;
 
   public FuncNode(Type returnType, String name,
-      ParamList paramList, ASTNode astNode, SymbolTable st) {
+      TypeList paramList, ASTNode astNode, SymbolTable st) {
     this.returnType = returnType;
     this.name = name;
     this.paramList = paramList;

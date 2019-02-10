@@ -12,4 +12,8 @@ public class Function {
     this.paramList = paramList;
     this.returnType = returnType;
   }
+
+  public List<Type> getParamList() {
+    return paramList;
+  }
 }

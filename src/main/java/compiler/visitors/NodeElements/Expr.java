@@ -1,8 +1,6 @@
 package compiler.visitors.NodeElements;
 
-import compiler.visitors.Returnable;
-
-public abstract class Expr extends AssignRHS implements Returnable {
+public abstract class Expr extends AssignRHS {
   protected boolean hasBrackets = false;
 
   public Expr(Type type) {
