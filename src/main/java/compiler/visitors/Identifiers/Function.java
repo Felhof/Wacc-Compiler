@@ -1,7 +1,7 @@
 package compiler.visitors.Identifiers;
 
-import compiler.visitors.NodeElements.Type;
 import compiler.visitors.NodeElements.TypeList;
+import compiler.visitors.NodeElements.Types.Type;
 import compiler.visitors.Returnable;
 
 public class Function implements Identifier, Returnable {

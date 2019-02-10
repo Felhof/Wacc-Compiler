@@ -1,7 +1,7 @@
 package compiler.visitors.Nodes;
 
 import compiler.visitors.NodeElements.TypeList;
-import compiler.visitors.NodeElements.Type;
+import compiler.visitors.NodeElements.Types.Type;
 import compiler.visitors.SymbolTable;
 
 public class FuncNode implements Node {

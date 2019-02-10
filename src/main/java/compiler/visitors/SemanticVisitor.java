@@ -39,15 +39,12 @@ import compiler.visitors.Identifiers.Function;
 import compiler.visitors.Identifiers.Identifier;
 import compiler.visitors.NodeElements.ArrayLiter;
 import compiler.visitors.NodeElements.AssignRHS;
-import compiler.visitors.NodeElements.BasicType;
 import compiler.visitors.NodeElements.FuncCall;
 import compiler.visitors.NodeElements.Types.ArrType;
 import compiler.visitors.NodeElements.Types.BasicType;
 import compiler.visitors.NodeElements.IdentExpr;
 import compiler.visitors.NodeElements.Pair;
-import compiler.visitors.NodeElements.PairType;
 import compiler.visitors.NodeElements.TypeList;
-import compiler.visitors.NodeElements.Type;
 import compiler.visitors.NodeElements.Types.PairType;
 import compiler.visitors.NodeElements.Types.Type;
 import compiler.visitors.NodeElements.UnaryExpr;
@@ -336,6 +333,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
 
   @Override
   public Returnable visitIdentLhs(IdentLhsContext ctx) {
+    // TODO fix for function assign
     String varName = ctx.IDENT().getText();
     Variable variable = (Variable) currentST.lookUpAll(varName);
     if (variable == null) {

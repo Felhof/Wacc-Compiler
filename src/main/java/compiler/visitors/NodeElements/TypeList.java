@@ -1,5 +1,6 @@
 package compiler.visitors.NodeElements;
 
+import compiler.visitors.NodeElements.Types.Type;
 import compiler.visitors.Returnable;
 import java.util.ArrayList;
 import java.util.List;

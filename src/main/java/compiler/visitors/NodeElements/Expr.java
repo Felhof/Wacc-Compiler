@@ -12,8 +12,4 @@ public abstract class Expr extends AssignRHS {
   public void putBrackets() {
     this.hasBrackets = true;
   }
-
-  public Type type() {
-    return super.type();
-  }
 }
