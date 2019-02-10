@@ -1,4 +1,4 @@
-# expresission type mismatch bool->int
+# Incompatible type at false (expected: INT, actual: BOOL)
 
 # Output:
 # #semantic_error#

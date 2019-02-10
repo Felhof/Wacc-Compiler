@@ -1,0 +1,15 @@
+# Output:
+# #semantic_error#
+# Incompatible types
+
+# Exit:
+# 200
+
+# Program:
+
+begin
+  bool neg = ! 3 ;
+  int minus = - false ;
+  int ordinal = ord 4 ;
+  char character = chr 'a'
+end

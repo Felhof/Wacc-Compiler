@@ -18,6 +18,7 @@ import antlr.BasicParser.ProgContext;
 import antlr.BasicParser.RecursiveStatContext;
 import antlr.BasicParser.StatContext;
 import antlr.BasicParser.StrExpContext;
+import antlr.BasicParser.UnaryExpContext;
 import antlr.BasicParser.VarDeclarationStatContext;
 import antlr.BasicParser.WhileStatContext;
 import antlr.BasicParserBaseVisitor;
@@ -27,6 +28,8 @@ import compiler.visitors.NodeElements.IdentExpr;
 import compiler.visitors.NodeElements.Pair;
 import compiler.visitors.NodeElements.PairType;
 import compiler.visitors.NodeElements.Type;
+import compiler.visitors.NodeElements.UnaryExpr;
+import compiler.visitors.NodeElements.UnaryExpr.UNOP;
 import compiler.visitors.Nodes.ASTNode;
 import compiler.visitors.Nodes.IfElseNode;
 import compiler.visitors.Nodes.VarDeclareNode;
@@ -143,12 +146,26 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
     Expr lhs = (Expr) visit(ctx.expr(0));
     Expr rhs = (Expr) visit(ctx.expr(1));
     BinExpr binExpr = new BinExpr(lhs, BINOP.get(ctx.binary_oper().getText()), rhs);
-    if (!binExpr.isTypeCompatible()) {
-      parser
-          .notifyErrorListeners("Semantic error at line: " + ctx.start.getLine()
-              + ": type mismatch in binary expression");
+    String errorMessage = binExpr.isTypeCompatible();
+    if (errorMessage != null) {
+      parser.notifyErrorListeners("Semantic error at line: "
+          + ctx.start.getLine() + ": " + errorMessage);
     }
     return binExpr;
+  }
+
+  @Override
+  public Returnable visitUnaryExp(UnaryExpContext ctx) {
+    Expr expr = (Expr) visit(ctx.expr());
+    UnaryExpr unaryExpr = new UnaryExpr(UNOP.get(ctx.unary_oper().getText()),
+        expr);
+    String errorMessage = unaryExpr.isTypeCompatible();
+    if(errorMessage != null) {
+      parser.notifyErrorListeners("Semantic error at line: "
+          + ctx.start.getLine() + ":" + ctx.expr().start.getCharPositionInLine()
+          + ": Incompatible type at " + ctx.expr().getText() + errorMessage);
+    }
+    return unaryExpr;
   }
 
   @Override

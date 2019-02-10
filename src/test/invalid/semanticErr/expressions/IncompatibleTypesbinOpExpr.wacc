@@ -1,0 +1,14 @@
+
+# Output:
+# #semantic_error#
+
+# Exit:
+# 200
+
+# Program:
+
+begin
+  int a = false + 7 ;
+  bool b = true || 7 ;
+  bool c = 'a' > 8
+end
