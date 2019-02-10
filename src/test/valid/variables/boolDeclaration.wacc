@@ -6,5 +6,5 @@
 # Program:
 
 begin
-  bool b = true
+  x = 10
 end
