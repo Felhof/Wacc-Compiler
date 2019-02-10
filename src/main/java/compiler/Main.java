@@ -16,7 +16,7 @@ public class Main {
 
   public static void main(String[] args) {
     //ASTNode ast = compileProg(args[0]); // uncomment for labTS test
-    ASTNode ast = compileProg("src/test/valid/variables/boolDeclaration.wacc");
+    ASTNode ast = compileProg("src/test/invalid/semanticErr/expressions/IncompatibleTypesbinOpExpr.wacc");
     System.out.println(ast.toString());
   }
 

@@ -1,4 +1,4 @@
-package compiler.visitors.NodeElements;
+package compiler.visitors.NodeElements.Types;
 
 import compiler.visitors.Returnable;
 

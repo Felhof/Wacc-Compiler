@@ -1,4 +1,4 @@
-package compiler.visitors.NodeElements;
+package compiler.visitors.NodeElements.Types;
 
 import java.util.HashMap;
 import java.util.Map;

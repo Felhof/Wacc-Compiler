@@ -1,5 +1,8 @@
 package compiler.visitors.NodeElements;
 
+import compiler.visitors.NodeElements.Types.BasicType;
+import compiler.visitors.NodeElements.Types.TYPE;
+
 public class CharExpr extends Expr {
 
   private String value;

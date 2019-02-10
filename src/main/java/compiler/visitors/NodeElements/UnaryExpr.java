@@ -1,5 +1,8 @@
 package compiler.visitors.NodeElements;
 
+import compiler.visitors.NodeElements.Types.BasicType;
+import compiler.visitors.NodeElements.Types.TYPE;
+import compiler.visitors.NodeElements.Types.Type;
 import java.util.HashMap;
 import java.util.Map;
 

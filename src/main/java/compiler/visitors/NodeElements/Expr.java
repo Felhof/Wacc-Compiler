@@ -1,5 +1,6 @@
 package compiler.visitors.NodeElements;
 
+import compiler.visitors.NodeElements.Types.Type;
 import compiler.visitors.Returnable;
 
 public abstract class Expr extends AssignRHS implements Returnable {

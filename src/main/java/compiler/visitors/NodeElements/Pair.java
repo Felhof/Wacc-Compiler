@@ -1,5 +1,6 @@
 package compiler.visitors.NodeElements;
 
+import compiler.visitors.NodeElements.Types.PairType;
 import compiler.visitors.Returnable;
 
 public class Pair extends AssignRHS implements Returnable {
