@@ -30,8 +30,19 @@ public class BinExpr extends Expr {
     this.rhs = rhs;
   }
 
-  public boolean isTypeCompatible() {
-    return lhs.type().equals(rhs.type()) && contains(operator.argTypes(), lhs.type());
+  public String isTypeCompatible() {
+    if (!contains(operator.argTypes(), lhs.type())) {
+      return "Incompatible type " + lhs.type().toString();
+    }
+    if (!contains(operator.argTypes(), rhs.type())) {
+      return "Incompatible type " + rhs.type().toString();
+    }
+    if (!lhs.type().equals(rhs.type())) {
+      return "Incompatible type at " + rhs.toString()
+          + " (expected: " + lhs.type().toString()
+          + ", actual: " + rhs.type.toString();
+    }
+    return null;
   }
 
   private boolean contains(List<Type> argTypes, Type type) {

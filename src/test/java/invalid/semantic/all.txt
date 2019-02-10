@@ -7,6 +7,8 @@ src/test/invalid/semanticErr/expressions/intOpTypeErr.wacc
 src/test/invalid/semanticErr/expressions/lessPairExpr.wacc
 src/test/invalid/semanticErr/expressions/mixedOpTypeErr.wacc
 src/test/invalid/semanticErr/expressions/moreArrExpr.wacc
+src/test/invalid/semanticErr/expressions/boolOpTypeErr.wacc
+src/test/invalid/semanticErr/expressions/IncompatibleTypesbinOpExpr.wacc
 src/test/invalid/semanticErr/function/functionAssign.wacc
 src/test/invalid/semanticErr/function/functionBadArgUse.wacc
 src/test/invalid/semanticErr/function/functionBadCall.wacc
