@@ -1,5 +1,6 @@
 package compiler.visitors.NodeElements;
 
+import compiler.visitors.NodeElements.Types.ArrType;
 import compiler.visitors.NodeElements.Types.BasicType;
 import compiler.visitors.NodeElements.Types.Type.TYPE;
 import compiler.visitors.NodeElements.Types.Type;
@@ -11,6 +12,17 @@ public class UnaryExpr extends Expr {
   private final static Type intType = new BasicType(TYPE.INT);
   private final static Type charType = new BasicType(TYPE.CHAR);
   private final static Type boolType = new BasicType(TYPE.BOOL);
+  private final static Type arrayType = new Type() {
+    @Override
+    public boolean equals(Type type) {
+      return type instanceof ArrType;
+    }
+
+    @Override
+    public String toString() {
+      return "T[]";
+    }
+  };
 
   private UNOP operator;
   private Expr expr;
@@ -29,13 +41,10 @@ public class UnaryExpr extends Expr {
     return null;
   }
 
-
-
   public enum UNOP {
     NEG("!", boolType, boolType), PLUS("+", intType, intType),
     MINUS("-", intType, intType), ORD("ord", charType, intType),
-    CHR("chr", intType, charType);
-    // LEN("len", arrayType, intType); // implement array type
+    CHR("chr", intType, charType), LEN("len", arrayType, intType);
 
     private String op;
     private Type argType;
