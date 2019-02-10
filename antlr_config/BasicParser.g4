@@ -18,7 +18,7 @@ param:
 stat:
       SKP #todo
     | type IDENT ASS assign_rhs #varDeclarationStat
-    | assign_lhs ASS assign_rhs #todo
+    | assign_lhs ASS assign_rhs #assignLhs
     | READ assign_lhs #todo
     | FREE expr #todo
     | RETURN expr #returnStat
@@ -31,9 +31,9 @@ stat:
     | stat SEMICOL stat #recursiveStat ;
 
 assign_lhs:
-      IDENT
-    | array_elem
-    | pair_elem ;
+      IDENT #identLhs
+    | array_elem #arrayElemLhs
+    | pair_elem #pairElemLhs;
 
 assign_rhs:
       expr #assignExp
