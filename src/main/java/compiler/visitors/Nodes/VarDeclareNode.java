@@ -1,6 +1,6 @@
 package compiler.visitors.Nodes;
 
-import compiler.visitors.NodeElements.AssignRHS;
+import compiler.visitors.NodeElements.RHS.AssignRHS;
 
 public class VarDeclareNode implements Node {
   private String varName;
@@ -14,10 +14,6 @@ public class VarDeclareNode implements Node {
 
   @Override
   public String toString() {
-
-
-
-
     return "VarDeclaration: " + varName + " = " + rhs.toString();
   }
 }

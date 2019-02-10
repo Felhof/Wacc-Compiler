@@ -1,5 +1,7 @@
-package compiler.visitors.NodeElements;
+package compiler.visitors.NodeElements.RHS;
 
+import compiler.visitors.NodeElements.RHS.AssignRHS;
+import compiler.visitors.NodeElements.RHS.Expr;
 import compiler.visitors.NodeElements.Types.PairType;
 import compiler.visitors.Returnable;
 

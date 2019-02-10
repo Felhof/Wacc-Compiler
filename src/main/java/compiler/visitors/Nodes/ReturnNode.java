@@ -1,6 +1,6 @@
 package compiler.visitors.Nodes;
 
-import compiler.visitors.NodeElements.Expr;
+import compiler.visitors.NodeElements.RHS.Expr;
 
 public class ReturnNode implements Node {
   private Expr expr;
