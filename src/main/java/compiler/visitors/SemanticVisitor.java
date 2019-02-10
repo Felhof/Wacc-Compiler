@@ -1,6 +1,5 @@
 package compiler.visitors;
 
-import antlr.BasicParser.ArrayExpContext;
 import antlr.BasicParser.ArrayTypeContext;
 import antlr.BasicParser.Array_literContext;
 import antlr.BasicParser.AssignArrayContext;
@@ -9,15 +8,16 @@ import antlr.BasicParser;
 import antlr.BasicParser.BinaryExpContext;
 import antlr.BasicParser.BoolExpContext;
 import antlr.BasicParser.CharExpContext;
-import antlr.BasicParser.DefPairTypeContext;
 import antlr.BasicParser.ExprContext;
 import antlr.BasicParser.IdentExpContext;
 import antlr.BasicParser.IfStatContext;
 import antlr.BasicParser.IntExpContext;
 import antlr.BasicParser.NewPairContext;
+import antlr.BasicParser.PairElemArrayTypeContext;
 import antlr.BasicParser.PairElemBaseTypeContext;
 import antlr.BasicParser.PairElemPairTypeContext;
 import antlr.BasicParser.PairTypeContext;
+import antlr.BasicParser.Pair_typeContext;
 import antlr.BasicParser.ProgContext;
 import antlr.BasicParser.RecursiveStatContext;
 import antlr.BasicParser.StatContext;
@@ -46,11 +46,9 @@ import compiler.visitors.NodeElements.CharExpr;
 import compiler.visitors.NodeElements.Expr;
 import compiler.visitors.NodeElements.IntExpr;
 import compiler.visitors.NodeElements.StringExpr;
-import compiler.visitors.NodeElements.Types.TYPE;
+import compiler.visitors.NodeElements.Types.Type.TYPE;
 import compiler.visitors.Identifiers.Variable;
 import compiler.visitors.Nodes.WhileNode;
-import java.util.ArrayList;
-import java.util.List;
 
 public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
 
@@ -111,7 +109,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
 
     Type varType = (Type) visit(ctx.type());
     Variable var = (Variable) currentST.lookUpScope(varName);
-    AssignRHS rhs = (AssignRHS) visit(ctx.assign_rhs()); // simple case
+    AssignRHS rhs = (AssignRHS) visit(ctx.assign_rhs());
 
     if(!varType.equals(rhs.type())) {
       parser
@@ -200,12 +198,24 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
   @Override
   public Returnable visitAssignArray(AssignArrayContext ctx) {
     Array_literContext context = ctx.array_liter();
-    List<Expr> elems = new ArrayList<Expr>();
-    // TODO fill elems
-    // TODO check types of all elems are the same
-    // TODO determine array type
+    Expr[] elems = new Expr[context.expr().size()];
+
     Type elemType = null;
-    return new ArrayLiter((Expr[]) elems.toArray(), elemType);
+    for (int i = 0; i < elems.length; i++) {
+      ExprContext e = context.expr().get(i);
+      Expr expr = (Expr) visit(e);
+
+      if (elemType == null) {
+        elemType = expr.type();
+      }
+      else if (!expr.type().equals(elemType)) {
+        parser.notifyErrorListeners("Incompatible type at " + e.getText()
+            + " (expected: " + elemType.toString()
+            + "actual: " + expr.type().toString()+ ")");
+      }
+      elems[i] = expr;
+    }
+    return new ArrayLiter(elems, elemType);
   }
 
   @Override
@@ -214,20 +224,26 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
   }
 
   @Override
-  public Returnable visitPairType(PairTypeContext ctx) {
-    return visit(ctx.pair_type());
+  public Returnable visitArrayType(ArrayTypeContext ctx) {
+    return new ArrType((Type) visit(ctx.type()));
   }
 
   @Override
-  public Returnable visitDefPairType(DefPairTypeContext ctx) {
-    Type lhs = (Type) visit(ctx.pair_elem_type(0));
-    Type rhs = (Type) visit(ctx.pair_elem_type(1));
+  public Returnable visitPairType(PairTypeContext ctx) {
+    Pair_typeContext context = ctx.pair_type();
+    Type lhs = (Type) visit(context.pair_elem_type(0));
+    Type rhs = (Type) visit(context.pair_elem_type(1));
     return new PairType(lhs, rhs);
   }
 
   @Override
   public Returnable visitPairElemBaseType(PairElemBaseTypeContext ctx) {
     return new BasicType(TYPE.get(ctx.getText()));
+  }
+
+  @Override
+  public Returnable visitPairElemArrayType(PairElemArrayTypeContext ctx) {
+    return new ArrType((Type) visit(ctx.type()));
   }
 
   @Override

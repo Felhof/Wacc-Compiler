@@ -1,7 +1,7 @@
 package compiler.visitors.NodeElements;
 
 import compiler.visitors.NodeElements.Types.BasicType;
-import compiler.visitors.NodeElements.Types.TYPE;
+import compiler.visitors.NodeElements.Types.Type.TYPE;
 
 public class StringExpr extends Expr {
 

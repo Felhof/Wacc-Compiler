@@ -1,6 +1,6 @@
 package compiler.visitors.NodeElements.Types;
 
-public class ArrType implements Type {
+public class ArrType extends Type {
 
   private Type type;
 
@@ -8,8 +8,17 @@ public class ArrType implements Type {
     this.type = type;
   }
 
+  public Type type() {
+    return type;
+  }
+
   @Override
   public boolean equals(Type type) {
-    return this.type.equals(type);
+    return type instanceof ArrType && this.type.equals(((ArrType) type).type());
+  }
+
+  @Override
+  public String toString() {
+    return "ArrType(" + type.toString() + ')';
   }
 }

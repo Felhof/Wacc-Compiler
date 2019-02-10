@@ -1,8 +1,6 @@
 package compiler.visitors.NodeElements.Types;
 
-import compiler.visitors.Returnable;
-
-public class PairType implements Type, Returnable {
+public class PairType extends Type {
 
   Type fst;
   Type snd;

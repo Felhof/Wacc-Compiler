@@ -1,8 +1,6 @@
 package compiler.visitors.NodeElements.Types;
 
-import compiler.visitors.Returnable;
-
-public class BasicType implements Type, Returnable {
+public class BasicType extends Type {
   private TYPE type;
 
   public BasicType(TYPE type) {
