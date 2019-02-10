@@ -9,9 +9,9 @@ public class Pair extends AssignRHS implements Returnable {
   Expr sndExpr;
 
   public Pair(Expr fstExpr, Expr sndExpr) {
+    super(new PairType(fstExpr.type(), sndExpr.type()));
     this.fstExpr = fstExpr;
     this.sndExpr = sndExpr;
-    this.type = new PairType(fstExpr.type(), sndExpr.type());
   }
 
 }

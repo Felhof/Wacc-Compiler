@@ -1,5 +1,9 @@
 package compiler.visitors;
 
+import antlr.BasicParser.ArrayExpContext;
+import antlr.BasicParser.ArrayTypeContext;
+import antlr.BasicParser.Array_literContext;
+import antlr.BasicParser.AssignArrayContext;
 import antlr.BasicParser.BaseTypeContext;
 import antlr.BasicParser;
 import antlr.BasicParser.BinaryExpContext;
@@ -22,7 +26,9 @@ import antlr.BasicParser.UnaryExpContext;
 import antlr.BasicParser.VarDeclarationStatContext;
 import antlr.BasicParser.WhileStatContext;
 import antlr.BasicParserBaseVisitor;
+import compiler.visitors.NodeElements.ArrayLiter;
 import compiler.visitors.NodeElements.AssignRHS;
+import compiler.visitors.NodeElements.Types.ArrType;
 import compiler.visitors.NodeElements.Types.BasicType;
 import compiler.visitors.NodeElements.IdentExpr;
 import compiler.visitors.NodeElements.Pair;
@@ -43,6 +49,8 @@ import compiler.visitors.NodeElements.StringExpr;
 import compiler.visitors.NodeElements.Types.TYPE;
 import compiler.visitors.Identifiers.Variable;
 import compiler.visitors.Nodes.WhileNode;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
 
@@ -187,6 +195,17 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
     Expr snd = (Expr) visit(ctx.expr(1));
 
     return new Pair(fst, snd);
+  }
+
+  @Override
+  public Returnable visitAssignArray(AssignArrayContext ctx) {
+    Array_literContext context = ctx.array_liter();
+    List<Expr> elems = new ArrayList<Expr>();
+    // TODO fill elems
+    // TODO check types of all elems are the same
+    // TODO determine array type
+    Type elemType = null;
+    return new ArrayLiter((Expr[]) elems.toArray(), elemType);
   }
 
   @Override
