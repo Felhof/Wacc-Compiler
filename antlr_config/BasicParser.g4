@@ -39,15 +39,15 @@ assign_rhs:
       expr #assignExp
     | array_liter #assignArray
     | NEWPAIR OPEN expr COMMA expr CLOSE #newPair
-    | pair_elem #todoB
+    | pair_elem #pairElemRhs
     | CALL IDENT OPEN (arg_list)? CLOSE #funcCall ;
 
 arg_list:
     expr (COMMA expr)* ;
 
 pair_elem:
-      FST expr
-    | SND expr ;
+      FST expr #fstPair
+    | SND expr #sndPair;
 
 type:
       base_type #baseType

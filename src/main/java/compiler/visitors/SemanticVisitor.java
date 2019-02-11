@@ -13,6 +13,7 @@ import antlr.BasicParser.BracketExpContext;
 import antlr.BasicParser.CharExpContext;
 import antlr.BasicParser.ExitStatContext;
 import antlr.BasicParser.ExprContext;
+import antlr.BasicParser.FstPairContext;
 import antlr.BasicParser.FuncCallContext;
 import antlr.BasicParser.FuncContext;
 import antlr.BasicParser.IdentExpContext;
@@ -24,6 +25,7 @@ import antlr.BasicParser.NewScopeStatContext;
 import antlr.BasicParser.PairElemArrayTypeContext;
 import antlr.BasicParser.PairElemBaseTypeContext;
 import antlr.BasicParser.PairElemPairTypeContext;
+import antlr.BasicParser.PairElemRhsContext;
 import antlr.BasicParser.PairTypeContext;
 import antlr.BasicParser.ParamContext;
 import antlr.BasicParser.Param_listContext;
@@ -34,6 +36,7 @@ import antlr.BasicParser.ProgContext;
 import antlr.BasicParser.ReadStatContext;
 import antlr.BasicParser.RecursiveStatContext;
 import antlr.BasicParser.ReturnStatContext;
+import antlr.BasicParser.SndPairContext;
 import antlr.BasicParser.StatContext;
 import antlr.BasicParser.StrExpContext;
 import antlr.BasicParser.UnaryExpContext;
@@ -48,6 +51,7 @@ import compiler.visitors.NodeElements.LHS.AssignLHS;
 import compiler.visitors.NodeElements.RHS.AssignRHS;
 import compiler.visitors.NodeElements.RHS.FuncCall;
 import compiler.visitors.NodeElements.LHS.IdentLHS;
+import compiler.visitors.NodeElements.RHS.PairElem;
 import compiler.visitors.NodeElements.Types.ArrType;
 import compiler.visitors.NodeElements.Types.BasicType;
 import compiler.visitors.NodeElements.RHS.IdentExpr;
@@ -464,6 +468,30 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
     Expr expr = (Expr) visit(ctx.expr());
     expr.putBrackets();
     return expr;
+  }
+
+  @Override
+  public Returnable visitFstPair(FstPairContext ctx) {
+    Expr expr = (Expr) visit(ctx.expr());
+    if (!(expr.type() instanceof PairType)) {
+      parser.notifyErrorListeners(
+          "Semantic error at line: " + ctx.start.getLine() + " : type of argument is "
+              + expr.type().toString() + ", should be pair");
+      return null;
+    }
+    return new PairElem(((PairType) (expr).type()).getFst(), 2);
+  }
+
+  @Override
+  public Returnable visitSndPair(SndPairContext ctx) {
+    Expr expr = (Expr) visit(ctx.expr());
+    if (!(expr instanceof Pair)) {
+      parser.notifyErrorListeners(
+          "Semantic error at line: " + ctx.start.getLine() + " : type of argument is "
+              + expr.type().toString() + ", should be pair");
+      return null;
+    }
+    return new PairElem(((PairType) (expr).type()).getSnd(), 2);
   }
 
   public ScopeData visitStatInNewScope(StatContext stat) {

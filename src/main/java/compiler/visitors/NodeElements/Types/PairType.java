@@ -26,4 +26,13 @@ public class PairType extends Type {
   public String toString() {
     return "PAIR(" + fst.toString() + "," + snd.toString() + ")";
   }
+
+  public Type getFst() {
+    return fst;
+  }
+
+  public Type getSnd() {
+    return snd;
+  }
+
 }

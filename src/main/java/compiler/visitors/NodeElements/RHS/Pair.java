@@ -1,14 +1,12 @@
 package compiler.visitors.NodeElements.RHS;
 
-import compiler.visitors.NodeElements.RHS.AssignRHS;
-import compiler.visitors.NodeElements.RHS.Expr;
 import compiler.visitors.NodeElements.Types.PairType;
 import compiler.visitors.Returnable;
 
-public class Pair extends AssignRHS implements Returnable {
+public class Pair extends Expr implements Returnable {
 
-  Expr fstExpr;
-  Expr sndExpr;
+  private Expr fstExpr;
+  private Expr sndExpr;
 
   public Pair(Expr fstExpr, Expr sndExpr) {
     super(new PairType(fstExpr.type(), sndExpr.type()));
