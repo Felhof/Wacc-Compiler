@@ -1,13 +1,13 @@
 package compiler.visitors.Nodes;
 
-import compiler.visitors.NodeElements.RHS.AssignRHS;
+import compiler.visitors.NodeElements.NodeElem;
 
 public class VarDeclareNode implements Node {
   private String varName;
-  private AssignRHS rhs;
+  private NodeElem rhs;
 
   public VarDeclareNode(String varName,
-      AssignRHS rhs) {
+      NodeElem rhs) {
     this.varName = varName;
     this.rhs = rhs;
   }

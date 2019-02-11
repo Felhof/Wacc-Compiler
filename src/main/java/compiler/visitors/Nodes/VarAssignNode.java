@@ -1,15 +1,14 @@
 package compiler.visitors.Nodes;
 
-import compiler.visitors.NodeElements.LHS.AssignLHS;
-import compiler.visitors.NodeElements.RHS.AssignRHS;
+import compiler.visitors.NodeElements.NodeElem;
 
 public class VarAssignNode implements Node {
 
-  private AssignLHS lhs;
-  private AssignRHS rhs;
+  private NodeElem lhs;
+  private NodeElem rhs;
 
-  public VarAssignNode(AssignLHS lhs,
-      AssignRHS rhs) {
+  public VarAssignNode(NodeElem lhs,
+      NodeElem rhs) {
     this.lhs = lhs;
     this.rhs = rhs;
   }

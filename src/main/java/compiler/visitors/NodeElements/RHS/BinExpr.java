@@ -46,7 +46,7 @@ public class BinExpr extends Expr {
     if (!lhs.type().equals(rhs.type())) {
       return "Incompatible type at " + rhs.toString()
           + " (expected: " + lhs.type().toString()
-          + ", actual: " + rhs.type.toString();
+          + ", actual: " + rhs.type().toString();
     }
     return null;
   }

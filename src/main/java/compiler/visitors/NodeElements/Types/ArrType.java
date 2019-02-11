@@ -2,23 +2,41 @@ package compiler.visitors.NodeElements.Types;
 
 public class ArrType extends Type {
 
-  private Type type;
+  private Type elemType;
+  private int dimension;
 
-  public ArrType(Type type) {
-    this.type = type;
+  public ArrType(Type elemType) {
+    this.elemType = elemType;
+    this.dimension = 1;
   }
 
-  public Type type() {
-    return type;
+  public Type elemType() {
+    return elemType;
+  }
+
+  public int dimension() {
+    return dimension;
+  }
+
+  public ArrType addDimension() {
+    this.dimension++;
+    return this;
   }
 
   @Override
   public boolean equals(Type type) {
-    return type instanceof ArrType && this.type.equals(((ArrType) type).type());
+    return type instanceof ArrType
+        && this.elemType.equals(((ArrType) type).elemType())
+        && this.dimension == ((ArrType) type).dimension();
   }
 
   @Override
   public String toString() {
-    return "ArrType(" + type.toString() + ')';
+    return elemType.toString() + bracketsString(dimension);
   }
+
+  public static String bracketsString(int dim) {
+    return (dim > 0) ? ("[]" + bracketsString(dim - 1)) : "";
+  }
+
 }
