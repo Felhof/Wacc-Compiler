@@ -9,6 +9,7 @@ import antlr.BasicParser.BaseTypeContext;
 import antlr.BasicParser;
 import antlr.BasicParser.BinaryExpContext;
 import antlr.BasicParser.BoolExpContext;
+import antlr.BasicParser.BracketExpContext;
 import antlr.BasicParser.CharExpContext;
 import antlr.BasicParser.ExitStatContext;
 import antlr.BasicParser.ExprContext;
@@ -456,6 +457,13 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
     ScopeData stat = visitStatInNewScope(ctx.stat());
     currentASTNode.add(new ScopeNode(stat.astNode(), stat.symbolTable()));
     return null;
+  }
+
+  @Override
+  public Returnable visitBracketExp(BracketExpContext ctx) {
+    Expr expr = (Expr) visit(ctx.expr());
+    expr.putBrackets();
+    return expr;
   }
 
   public ScopeData visitStatInNewScope(StatContext stat) {
