@@ -25,14 +25,14 @@ public class SymbolTable {
   public void addFunc(String name, Function func) {funcDict.put(name, func); }
 
   public Variable lookUpAllVar(String name) {
-    return (Variable) genericlookUpAll(name, "var");
+    return (Variable) genericLookUpAll(name, "var");
   }
 
   public Function lookUpAllFunc(String name) {
-    return (Function) genericlookUpAll(name, "func");
+    return (Function) genericLookUpAll(name, "func");
   }
 
-  public Identifier genericlookUpAll(String name, String type) {
+  public Identifier genericLookUpAll(String name, String type) {
     SymbolTable currST = this;
     while (currST != null) {
       Identifier identifier;
