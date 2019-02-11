@@ -34,7 +34,7 @@ public class BasicType extends Type {
   }
 
   public enum TYPE {
-    BOOL("bool"), INT("int"), CHAR("char"), STRING("string"), RECOVERY("recovery");
+    BOOL("bool"), INT("int"), CHAR("char"), STRING("string");
 
     private String value;
     private static Map<String, TYPE> map;
@@ -59,7 +59,7 @@ public class BasicType extends Type {
     }
 
     public boolean equals(TYPE o) {
-      return this == o || this == RECOVERY || o == RECOVERY;
+      return this == o;
     }
 
   }

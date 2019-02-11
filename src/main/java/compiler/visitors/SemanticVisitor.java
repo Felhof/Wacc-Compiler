@@ -270,7 +270,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
       parser.notifyErrorListeners(
           "Semantic error at line: " + ctx.start.getLine() + " : variable "
               + varName + " is not defined in this scope");
-      variable = new Variable(new BasicType(BasicType.TYPE.RECOVERY));
+      variable = new Variable(new GenericType());
     }
     return new IdentExprRHS(variable.type());
   }
@@ -338,7 +338,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
 
   @Override
   public Returnable visitPairElemPairType(PairElemPairTypeContext ctx) {
-    return new PairType(new BasicType(TYPE.RECOVERY), new BasicType(TYPE.RECOVERY));
+    return new PairType(new GenericType(), new GenericType());
   }
 
   @Override
@@ -403,7 +403,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
       parser.notifyErrorListeners(
           "Semantic error at line: " + ctx.start.getLine() + " : variable "
               + varName + " is not defined in this scope");
-      variable = new Variable(new BasicType(BasicType.TYPE.RECOVERY));
+      variable = new Variable(new GenericType());
     }
     return new IdentLHS(variable.type());
   }
