@@ -17,7 +17,7 @@ public class Main {
 
   public static void main(String[] args) {
     //ASTNode ast = compileProg(args[0]); // uncomment for labTS test
-    ASTNode ast = compileProg("src/test/valid/function/simple_functions/functionReturnPair.wacc");
+    ASTNode ast = compileProg("src/test/valid/pairs/checkRefPair.wacc");
     System.out.println(ast.toString());
     System.exit(0);
   }
