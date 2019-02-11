@@ -19,6 +19,7 @@ import antlr.BasicParser.IdentLhsContext;
 import antlr.BasicParser.IfStatContext;
 import antlr.BasicParser.IntExpContext;
 import antlr.BasicParser.NewPairContext;
+import antlr.BasicParser.NewScopeStatContext;
 import antlr.BasicParser.PairElemArrayTypeContext;
 import antlr.BasicParser.PairElemBaseTypeContext;
 import antlr.BasicParser.PairElemPairTypeContext;
@@ -447,6 +448,13 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
                       + ", free statement requires: pair(T1,T2) or T[], found: " + expr.type().toString());
     }
     currentASTNode.add(new FreeNode(expr));
+    return null;
+  }
+
+  @Override
+  public Returnable visitNewScopeStat(NewScopeStatContext ctx) {
+    ScopeData stat = visitStatInNewScope(ctx.stat());
+    currentASTNode.add(new ScopeNode(stat.astNode(), stat.symbolTable()));
     return null;
   }
 

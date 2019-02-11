@@ -27,7 +27,7 @@ stat:
     | PRINTLN expr #printlnStat
     | IF expr THEN stat ELSE stat FI #ifStat
     | WHILE expr DO stat DONE #whileStat
-    | BEG stat END #todo
+    | BEG stat END #newScopeStat
     | stat SEMICOL stat #recursiveStat ;
 
 assign_lhs:
