@@ -18,7 +18,8 @@ job 2:
                                          +SemanticRead
                                          +SemanticScope
                                          +SemanticVariables
-                                         +SemanticWhile'
+                                         +SemanticWhile
+                                         +SemanticPairs'
     #- mvn test '-Dtest=!InvalidTests#Expression+Variables' # mvn test
     #      -Dgroups="<Test Category>"
     #only:

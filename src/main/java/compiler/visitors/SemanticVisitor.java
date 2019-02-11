@@ -57,14 +57,7 @@ import compiler.visitors.NodeElements.Types.PairType;
 import compiler.visitors.NodeElements.Types.Type;
 import compiler.visitors.NodeElements.RHS.UnaryExpr;
 import compiler.visitors.NodeElements.RHS.UnaryExpr.UNOP;
-import compiler.visitors.Nodes.ASTNode;
-import compiler.visitors.Nodes.ExitNode;
-import compiler.visitors.Nodes.FuncNode;
-import compiler.visitors.Nodes.IfElseNode;
-import compiler.visitors.Nodes.PrintNode;
-import compiler.visitors.Nodes.ReturnNode;
-import compiler.visitors.Nodes.VarAssignNode;
-import compiler.visitors.Nodes.VarDeclareNode;
+import compiler.visitors.Nodes.*;
 import compiler.visitors.NodeElements.RHS.BinExpr;
 import compiler.visitors.NodeElements.RHS.BinExpr.BINOP;
 import compiler.visitors.NodeElements.RHS.BoolExpr;
@@ -443,6 +436,18 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
     TypeList argsList = new TypeList();
     ctx.expr().forEach(e -> argsList.add(((Expr) visit(e)).type()));
     return argsList;
+  }
+
+  @Override
+  public Returnable visitFreeStat(BasicParser.FreeStatContext ctx) {
+    Expr expr = (Expr) visit(ctx.expr());
+    if (!(expr.type() instanceof ArrType) && !(expr.type() instanceof PairType)) {
+      parser.notifyErrorListeners(
+              "Semantic error at line: " + ctx.start.getLine() + " at character: " + ctx.expr().getStop().getCharPositionInLine()
+                      + ", free statement requires: pair(T1,T2) or T[], found: " + expr.type().toString());
+    }
+    currentASTNode.add(new FreeNode(expr));
+    return null;
   }
 
   public ScopeData visitStatInNewScope(StatContext stat) {
