@@ -25,26 +25,24 @@ public class SymbolTable {
   public void addFunc(String name, Function func) {funcDict.put(name, func); }
 
   public Variable lookUpAllVar(String name) {
-    SymbolTable currST = this;
-    while (currST != null) {
-      Variable var = currST.lookUpVarScope(name);
-      if (var != null) {
-        return var;
-      }
-      if (currST.functionScope) {
-        return null;
-      }
-      currST = currST.getEncSymTable();
-    }
-    return null;
+    return (Variable) genericlookUpAll(name, "var");
   }
 
   public Function lookUpAllFunc(String name) {
+    return (Function) genericlookUpAll(name, "func");
+  }
+
+  public Identifier genericlookUpAll(String name, String type) {
     SymbolTable currST = this;
     while (currST != null) {
-      Function function = currST.lookUpFuncScope(name);
-      if (function != null) {
-        return function;
+      Identifier identifier;
+      if (type.equals("var")) {
+        identifier = currST.lookUpVarScope(name);
+      } else {
+        identifier = currST.lookUpFuncScope(name);
+      }
+      if (identifier != null) {
+        return identifier;
       }
       if (currST.functionScope) {
         return null;
@@ -53,8 +51,6 @@ public class SymbolTable {
     }
     return null;
   }
-
-
 
 
   public Identifier lookUpScope(String name) {
