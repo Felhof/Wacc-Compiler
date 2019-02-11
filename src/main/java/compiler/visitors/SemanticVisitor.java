@@ -297,13 +297,11 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
 
   @Override
   public Returnable visitArrayElemLhs(ArrayElemLhsContext ctx) {
-    // TODO refactor
     return visit(ctx.array_elem());
   }
 
   @Override
   public Returnable visitArrayExp(ArrayExpContext ctx) {
-    // TODO refactor
     return visit(ctx.array_elem());
   }
 
@@ -332,7 +330,8 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
               + ArrType.bracketsString(ctx.expr().size()));
     }
     else {
-      return new ArrayElem(varName, (Expr[]) ctx.expr().stream().map(this::visit).toArray());
+      return new ArrayElem(var.type(), varName,
+          (Expr[]) ctx.expr().stream().map(this::visit).toArray());
     }
     return null;
   }

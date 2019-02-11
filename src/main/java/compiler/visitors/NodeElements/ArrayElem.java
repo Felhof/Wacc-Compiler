@@ -1,14 +1,15 @@
 package compiler.visitors.NodeElements;
 
 import compiler.visitors.NodeElements.RHS.Expr;
-import compiler.visitors.Returnable;
+import compiler.visitors.NodeElements.Types.Type;
 
-public class ArrayElem implements Returnable {
+public class ArrayElem extends NodeElem {
 
   private String varName;
   private Expr[] indexes;
 
-  public ArrayElem(String varName, Expr[] indexes) {
+  public ArrayElem(Type type, String varName, Expr[] indexes) {
+    super(type);
     this.varName = varName;
     this.indexes = indexes;
   }
