@@ -1,12 +1,12 @@
-package compiler.visitors.NodeElements.LHS;
+package compiler.visitors.NodeElements;
 
 import compiler.visitors.NodeElements.Types.Type;
 import compiler.visitors.Returnable;
 
-public abstract class AssignLHS implements Returnable {
+public abstract class NodeElem implements Returnable {
   protected Type type;
 
-  public AssignLHS(Type type) {
+  public NodeElem(Type type) {
     this.type = type;
   }
 

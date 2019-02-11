@@ -1,10 +1,10 @@
 package compiler.visitors.NodeElements.RHS;
 
-import compiler.visitors.NodeElements.RHS.AssignRHS;
+import compiler.visitors.NodeElements.NodeElem;
 import compiler.visitors.NodeElements.TypeList;
 import compiler.visitors.NodeElements.Types.Type;
 
-public class FuncCall extends AssignRHS {
+public class FuncCall extends NodeElem {
   private String funcName;
   private TypeList argsList;
 

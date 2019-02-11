@@ -1,12 +1,12 @@
 package compiler.visitors.Nodes;
 
-import compiler.visitors.NodeElements.LHS.AssignLHS;
+import compiler.visitors.NodeElements.NodeElem;
 
 public class ReadNode implements Node {
 
-  private AssignLHS lhs;
+  private NodeElem lhs;
 
-  public ReadNode(AssignLHS lhs) {
+  public ReadNode(NodeElem lhs) {
     this.lhs = lhs;
   }
 
