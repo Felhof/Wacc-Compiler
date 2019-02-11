@@ -425,7 +425,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
   @Override
   public Returnable visitFreeStat(BasicParser.FreeStatContext ctx) {
     Expr expr = (Expr) visit(ctx.expr());
-    if (!(expr.type().getClass().isInstance(ArrType.class) && !(expr.type().getClass().isInstance(PairType.class)))) {
+    if (!(expr.type() instanceof ArrType) && !(expr.type() instanceof PairType)) {
       parser.notifyErrorListeners(
               "Semantic error at line: " + ctx.start.getLine() + " at character: " + ctx.expr().getStop().getCharPositionInLine()
                       + ", free statement requires: pair(T1,T2) or T[], found: " + expr.type().toString());

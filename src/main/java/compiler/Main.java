@@ -17,7 +17,7 @@ public class Main {
 
   public static void main(String[] args) {
     //ASTNode ast = compileProg(args[0]); // uncomment for labTS test
-    ASTNode ast = compileProg("src/test/invalid/semanticErr/exit/badCharExit.wacc");
+    ASTNode ast = compileProg("src/test/invalid/semanticErr/pairs/freeNonPair.wacc");
     System.out.println(ast.toString());
     System.exit(0);
   }
