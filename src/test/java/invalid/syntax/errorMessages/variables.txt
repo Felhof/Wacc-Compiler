@@ -1,0 +1,3 @@
+src/test/java/invalid/syntax/errorMessages/variables/badintAssignments.txt
+src/test/java/invalid/syntax/errorMessages/variables/bigIntAssignment.txt
+src/test/java/invalid/syntax/errorMessages/variables/varNoName.txt

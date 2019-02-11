@@ -1,0 +1,16 @@
+src/test/java/invalid/syntax/errorMessages/function/badlyNamed.txt
+src/test/java/invalid/syntax/errorMessages/function/badlyPlaced.txt
+src/test/java/invalid/syntax/errorMessages/function/funcExpr.txt
+src/test/java/invalid/syntax/errorMessages/function/funcExpr2.txt
+src/test/java/invalid/syntax/errorMessages/function/functionConditionalNoReturn.txt
+src/test/java/invalid/syntax/errorMessages/function/functionJunkAfterReturn.txt
+src/test/java/invalid/syntax/errorMessages/function/functionLateDefine.txt
+src/test/java/invalid/syntax/errorMessages/function/functionMissingCall.txt
+src/test/java/invalid/syntax/errorMessages/function/functionMissingParam.txt
+src/test/java/invalid/syntax/errorMessages/function/functionMissingPType.txt
+src/test/java/invalid/syntax/errorMessages/function/functionMissingType.txt
+src/test/java/invalid/syntax/errorMessages/function/functionNoReturn.txt
+src/test/java/invalid/syntax/errorMessages/function/functionScopeDef.txt
+src/test/java/invalid/syntax/errorMessages/function/mutualRecursionNoReturn.txt
+src/test/java/invalid/syntax/errorMessages/function/noBodyAfterFuncs.txt
+src/test/java/invalid/syntax/errorMessages/function/thisIsNotC.txt

@@ -40,6 +40,10 @@ public class SyntaxVisitor extends BasicParserBaseVisitor<Void>{
 
     String operatorText = ctx.getText();
 
+    System.out.println("StartLine: " + ctx.start.getLine());
+    System.out.println("StopLine: " + ctx.stop.getLine());
+
+
     BasicParser.ExprContext expr = (BasicParser.ExprContext) ctx.getParent().getChild(1);
 
     String childText = expr.getText();
@@ -49,7 +53,7 @@ public class SyntaxVisitor extends BasicParserBaseVisitor<Void>{
     switch (operatorText){
       case "+":
         if(c == '"' || c == '\'' || c == '(' || c == ')'){
-          parser.notifyErrorListeners("Missmatched Input '" + c + "'. Expecting Integer");
+          parser.notifyErrorListeners("Missmatched Input '" + c + "' expecting INTEGER");
         }
         break;
     }

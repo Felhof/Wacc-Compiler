@@ -1,0 +1,5 @@
+src/test/java/invalid/syntax/errorMessages/while/donoErr.txt
+src/test/java/invalid/syntax/errorMessages/while/dooErr.txt
+src/test/java/invalid/syntax/errorMessages/while/whileNodone.txt
+src/test/java/invalid/syntax/errorMessages/while/whileNodo.txt
+src/test/java/invalid/syntax/errorMessages/while/whilErr.txt

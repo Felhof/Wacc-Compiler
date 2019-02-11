@@ -1,0 +1,9 @@
+src/test/java/invalid/syntax/errorMessages/basic/badComment2.txt
+src/test/java/invalid/syntax/errorMessages/basic/badComment.txt
+src/test/java/invalid/syntax/errorMessages/basic/badEscape.txt
+src/test/java/invalid/syntax/errorMessages/basic/beginNoend.txt
+src/test/java/invalid/syntax/errorMessages/basic/bgnErr.txt
+src/test/java/invalid/syntax/errorMessages/basic/multipleBegins.txt
+src/test/java/invalid/syntax/errorMessages/basic/noBody.txt
+src/test/java/invalid/syntax/errorMessages/basic/skpErr.txt
+src/test/java/invalid/syntax/errorMessages/basic/unescapedChar.txt
