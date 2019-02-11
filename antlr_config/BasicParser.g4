@@ -20,7 +20,7 @@ stat:
     | type IDENT ASS assign_rhs #varDeclarationStat
     | assign_lhs ASS assign_rhs #assignLhs
     | READ assign_lhs #todo
-    | FREE expr #todo
+    | FREE expr #freeStat
     | RETURN expr #returnStat
     | EXIT expr #exitStat
     | PRINT expr #printStat
