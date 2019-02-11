@@ -46,8 +46,8 @@ arg_list:
     expr (COMMA expr)* ;
 
 pair_elem:
-      FST expr #fstPair
-    | SND expr #sndPair;
+      FST expr
+    | SND expr ;
 
 type:
       base_type #baseType

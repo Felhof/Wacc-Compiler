@@ -9,7 +9,7 @@
 # Program:
 
 begin
-  pair(pair, pair) a = null ;
+  pair(int, int) a = null ;
   free a
 end
 

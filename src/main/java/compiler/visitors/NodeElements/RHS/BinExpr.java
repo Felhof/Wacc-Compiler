@@ -1,6 +1,7 @@
 package compiler.visitors.NodeElements.RHS;
 
 import compiler.visitors.NodeElements.Types.BasicType;
+import compiler.visitors.NodeElements.Types.PairType;
 import compiler.visitors.NodeElements.Types.Type;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -13,6 +14,7 @@ public class BinExpr extends Expr {
   private final static Type charType = new BasicType(BasicType.TYPE.CHAR);
   private final static Type boolType = new BasicType(BasicType.TYPE.BOOL);
   private final static Type stringType = new BasicType(BasicType.TYPE.STRING);
+
 
   private final static List<Type> typesInt = Arrays.asList(intType);
   private final static List<Type> typesIntChar =
@@ -33,11 +35,13 @@ public class BinExpr extends Expr {
   }
 
   public String isTypeCompatible() {
-    if (!contains(operator.argTypes(), lhs.type())) {
-      return "Incompatible type " + lhs.type().toString();
-    }
-    if (!contains(operator.argTypes(), rhs.type())) {
-      return "Incompatible type " + rhs.type().toString();
+    if (!operator.op.equals("==") && !operator.op().equals("!="))  {
+      if (!contains(operator.argTypes(), lhs.type())) {
+        return "Incompatible type " + lhs.type().toString();
+      }
+      if (!contains(operator.argTypes(), rhs.type())) {
+        return "Incompatible type " + rhs.type().toString();
+      }
     }
     if (!lhs.type().equals(rhs.type())) {
       return "Incompatible type at " + rhs.toString()

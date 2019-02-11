@@ -44,9 +44,6 @@ public class SymbolTable {
       if (identifier != null) {
         return identifier;
       }
-      if (currST.functionScope) {
-        return null;
-      }
       currST = currST.getEncSymTable();
     }
     return null;
@@ -82,5 +79,15 @@ public class SymbolTable {
 
   public void setFunctionScope(boolean functionScope) {
     this.functionScope = functionScope;
+  }
+
+  public void setDict(
+      HashMap<String, Variable> dict) {
+    this.dict = dict;
+  }
+
+  public void setFuncDict(
+      HashMap<String, Function> funcDict) {
+    this.funcDict = funcDict;
   }
 }

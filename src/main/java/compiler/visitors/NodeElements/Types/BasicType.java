@@ -12,6 +12,9 @@ public class BasicType extends Type {
 
   @Override
   public boolean equals(Type type) {
+    if (type instanceof GenericType) {
+      return true;
+    }
     return type instanceof BasicType
         && this.type.equals(((BasicType) type).type());
   }
@@ -31,7 +34,7 @@ public class BasicType extends Type {
   }
 
   public enum TYPE {
-    BOOL("bool"), INT("int"), CHAR("char"), STRING("string"), RECOVERY(null);
+    BOOL("bool"), INT("int"), CHAR("char"), STRING("string");
 
     private String value;
     private static Map<String, TYPE> map;
@@ -56,7 +59,7 @@ public class BasicType extends Type {
     }
 
     public boolean equals(TYPE o) {
-      return this == o || this == RECOVERY || o == RECOVERY;
+      return this == o;
     }
 
   }
