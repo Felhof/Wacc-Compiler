@@ -5,9 +5,9 @@ import compiler.visitors.SymbolTable;
 
 public class WhileNode implements Node {
 
-  Expr condition;
-  ASTNode stat;
-  SymbolTable statST;
+  private Expr condition;
+  private ASTNode stat;
+  private SymbolTable statST;
 
   public WhileNode(Expr condition, ASTNode stat, SymbolTable statST) {
     this.condition = condition;
