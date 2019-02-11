@@ -3,14 +3,14 @@ package compiler.visitors.NodeElements.RHS;
 import compiler.visitors.NodeElements.Types.BasicType;
 
 public class IntExpr extends Expr {
-  private int value;
+  private String value;
 
   public IntExpr(String value) {
     super(new BasicType(BasicType.TYPE.INT));
-    this.value = Integer.parseInt(value);
+    this.value = value;
   }
 
-  public int getValue() {
+  public String getValue() {
     return value;
   }
 
