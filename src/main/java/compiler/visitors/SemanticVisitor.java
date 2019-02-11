@@ -98,19 +98,19 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
   @Override
   public Returnable visitFunc(FuncContext ctx) {
     Type funcReturnType = (Type) visit(ctx.type());
-    if (currentST.lookUpAll(ctx.IDENT().getText()) != null) {
+    if (currentST.lookUpAllFunc(ctx.IDENT().getText()) != null) {
       parser.notifyErrorListeners(
           "Semantic error at line: " + ctx.start.getLine() + " : function "
               + ctx.IDENT() + " has already been defined in this scope");
     }
 
-    ScopeData funcStat = visitFuncStatInNewScope(ctx.stat(), ctx.param_list(), funcReturnType);
+    ScopeData funcStat = visitFuncStatInNewScope(ctx.IDENT().getText(), ctx.stat(), ctx.param_list(), funcReturnType);
 
     currentASTNode.add(new FuncNode(funcReturnType,
         ctx.IDENT().getText(),
         funcStat.paramList(), funcStat.astNode(),
         funcStat.symbolTable()));
-    currentST.add(ctx.IDENT().getText(),
+    currentST.addFunc(ctx.IDENT().getText(),
          new Function(funcStat.paramList(), funcReturnType));
 
     return null;
@@ -128,7 +128,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
   @Override
   public Returnable visitParam(ParamContext ctx) {
     Type paramType = (Type) visit(ctx.type());
-    currentST.add(ctx.IDENT().getText(), new Variable(paramType));
+    currentST.addVar(ctx.IDENT().getText(), new Variable(paramType));
     return paramType;
   }
 
@@ -195,7 +195,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
     String varName = ctx.IDENT().getText();
 
     Type varType = (Type) visit(ctx.type());
-    Identifier var = currentST.lookUpScope(varName);
+    Variable var = currentST.lookUpVarScope(varName);
     AssignRHS rhs = (AssignRHS) visit(ctx.assign_rhs()); // simple case
 
     if(!isAssignSameType(varType, rhs)) {
@@ -209,7 +209,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
           .notifyErrorListeners("Semantic error at line " + ctx.start.getLine()
               + ". Variable name is already declared in scope");
     } else {
-      currentST.add(varName, new Variable(varType));
+      currentST.addVar(varName, new Variable(varType));
       currentASTNode.add(new VarDeclareNode(varName, rhs));
     }
     return null;
@@ -265,7 +265,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
   @Override
   public Returnable visitIdentExp(IdentExpContext ctx) {
     String varName = ctx.IDENT().getText();
-    Variable variable = (Variable) currentST.lookUpAll(varName);
+    Variable variable = currentST.lookUpAllVar(varName);
     if (variable == null) {
       parser.notifyErrorListeners(
           "Semantic error at line: " + ctx.start.getLine() + " : variable "
@@ -359,7 +359,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
       return null;
     }
 
-    Type funcDefinitionReturn = ((Variable) currentST.lookUpAll("return")).type();
+    Type funcDefinitionReturn = ( currentST.lookUpAllVar("return")).type();
     Type exprType = expr.type();
 
     if (!funcDefinitionReturn.equals(exprType)) {
@@ -396,24 +396,21 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
   public Returnable visitIdentLhs(IdentLhsContext ctx) {
     // TODO fix for function assign
     String varName = ctx.IDENT().getText();
-    Identifier identifier =  currentST.lookUpAll(varName);
-    if (identifier == null) {
+    Variable variable =  currentST.lookUpAllVar(varName);
+    if (variable == null) {
       parser.notifyErrorListeners(
           "Semantic error at line: " + ctx.start.getLine() + " : variable "
               + varName + " is not defined in this scope");
-      identifier = new Variable(new BasicType(BasicType.TYPE.RECOVERY));
-    } else if (identifier instanceof Function) {
-      parser.notifyErrorListeners("Semantic error at line: " + ctx.start.getLine() + "Cannot assign right hand side statement to a function");
-      return new GenericLHS(new GenericType());
+      variable = new Variable(new BasicType(BasicType.TYPE.RECOVERY));
     }
-    return new IdentLHS(((Variable) identifier).type());
+    return new IdentLHS(variable.type());
   }
 
   @Override
   public Returnable visitFuncCall(FuncCallContext ctx) {
     //return super.visitFuncCall(ctx);
     String funcName = ctx.IDENT().getText();
-    Function function = (Function) currentST.lookUpAll(funcName);
+    Function function = currentST.lookUpAllFunc(funcName);
 
     if (function == null) {
       parser.notifyErrorListeners(
@@ -473,8 +470,6 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
 
   @Override
   public Returnable visitPairElemRhs(PairElemRhsContext ctx) {
-//    System.out.println(ctx.getText());
-//    System.out.println(ctx.pair_elem().getChild(0).getText());
     Expr expr = (Expr) visit(ctx.pair_elem().getChild(1));
     if (!(expr.type() instanceof PairType)) {
       parser.notifyErrorListeners(
@@ -528,16 +523,21 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
     return exitScope(ASTNode);
   }
 
-  public ScopeData visitFuncStatInNewScope(StatContext stat,
+  public ScopeData visitFuncStatInNewScope(String funcName,
+      StatContext stat,
       Param_listContext paramListContext,
       Type funcReturnType) {
+
     ASTNode ASTNode = enterScope();
     currentST.setFunctionScope(true);
-    currentST.add("return", new Variable(funcReturnType));
+    currentST.addVar("return", new Variable(funcReturnType));
+
     TypeList paramList = new TypeList();
     if (paramListContext!= null) {
     paramList = (TypeList) visit(paramListContext);
     }
+
+    currentST.addFunc(funcName, new Function(paramList, funcReturnType));
     visit(stat);
     ScopeData sd = exitScope(ASTNode);
     return new ScopeData(sd.astNode(), sd.symbolTable(), paramList);
