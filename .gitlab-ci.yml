@@ -15,6 +15,7 @@ job 2:
                                          +SemanticExpression
                                          +SemanticIf
                                          +SemanticPrint
+                                         +SemanticRead
                                          +SemanticScope
                                          +SemanticVariables
                                          +SemanticWhile'

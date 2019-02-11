@@ -30,6 +30,7 @@ src/test/invalid/semanticErr/multiple/multiTypeErrs.wacc
 src/test/invalid/semanticErr/pairs/freeNonPair.wacc
 src/test/invalid/semanticErr/print/printTypeErr01.wacc
 src/test/invalid/semanticErr/read/readTypeErr01.wacc
+src/test/invalid/semanticErr/read/readTypeErr02.wacc
 src/test/invalid/semanticErr/scope/badScopeRedefine.wacc
 src/test/invalid/semanticErr/variables/basicTypeErr01.wacc
 src/test/invalid/semanticErr/variables/basicTypeErr02.wacc

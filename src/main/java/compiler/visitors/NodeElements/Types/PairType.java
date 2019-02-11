@@ -20,5 +20,10 @@ public class PairType extends Type {
           || this.fst.equals(((PairType) type).fst))
         && ((this.snd instanceof PairType && other.snd instanceof PairType)
           || this.snd.equals(((PairType) type).snd));
-    }
+  }
+
+  @Override
+  public String toString() {
+    return "PAIR(" + fst.toString() + "," + snd.toString() + ")";
+  }
 }
