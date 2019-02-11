@@ -473,7 +473,9 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
 
   @Override
   public Returnable visitPairElemRhs(PairElemRhsContext ctx) {
-    Expr expr = (Expr) visit(ctx.getChild(1));
+//    System.out.println(ctx.getText());
+//    System.out.println(ctx.pair_elem().getChild(0).getText());
+    Expr expr = (Expr) visit(ctx.pair_elem().getChild(1));
     if (!(expr.type() instanceof PairType)) {
       parser.notifyErrorListeners(
           "Semantic error at line: " + ctx.start.getLine() + " : type of argument is "
