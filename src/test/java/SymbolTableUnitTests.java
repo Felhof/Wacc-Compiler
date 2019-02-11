@@ -24,4 +24,6 @@ public class SymbolTableUnitTests {
     SymbolTable stChild = new SymbolTable(st);
     assertThat(stChild.lookUpAllVar("x"), is(notNullValue()));
   }
+
+
 }
