@@ -1,14 +1,13 @@
 package compiler.visitors.NodeElements.RHS;
 
 import compiler.visitors.NodeElements.Types.BasicType;
-import compiler.visitors.NodeElements.Types.Type.TYPE;
 
 public class StringExpr extends Expr {
 
   private final String value;
 
   public StringExpr(String value) {
-    super(new BasicType(TYPE.STRING));
+    super(new BasicType(BasicType.TYPE.STRING));
     this.value = value;
   }
 

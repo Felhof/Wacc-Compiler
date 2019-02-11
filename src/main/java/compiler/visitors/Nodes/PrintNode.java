@@ -10,4 +10,9 @@ public class PrintNode implements Node {
     this.newLine = newLine;
     this.expr = expr;
   }
+
+  @Override
+  public String toString() {
+    return "Print" + (newLine ? "ln " : " ") + expr.toString();
+  }
 }

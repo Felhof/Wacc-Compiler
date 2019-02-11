@@ -1,13 +1,12 @@
 package compiler.visitors.NodeElements.RHS;
 
 import compiler.visitors.NodeElements.Types.BasicType;
-import compiler.visitors.NodeElements.Types.Type.TYPE;
 
 public class BoolExpr extends Expr {
   private boolean value;
 
   public BoolExpr(String value) {
-    super(new BasicType(TYPE.BOOL));
+    super(new BasicType(BasicType.TYPE.BOOL));
     this.value = value.equals("true");
   }
 

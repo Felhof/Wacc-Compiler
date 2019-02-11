@@ -70,7 +70,6 @@ import compiler.visitors.NodeElements.RHS.CharExpr;
 import compiler.visitors.NodeElements.RHS.Expr;
 import compiler.visitors.NodeElements.RHS.IntExpr;
 import compiler.visitors.NodeElements.RHS.StringExpr;
-import compiler.visitors.NodeElements.Types.Type.TYPE;
 import compiler.visitors.Identifiers.Variable;
 import compiler.visitors.Nodes.WhileNode;
 
@@ -256,7 +255,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
       parser.notifyErrorListeners(
           "Semantic error at line: " + ctx.start.getLine() + " : variable "
               + varName + " is not defined in this scope");
-      variable = new Variable(new BasicType(TYPE.RECOVERY));
+      variable = new Variable(new BasicType(BasicType.TYPE.RECOVERY));
     }
     return new IdentExpr(variable.type());
   }
@@ -294,7 +293,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
 
   @Override
   public Returnable visitBaseType(BaseTypeContext ctx) {
-    return new BasicType(TYPE.get(ctx.getText()));
+    return new BasicType(BasicType.TYPE.get(ctx.getText()));
   }
 
   @Override
@@ -312,7 +311,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
 
   @Override
   public Returnable visitPairElemBaseType(PairElemBaseTypeContext ctx) {
-    return new BasicType(TYPE.get(ctx.getText()));
+    return new BasicType(BasicType.TYPE.get(ctx.getText()));
   }
 
   @Override
@@ -322,13 +321,13 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
 
   @Override
   public Returnable visitPairElemPairType(PairElemPairTypeContext ctx) {
-    return new PairType(new BasicType(TYPE.RECOVERY), new BasicType(TYPE.RECOVERY));
+    return new PairType(new BasicType(BasicType.TYPE.RECOVERY), new BasicType(BasicType.TYPE.RECOVERY));
   }
 
   @Override
   public Returnable visitExitStat(ExitStatContext ctx) {
     Expr expr = (Expr) visit(ctx.expr());
-    if (!expr.type().equals(new BasicType(TYPE.INT))) {
+    if (!expr.type().equals(new BasicType(BasicType.TYPE.INT))) {
       parser.notifyErrorListeners(
           "Semantic error at line: " + ctx.start.getLine() + " at character: " + ctx.expr().getStop().getCharPositionInLine() + ", exit statement requires: INT, found: " + expr.type().toString());
     }
@@ -387,7 +386,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
       parser.notifyErrorListeners(
           "Semantic error at line: " + ctx.start.getLine() + " : variable "
               + varName + " is not defined in this scope");
-      identifier = new Variable(new BasicType(TYPE.RECOVERY));
+      identifier = new Variable(new BasicType(BasicType.TYPE.RECOVERY));
     } else if (identifier instanceof Function) {
       parser.notifyErrorListeners("Semantic error at line: " + ctx.start.getLine() + "Cannot assign right hand side statement to a function");
       return new GenericLHS(new GenericType());
@@ -467,7 +466,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
   }
 
   private void checkBoolExpr(ExprContext ctx, Expr condition) {
-    if(!condition.type().equals(new BasicType(TYPE.BOOL))) {
+    if(!condition.type().equals(new BasicType(BasicType.TYPE.BOOL))) {
       parser.notifyErrorListeners(
           "Semantic error at line " + ctx.start.getLine()
               + ": Incompatible type at " + ctx.getText() + " (expected: "

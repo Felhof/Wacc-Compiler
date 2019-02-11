@@ -1,7 +1,6 @@
 package compiler.visitors.NodeElements.RHS;
 
 import compiler.visitors.NodeElements.Types.BasicType;
-import compiler.visitors.NodeElements.Types.Type.TYPE;
 import compiler.visitors.NodeElements.Types.Type;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -10,10 +9,10 @@ import java.util.Map;
 
 public class BinExpr extends Expr {
 
-  private final static Type intType = new BasicType(TYPE.INT);
-  private final static Type charType = new BasicType(TYPE.CHAR);
-  private final static Type boolType = new BasicType(TYPE.BOOL);
-  private final static Type stringType = new BasicType(TYPE.STRING);
+  private final static Type intType = new BasicType(BasicType.TYPE.INT);
+  private final static Type charType = new BasicType(BasicType.TYPE.CHAR);
+  private final static Type boolType = new BasicType(BasicType.TYPE.BOOL);
+  private final static Type stringType = new BasicType(BasicType.TYPE.STRING);
 
   private final static List<Type> typesInt = Arrays.asList(intType);
   private final static List<Type> typesIntChar =
@@ -50,6 +49,11 @@ public class BinExpr extends Expr {
 
   private boolean contains(List<Type> argTypes, Type type) {
     return argTypes.stream().filter(t -> t.equals(type)).toArray().length > 0;
+  }
+
+  @Override
+  public String toString() {
+    return "BinExpr(" + lhs.toString() + " " + operator.op().toString() + " " + rhs.toString() +")";
   }
 
   public enum BINOP {
