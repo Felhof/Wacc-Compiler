@@ -15,7 +15,13 @@ public class PairType extends Type {
     if (!(type instanceof PairType)) {
       return false;
     }
+
     PairType other = (PairType) type;
+    if (other.fst instanceof GenericType
+        && other.snd instanceof GenericType) {
+      return true;
+    }
+
     return ((this.fst instanceof PairType && other.fst instanceof PairType)
           || this.fst.equals(((PairType) type).fst))
         && ((this.snd instanceof PairType && other.snd instanceof PairType)

@@ -26,6 +26,7 @@ import antlr.BasicParser.PairElemBaseTypeContext;
 import antlr.BasicParser.PairElemLhsContext;
 import antlr.BasicParser.PairElemPairTypeContext;
 import antlr.BasicParser.PairElemRhsContext;
+import antlr.BasicParser.PairExpContext;
 import antlr.BasicParser.PairTypeContext;
 import antlr.BasicParser.Pair_elemContext;
 import antlr.BasicParser.ParamContext;
@@ -51,12 +52,14 @@ import compiler.visitors.NodeElements.RHS.AssignRHS;
 import compiler.visitors.NodeElements.RHS.FuncCall;
 import compiler.visitors.NodeElements.LHS.IdentLHS;
 import compiler.visitors.NodeElements.RHS.PairElemRHS;
+import compiler.visitors.NodeElements.RHS.PairExp;
 import compiler.visitors.NodeElements.Types.ArrType;
 import compiler.visitors.NodeElements.Types.BasicType;
 import compiler.visitors.NodeElements.RHS.IdentExprRHS;
 import compiler.visitors.NodeElements.RHS.Pair;
 import compiler.visitors.NodeElements.TypeList;
 import compiler.visitors.NodeElements.Types.BasicType.TYPE;
+import compiler.visitors.NodeElements.Types.GenericType;
 import compiler.visitors.NodeElements.Types.PairType;
 import compiler.visitors.NodeElements.Types.Type;
 import compiler.visitors.NodeElements.RHS.UnaryExpr;
@@ -323,7 +326,9 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
 
   @Override
   public Returnable visitPairElemBaseType(PairElemBaseTypeContext ctx) {
-    return new BasicType(BasicType.TYPE.get(ctx.getText()));
+    String s = ctx.getText();
+    TYPE t = BasicType.TYPE.get(s);
+    return new BasicType(t);
   }
 
   @Override
@@ -333,7 +338,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
 
   @Override
   public Returnable visitPairElemPairType(PairElemPairTypeContext ctx) {
-    return new PairType(new BasicType(BasicType.TYPE.RECOVERY), new BasicType(BasicType.TYPE.RECOVERY));
+    return new PairType(new BasicType(TYPE.RECOVERY), new BasicType(TYPE.RECOVERY));
   }
 
   @Override
@@ -487,6 +492,11 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
       return null;
     }
     return getPairElem(expr, ctx.pair_elem(), "rhs");
+  }
+
+  @Override
+  public Returnable visitPairExp(PairExpContext ctx) {
+    return new PairExp(new PairType(new GenericType(), new GenericType()));
   }
 
   public Returnable getPairElem(Expr expr, Pair_elemContext ctx, String side) {
