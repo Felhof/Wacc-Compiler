@@ -315,13 +315,12 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
           .notifyErrorListeners("Semantic error at line " + ctx.start.getLine()
               + ". Variable name is not declared in scope");
     }
-    else if (var.type() instanceof ArrType) {
+    else if (!(var.type() instanceof ArrType)) {
       parser
           .notifyErrorListeners("Semantic error at line " + ctx.start.getLine() + ":" + ctx.start.getCharPositionInLine()
-              + " Incompatible type at " + varName + " (expected: Any[], "
-              + ", actual: " + var.type().toString());
+              + " Incompatible type at " + varName + " (expected: Any[], actual: " + var.type().toString());
     }
-    else if (((ArrType) var.type()).dimension() == ctx.expr().size()) {
+    else if (((ArrType) var.type()).dimension() != ctx.expr().size()) {
       parser
           .notifyErrorListeners("Semantic error at line " + ctx.start.getLine() + ":" + ctx.start.getCharPositionInLine()
               + " Incompatible type at " + varName
@@ -330,8 +329,13 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
               + ArrType.bracketsString(ctx.expr().size()));
     }
     else {
-      return new ArrayElem(var.type(), varName,
-          (Expr[]) ctx.expr().stream().map(this::visit).toArray());
+      Expr[] indexes = new Expr[ctx.expr().size()];
+      for (int i = 0; i < ctx.expr().size(); i++) {
+        indexes[i] = (Expr) visit(ctx.expr(i));
+      }
+      return new ArrayElem(var.type(), varName, indexes);
+//      return new ArrayElem(var.type(), varName,
+//          (Expr[]) ctx.expr().stream().map(this::visit).toArray());
     }
     return null;
   }

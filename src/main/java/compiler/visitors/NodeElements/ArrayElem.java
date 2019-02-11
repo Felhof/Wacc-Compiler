@@ -3,7 +3,7 @@ package compiler.visitors.NodeElements;
 import compiler.visitors.NodeElements.RHS.Expr;
 import compiler.visitors.NodeElements.Types.Type;
 
-public class ArrayElem extends NodeElem {
+public class ArrayElem extends Expr {
 
   private String varName;
   private Expr[] indexes;
