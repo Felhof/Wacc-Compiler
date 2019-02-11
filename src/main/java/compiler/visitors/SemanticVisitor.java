@@ -29,6 +29,7 @@ import antlr.BasicParser.Pair_typeContext;
 import antlr.BasicParser.PrintStatContext;
 import antlr.BasicParser.PrintlnStatContext;
 import antlr.BasicParser.ProgContext;
+import antlr.BasicParser.ReadStatContext;
 import antlr.BasicParser.RecursiveStatContext;
 import antlr.BasicParser.ReturnStatContext;
 import antlr.BasicParser.StatContext;
@@ -50,6 +51,7 @@ import compiler.visitors.NodeElements.Types.BasicType;
 import compiler.visitors.NodeElements.RHS.IdentExpr;
 import compiler.visitors.NodeElements.RHS.Pair;
 import compiler.visitors.NodeElements.TypeList;
+import compiler.visitors.NodeElements.Types.BasicType.TYPE;
 import compiler.visitors.NodeElements.Types.GenericType;
 import compiler.visitors.NodeElements.Types.PairType;
 import compiler.visitors.NodeElements.Types.Type;
@@ -64,6 +66,8 @@ import compiler.visitors.NodeElements.RHS.Expr;
 import compiler.visitors.NodeElements.RHS.IntExpr;
 import compiler.visitors.NodeElements.RHS.StringExpr;
 import compiler.visitors.Identifiers.Variable;
+import compiler.visitors.Nodes.WhileNode;
+import compiler.visitors.Nodes.ReadNode;
 
 public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
 
@@ -137,6 +141,18 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
   @Override
   public Returnable visitPrintlnStat(PrintlnStatContext ctx) {
     currentASTNode.add(new PrintNode(true, (Expr) visit(ctx.expr())));
+    return null;
+  }
+
+  @Override
+  public Returnable visitReadStat(ReadStatContext ctx) {
+    AssignLHS lhs = (AssignLHS) visit(ctx.assign_lhs());
+    if (!isReadableType(lhs)) {
+      parser.notifyErrorListeners("Semantic error at line: "
+          + ctx.start.getLine() + ":" + ctx.assign_lhs().start.getCharPositionInLine()
+          + ": Incompatible type " + lhs.type().toString());
+    }
+    currentASTNode.add(new ReadNode(lhs));
     return null;
   }
 
@@ -513,6 +529,12 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
   private boolean isAssignSameType(Type varType, AssignRHS rhs) {
     return (rhs instanceof ArrayLiter && ((ArrayLiter) rhs).isEmpty())
         || varType.equals(rhs.type());
+  }
+
+  private boolean isReadableType(AssignLHS lhs) {
+    return lhs.type() instanceof BasicType &&
+        (((BasicType) lhs.type()).type().equals(TYPE.INT)
+            ||((BasicType) lhs.type()).type().equals(TYPE.INT));
   }
 
 }

@@ -1,1 +1,2 @@
 src/test/invalid/semanticErr/read/readTypeErr01.wacc
+src/test/invalid/semanticErr/read/readTypeErr02.wacc

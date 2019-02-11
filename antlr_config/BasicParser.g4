@@ -19,7 +19,7 @@ stat:
       SKP #todo
     | type IDENT ASS assign_rhs #varDeclarationStat
     | assign_lhs ASS assign_rhs #assignLhs
-    | READ assign_lhs #todo
+    | READ assign_lhs #readStat
     | FREE expr #freeStat
     | RETURN expr #returnStat
     | EXIT expr #exitStat

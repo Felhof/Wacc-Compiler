@@ -1,0 +1,23 @@
+#Semantic error at line: 17:6: Incompatible type BOOL
+#Semantic error at line: 18:6: Incompatible type STRING
+#Semantic error at line: 19:6: Incompatible type ArrType(INT)
+#Semantic error at line: 20:6: Incompatible type PAIR(INT,INT)
+
+# Output:
+# #semantic_error#
+
+# Exit:
+# 200
+
+# Program:
+
+begin
+  bool b = false ;
+  string s = "abc" ;
+  int[] a = [1,1];
+  pair(int, int) p = newpair(1,2);
+	read b ;
+	read s ;
+	read a ;
+	read p
+end
