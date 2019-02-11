@@ -11,10 +11,8 @@ public class SyntaxVisitor extends BasicParserBaseVisitor<Void>{
   }
 
 
-/*
   @Override
-  public Void visitExpr(BasicParser.ExprContext ctx) {
-
+  public Void visitIntExp(BasicParser.IntExpContext ctx) {
 
     String op = ctx.getParent().getChild(0).getText();
 
@@ -32,17 +30,17 @@ public class SyntaxVisitor extends BasicParserBaseVisitor<Void>{
     visitChildren(ctx);
 
     return null;
+
   }
-*/
+
 
   @Override
   public Void visitUnary_oper(BasicParser.Unary_operContext ctx){
 
     String operatorText = ctx.getText();
 
-    System.out.println("StartLine: " + ctx.start.getLine());
-    System.out.println("StopLine: " + ctx.stop.getLine());
-
+    //System.out.println("StartLine: " + ctx.start.getLine());
+    //System.out.println("StopLine: " + ctx.stop.getLine());
 
     BasicParser.ExprContext expr = (BasicParser.ExprContext) ctx.getParent().getChild(1);
 
@@ -50,12 +48,8 @@ public class SyntaxVisitor extends BasicParserBaseVisitor<Void>{
 
     char c = childText.charAt(0);
 
-    switch (operatorText){
-      case "+":
-        if(c == '"' || c == '\'' || c == '(' || c == ')'){
-          parser.notifyErrorListeners("Missmatched Input '" + c + "' expecting INTEGER");
-        }
-        break;
+    if (operatorText.equals("+") && (c == '"' || c == '\'' || c == '(' || c == ')')) {
+      parser.notifyErrorListeners("Missmatched Input '" + c + "' expecting INTEGER");
     }
 
     return null;
