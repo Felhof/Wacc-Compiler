@@ -46,6 +46,7 @@ import antlr.BasicParser.UnaryExpContext;
 import antlr.BasicParser.VarDeclarationStatContext;
 import antlr.BasicParser.WhileStatContext;
 import antlr.BasicParserBaseVisitor;
+import compiler.AST.Nodes.AST;
 import compiler.AST.Nodes.ASTNode;
 import compiler.AST.Nodes.ExitNode;
 import compiler.AST.Nodes.FreeNode;
@@ -98,12 +99,12 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
   }
 
   @Override
-  public ASTNode visitProg(ProgContext ctx) {
+  public Returnable visitProg(ProgContext ctx) {
     currentASTNode = new ASTNode();
     addFuncDefToST(ctx);
     ctx.func().forEach(this::visitFunc);
     visit(ctx.stat(0));
-    return currentASTNode;
+    return new AST(currentASTNode, currentST);
   }
 
   private void addFuncDefToST(ProgContext ctx) {
@@ -159,7 +160,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
   }
 
   @Override
-  public ASTNode visitRecursiveStat(RecursiveStatContext ctx) {
+  public Returnable visitRecursiveStat(RecursiveStatContext ctx) {
     visit(ctx.stat(0));
     visit(ctx.stat(1));
     return null;
@@ -218,7 +219,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
   }
 
   @Override
-  public ASTNode visitVarDeclarationStat(VarDeclarationStatContext ctx) {
+  public Returnable visitVarDeclarationStat(VarDeclarationStatContext ctx) {
     String varName = ctx.IDENT().getText();
 
     Type varType = (Type) visit(ctx.type());

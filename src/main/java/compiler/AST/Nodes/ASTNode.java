@@ -1,10 +1,9 @@
 package compiler.AST.Nodes;
 
-import compiler.visitors.Returnable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ASTNode implements Returnable, Node {
+public class ASTNode implements Node {
 
   private List<Node> children;
 
