@@ -1,8 +1,8 @@
 package compiler;
 
+import compiler.AST.Nodes.AST;
 import compiler.listeners.SemanticErrorListener;
 import compiler.listeners.SyntaxErrorListener;
-import compiler.visitors.Nodes.ASTNode;
 import compiler.visitors.ReturnFunctionVisitor;
 import compiler.visitors.SemanticVisitor;
 import java.io.IOException;
@@ -17,13 +17,14 @@ import org.antlr.v4.runtime.tree.ParseTree;
 public class Main {
 
   public static void main(String[] args) {
-    //ASTNode ast = compileProg(args[0]); // uncomment for labTS test
-    ASTNode ast = compileProg("src/test/valid/function/simple_functions/functionSimple.wacc");
+    //ParentNode ast = compileProg(args[0]); // uncomment for labTS test
+    AST ast = compileProg("src/test/valid/function/simple_functions"
+        + "/functionSimple.wacc");
     //System.out.println(ast.toString());
     System.exit(0);
   }
 
-  public static ASTNode compileProg(String filename) {
+  public static AST compileProg(String filename) {
     BasicLexer lexer = lexFile(filename);
     CommonTokenStream tokenStream = new CommonTokenStream(lexer);
     return parser(tokenStream);
@@ -39,7 +40,7 @@ public class Main {
     return new BasicLexer(input);
   }
 
-  public static ASTNode parser(CommonTokenStream stream) {
+  public static AST parser(CommonTokenStream stream) {
     BasicParser parser = new BasicParser(stream);
 
     parser.removeErrorListeners();
@@ -63,12 +64,12 @@ public class Main {
     //return null;
   }
 
-  public static ASTNode semanticCheck(BasicParser parser, ParseTree tree) {
+  public static AST semanticCheck(BasicParser parser, ParseTree tree) {
     parser.removeErrorListeners();
     SemanticErrorListener semanticErrorListener = new SemanticErrorListener();
     parser.addErrorListener(semanticErrorListener);
     SemanticVisitor semanticVisitor = new SemanticVisitor(parser);
-    ASTNode ast = (ASTNode) semanticVisitor.visit(tree);
+    AST ast = (AST) semanticVisitor.visit(tree);
     semanticErrorsExit(semanticErrorListener.getNbSemanticErrors());
     return ast;
   }
