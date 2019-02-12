@@ -43,6 +43,7 @@ import antlr.BasicParser.RecursiveStatContext;
 import antlr.BasicParser.ReturnStatContext;
 import antlr.BasicParser.StatContext;
 import antlr.BasicParser.StrExpContext;
+import antlr.BasicParser.StringTypeContext;
 import antlr.BasicParser.UnaryExpContext;
 import antlr.BasicParser.VarDeclarationStatContext;
 import antlr.BasicParser.WhileStatContext;
@@ -387,6 +388,11 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
     Type elemType = (Type) visit(ctx.type());
     return (elemType instanceof ArrType) ?
         ((ArrType) elemType).addDimension() : new ArrType(elemType);
+  }
+
+  @Override
+  public Returnable visitStringType(StringTypeContext ctx) {
+    return new ArrType(new BasicType(TYPE.CHAR));
   }
 
   @Override
