@@ -6,23 +6,26 @@ import compiler.visitors.Identifiers.Variable;
 import java.util.HashMap;
 
 public class SymbolTable {
+
   private boolean functionScope;
   private SymbolTable encSymTable;
-  private HashMap<String, Variable> dict;
+  private HashMap<String, Variable> varDict;
   private HashMap<String, Function> funcDict;
 
   public SymbolTable(SymbolTable encSymTable) {
     this.encSymTable = encSymTable;
-    dict = new HashMap<>();
+    varDict = new HashMap<>();
     funcDict = new HashMap<>();
     functionScope = false;
   }
 
   public void addVar(String name, Variable ident) {
-    dict.put(name, ident);
+    varDict.put(name, ident);
   }
 
-  public void addFunc(String name, Function func) {funcDict.put(name, func); }
+  public void addFunc(String name, Function func) {
+    funcDict.put(name, func);
+  }
 
   public Variable lookUpAllVar(String name) {
     return (Variable) genericLookUpAll(name, "var");
@@ -49,13 +52,8 @@ public class SymbolTable {
     return null;
   }
 
-
-  public Identifier lookUpScope(String name) {
-    return this.dict.get(name);
-  }
-
   public Variable lookUpVarScope(String name) {
-    return this.dict.get(name);
+    return this.varDict.get(name);
   }
 
   public Function lookUpFuncScope(String name) {
@@ -66,11 +64,11 @@ public class SymbolTable {
     return encSymTable;
   }
 
-  public void setFunctionScope(boolean functionScope) {
-    this.functionScope = functionScope;
+  public boolean isFunctionScope() {
+    return functionScope;
   }
 
-  public boolean functionScope() {
-    return functionScope;
+  public void setFunctionScope(boolean functionScope) {
+    this.functionScope = functionScope;
   }
 }

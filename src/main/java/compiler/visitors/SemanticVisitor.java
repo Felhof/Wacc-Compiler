@@ -75,6 +75,7 @@ import compiler.visitors.NodeElements.RHS.StringExpr;
 import compiler.visitors.Identifiers.Variable;
 import compiler.visitors.Nodes.WhileNode;
 import compiler.visitors.Nodes.ReadNode;
+import java.util.List;
 
 public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
 
@@ -111,7 +112,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
       if (param_listContext != null) {
         params = (ListExpr) visit(ctx.func(i).param_list());
       }
-      currentST.addFunc(funcName, new Function(params, type));
+      currentST.addFunc(funcName, new Function(params.getExprTypes(), type));
     }
   }
 
@@ -444,7 +445,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
     Expr expr = (Expr) visit(ctx.expr());
     Type exprType = expr.type();
 
-    if (!currentST.functionScope()) {
+    if (!currentST.isFunctionScope()) {
       parser.notifyErrorListeners(
           "Semantic error at line: " + ctx.start.getLine() + ", character:"
               + ctx.expr().getStart().getCharPositionInLine()
@@ -510,12 +511,12 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
       if (ctx.arg_list() != null) {
         args = (ListExpr) visit(ctx.arg_list());
       }
-      ListExpr params = function.getParamList();
-      if (!args.hasSameTypes(params)) {
+      List<Type> paramsTypes = function.getParamTypes();
+      if (!ListExpr.hasSameTypes(args.getExprTypes(),paramsTypes)) {
         parser.notifyErrorListeners(
             "Semantic error at line: " + ctx.start.getLine() + " : function "
                 + funcName + " has conflicting parameters and arguments, "
-                + "expected: " + params.toString() + ", " + "actual: " + args
+                + "expected: " + paramsTypes.toString() + ", " + "actual: " + args
                 .toString());
       }
       return new FuncCall(funcName, args, function.getType());
@@ -609,14 +610,13 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
       paramList = (ListExpr) visit(paramListContext);
     }
 
-    currentST.addFunc(funcName, new Function(paramList, funcReturnType));
     visit(stat);
     ScopeData sd = exitScope(ASTNode);
     return new ScopeData(sd.astNode(), sd.symbolTable(), paramList);
   }
 
   private ASTNode enterScope() {
-    boolean inFuncScope = currentST.functionScope();
+    boolean inFuncScope = currentST.isFunctionScope();
     currentST = new SymbolTable(currentST);
     currentST.setFunctionScope(inFuncScope);
     ASTNode parentASTNode = currentASTNode;

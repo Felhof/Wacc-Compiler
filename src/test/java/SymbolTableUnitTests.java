@@ -15,7 +15,7 @@ public class SymbolTableUnitTests {
   @Test
   public void canLookUpInCurrentSymbolTable() {
     st.addVar("x", var);
-    assertThat(st.lookUpScope("x"), is(notNullValue()));
+    assertThat(st.lookUpVarScope("x"), is(notNullValue()));
   }
 
   @Test
