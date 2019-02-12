@@ -43,6 +43,7 @@ import antlr.BasicParser.RecursiveStatContext;
 import antlr.BasicParser.ReturnStatContext;
 import antlr.BasicParser.StatContext;
 import antlr.BasicParser.StrExpContext;
+import antlr.BasicParser.StringTypeContext;
 import antlr.BasicParser.UnaryExpContext;
 import antlr.BasicParser.VarDeclarationStatContext;
 import antlr.BasicParser.WhileStatContext;
@@ -336,7 +337,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
       for (int i = 0; i < ctx.expr().size(); i++) {
         indexes[i] = (Expr) visit(ctx.expr(i));
       }
-      return new ArrayElem(var.type(), varName, indexes);
+      return new ArrayElem(((ArrType) var.type()).elemType(), varName, indexes);
 //      return new ArrayElem(var.type(), varName,
 //          (Expr[]) ctx.expr().stream().map(this::visit).toArray());
     }
@@ -384,6 +385,11 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
     Type elemType = (Type) visit(ctx.type());
     return (elemType instanceof ArrType) ?
         ((ArrType) elemType).addDimension() : new ArrType(elemType);
+  }
+
+  @Override
+  public Returnable visitStringType(StringTypeContext ctx) {
+    return new ArrType(new BasicType(TYPE.CHAR));
   }
 
   @Override

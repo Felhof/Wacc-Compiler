@@ -34,7 +34,7 @@ public class BasicType extends Type {
   }
 
   public enum TYPE {
-    BOOL("bool"), INT("int"), CHAR("char"), STRING("string");
+    BOOL("bool"), INT("int"), CHAR("char");
 
     private String value;
     private static Map<String, TYPE> map;
