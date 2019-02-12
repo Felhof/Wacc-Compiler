@@ -1,7 +1,7 @@
-import compiler.visitors.NodeElements.Types.BasicType;
-import compiler.visitors.NodeElements.Types.BasicType.TYPE;
-import compiler.visitors.NodeElements.Types.Type;
-import compiler.visitors.SymbolTable;
+import compiler.AST.Types.BasicType;
+import compiler.AST.Types.BasicType.TYPE;
+import compiler.AST.Types.Type;
+import compiler.AST.SymbolTable.SymbolTable;
 import org.junit.Test;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;

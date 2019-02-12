@@ -2,7 +2,7 @@ package compiler;
 
 import compiler.listeners.SemanticErrorListener;
 import compiler.listeners.SyntaxErrorListener;
-import compiler.visitors.Nodes.ASTNode;
+import compiler.AST.Nodes.ASTNode;
 import compiler.visitors.ReturnFunctionVisitor;
 import compiler.visitors.SemanticVisitor;
 import java.io.IOException;
