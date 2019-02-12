@@ -234,7 +234,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
               + ". Variable name is already declared in scope");
     } else {
       currentST.addVar(varName, new Variable(varType));
-      currentASTNode.add(new VarDeclareNode(varName, rhs));
+      currentASTNode.add(new VarDeclareNode(varType, varName, rhs));
     }
     return null;
   }
@@ -316,6 +316,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
   @Override
   public Returnable visitArray_elem(Array_elemContext ctx) {
     String varName = ctx.IDENT().getText();
+    int dimensionAccessed = ctx.expr().size();
 
     Variable var = currentST.lookUpAllVar(varName);
     if (var == null) {
@@ -328,20 +329,21 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
           .notifyErrorListeners("Semantic error at line " + ctx.start.getLine() + ":" + ctx.start.getCharPositionInLine()
               + " Incompatible type at " + varName + " (expected: Any[], actual: " + var.type().toString());
     }
-    else if (((ArrType) var.type()).dimension() != ctx.expr().size()) {
+    else if (((ArrType) var.type()).dimension() < dimensionAccessed) {
       parser
           .notifyErrorListeners("Semantic error at line " + ctx.start.getLine() + ":" + ctx.start.getCharPositionInLine()
               + " Incompatible type at " + varName
               + " (expected: " + var.type().toString()
               + ", actual: " + ((ArrType) var.type()).elemType()
-              + ArrType.bracketsString(ctx.expr().size()));
+              + ArrType.bracketsString(dimensionAccessed));
     }
     else {
-      Expr[] indexes = new Expr[ctx.expr().size()];
-      for (int i = 0; i < ctx.expr().size(); i++) {
+      Expr[] indexes = new Expr[dimensionAccessed];
+      for (int i = 0; i < dimensionAccessed; i++) {
         indexes[i] = (Expr) visit(ctx.expr(i));
       }
-      return new ArrayElem(((ArrType) var.type()).elemType(), varName, indexes);
+      return new ArrayElem(((ArrType) var.type()).getArrayElem(dimensionAccessed), varName,
+          indexes);
 //      return new ArrayElem(var.type(), varName,
 //          (Expr[]) ctx.expr().stream().map(this::visit).toArray());
     }
