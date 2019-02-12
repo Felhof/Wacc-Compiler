@@ -283,6 +283,12 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
         expr);
     String errorMessage = unaryExpr.isTypeCompatible();
     if (errorMessage != null) {
+      /*if(ctx.unary_oper().PLUS() != null){
+        parser.notifyErrorListeners("Syntactic error at line: "
+          + ctx.start.getLine() + ":" + ctx.expr().start.getCharPositionInLine()
+          + "-- missmatched input '" + ctx.expr().getText().charAt(0) + "' expecting INTEGER");
+      }*/
+
       parser.notifyErrorListeners("Semantic error at line: "
           + ctx.start.getLine() + ":" + ctx.expr().start.getCharPositionInLine()
           + ": Incompatible type at " + ctx.expr().getText() + errorMessage);
