@@ -7,7 +7,7 @@ import compiler.visitors.ReturnFunctionVisitor;
 import compiler.visitors.SemanticVisitor;
 import java.io.IOException;
 import antlr.*;
-import compiler.visitors.SyntaxVisitor;
+import compiler.visitors.FormatVisitor;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -17,7 +17,7 @@ public class Main {
 
   public static void main(String[] args) {
     //ASTNode ast = compileProg(args[0]); // uncomment for labTS test
-    ASTNode ast = compileProg("src/test/valid/runtimeErr/integerOverflow/intnegateOverflow.wacc");
+    ASTNode ast = compileProg("src/test/invalid/syntaxErr/expressions/printlnConcat.wacc");
     System.out.println(ast.toString());
     System.exit(0);
   }
@@ -50,7 +50,7 @@ public class Main {
 
     ReturnFunctionVisitor returnFunctionVisitor = new ReturnFunctionVisitor(parser);
     returnFunctionVisitor.visit(tree);
-    SyntaxVisitor syntaxVisitor = new SyntaxVisitor(parser);
+    FormatVisitor syntaxVisitor = new FormatVisitor(parser);
     syntaxVisitor.visit(tree);
     syntaxErrorsExit(syntaxErrorListener.getNbSyntaxErrors());
 

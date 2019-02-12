@@ -14,12 +14,12 @@ import antlr.BasicParser.BinaryExpContext;
 
 
 
-public class SyntaxVisitor extends BasicParserBaseVisitor<Boolean>{
+public class FormatVisitor extends BasicParserBaseVisitor<Boolean>{
 
   private BasicParser parser;
-  private boolean unaryExpr = false;
+  private boolean negativeExpr = false;
 
-  public SyntaxVisitor(BasicParser parser) {
+  public FormatVisitor(BasicParser parser) {
     this.parser = parser;
   }
 
@@ -31,53 +31,53 @@ public class SyntaxVisitor extends BasicParserBaseVisitor<Boolean>{
 
      boolean validInteger = CheckInteger(value);
 
-     if(!unaryExpr && !validInteger){
+     if(!negativeExpr && !validInteger){
        parser.notifyErrorListeners("Integer value " + value + " on line " + ctx.start.getLine() + " is badly " +
                "formatted (either it has a badly defined sign or it is too large for a 32-bit signed integer)");
      }
 
-     unaryExpr = false;
+     negativeExpr = false;
      return validInteger;
 
   }
 
   @Override
   public Boolean visitBoolExp(BoolExpContext ctx){
-    unaryExpr = false;
+    negativeExpr = false;
 
     return true;
   }
 
   @Override
   public Boolean visitCharExp(CharExpContext ctx){
-    unaryExpr = false;
+    negativeExpr = false;
 
     return true;
   }
 
   @Override
   public Boolean visitStrExp(StrExpContext ctx){
-    unaryExpr = false;
+    negativeExpr = false;
 
     return true;
   }
 
   @Override
   public Boolean visitIdentExp(IdentExpContext ctx){
-    unaryExpr = false;
+    negativeExpr = false;
 
     return true;
   }
   @Override
   public Boolean visitArrayExp(ArrayExpContext ctx){
-    unaryExpr = false;
+    negativeExpr = false;
 
     return true;
   }
 
   @Override
   public Boolean visitBracketExp(BracketExpContext ctx){
-    unaryExpr = false;
+    negativeExpr = false;
 
     return true;
   }
@@ -85,25 +85,25 @@ public class SyntaxVisitor extends BasicParserBaseVisitor<Boolean>{
 
   @Override
   public Boolean visitPairExp(PairExpContext ctx){
-    unaryExpr = false;
+    negativeExpr = false;
 
     return true;
   }
 
   @Override
   public Boolean visitBinaryExp(BinaryExpContext ctx){
-    unaryExpr = false;
+    negativeExpr = false;
 
     return true;
   }
 
 
-
-
-
   @Override
   public Boolean visitUnaryExp(UnaryExpContext ctx){
-    unaryExpr = true;
+
+    if(ctx.unary_oper().MINUS() != null) {
+      negativeExpr = true;
+    }
 
     boolean validPositive = visit(ctx.expr());
 
