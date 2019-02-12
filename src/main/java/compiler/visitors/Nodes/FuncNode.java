@@ -1,7 +1,6 @@
 package compiler.visitors.Nodes;
 
 import compiler.visitors.NodeElements.ListExpr;
-import compiler.visitors.NodeElements.TypeList;
 import compiler.visitors.NodeElements.Types.Type;
 import compiler.visitors.SymbolTable;
 
