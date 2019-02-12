@@ -17,7 +17,7 @@ public class Main {
 
   public static void main(String[] args) {
     //ASTNode ast = compileProg(args[0]); // uncomment for labTS test
-    ASTNode ast = compileProg("src/test/valid/while/min.wacc");
+    ASTNode ast = compileProg("src/test/valid/runtimeErr/integerOverflow/intnegateOverflow.wacc");
     System.out.println(ast.toString());
     System.exit(0);
   }

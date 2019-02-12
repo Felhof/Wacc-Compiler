@@ -1,10 +1,23 @@
-package compiler.visitors;import antlr.*;
-import org.antlr.v4.runtime.CommonToken;
-import org.antlr.v4.runtime.tree.ParseTree;
+package compiler.visitors;
 
-public class SyntaxVisitor extends BasicParserBaseVisitor<Void>{
+import antlr.*;
+import antlr.BasicParser.UnaryExpContext;
+import antlr.BasicParser.IntExpContext;
+import antlr.BasicParser.BoolExpContext;
+import antlr.BasicParser.CharExpContext;
+import antlr.BasicParser.StrExpContext;
+import antlr.BasicParser.PairExpContext;
+import antlr.BasicParser.IdentExpContext;
+import antlr.BasicParser.ArrayExpContext;
+import antlr.BasicParser.BracketExpContext;
+import antlr.BasicParser.BinaryExpContext;
+
+
+
+public class SyntaxVisitor extends BasicParserBaseVisitor<Boolean>{
 
   private BasicParser parser;
+  private boolean unaryExpr = false;
 
   public SyntaxVisitor(BasicParser parser) {
     this.parser = parser;
@@ -12,57 +25,113 @@ public class SyntaxVisitor extends BasicParserBaseVisitor<Void>{
 
 
   @Override
-  public Void visitIntExp(BasicParser.IntExpContext ctx) {
+  public Boolean visitIntExp(IntExpContext ctx) {
 
-    String op = ctx.getParent().getChild(0).getText();
+    String value = ctx.INTEGER().getText();
 
-    String value = ctx.getText();
+     boolean validInteger = CheckInteger(value);
 
-    if(op.equals("-")){
-      value = "-" + value;
-    }
+     if(!unaryExpr && !validInteger){
+       parser.notifyErrorListeners("Integer value " + value + " on line " + ctx.start.getLine() + " is badly " +
+               "formatted (either it has a badly defined sign or it is too large for a 32-bit signed integer)");
+     }
 
-    if(ctx.INTEGER() != null){
+     unaryExpr = false;
+     return validInteger;
 
-      CheckInteger(value);
-    }
+  }
 
-    visitChildren(ctx);
+  @Override
+  public Boolean visitBoolExp(BoolExpContext ctx){
+    unaryExpr = false;
 
-    return null;
+    return true;
+  }
 
+  @Override
+  public Boolean visitCharExp(CharExpContext ctx){
+    unaryExpr = false;
+
+    return true;
+  }
+
+  @Override
+  public Boolean visitStrExp(StrExpContext ctx){
+    unaryExpr = false;
+
+    return true;
+  }
+
+  @Override
+  public Boolean visitIdentExp(IdentExpContext ctx){
+    unaryExpr = false;
+
+    return true;
+  }
+  @Override
+  public Boolean visitArrayExp(ArrayExpContext ctx){
+    unaryExpr = false;
+
+    return true;
+  }
+
+  @Override
+  public Boolean visitBracketExp(BracketExpContext ctx){
+    unaryExpr = false;
+
+    return true;
   }
 
 
   @Override
-  public Void visitUnary_oper(BasicParser.Unary_operContext ctx){
+  public Boolean visitPairExp(PairExpContext ctx){
+    unaryExpr = false;
 
-    String operatorText = ctx.getText();
+    return true;
+  }
 
-    //System.out.println("StartLine: " + ctx.start.getLine());
-    //System.out.println("StopLine: " + ctx.stop.getLine());
+  @Override
+  public Boolean visitBinaryExp(BinaryExpContext ctx){
+    unaryExpr = false;
 
-    BasicParser.ExprContext expr = (BasicParser.ExprContext) ctx.getParent().getChild(1);
-
-    String childText = expr.getText();
-
-    char c = childText.charAt(0);
-
-    if (operatorText.equals("+") && (c == '"' || c == '\'' || c == '(' || c == ')')) {
-      parser.notifyErrorListeners("Missmatched Input '" + c + "' expecting INTEGER");
-    }
-
-    return null;
+    return true;
   }
 
 
-  public void CheckInteger(String value){
+
+
+
+  @Override
+  public Boolean visitUnaryExp(UnaryExpContext ctx){
+    unaryExpr = true;
+
+    boolean validPositive = visit(ctx.expr());
+
+
+    if(!validPositive){
+      String value = "-" + ctx.expr().getText();
+      boolean validNegative = CheckInteger(value);
+
+      if(!validNegative){
+        parser.notifyErrorListeners("Integer value " + value + " on line " + ctx.start.getLine() + " is badly " +
+                "formatted (either it has a badly defined sign or it is too large for a 32-bit signed integer)");
+      }
+    }
+
+    return true;
+  }
+
+
+
+  public boolean CheckInteger(String value){
 
     try {
       Integer.parseInt(value);
     } catch (NumberFormatException e) {
-      parser.notifyErrorListeners("Badly formated Integer");
+      return false;
     }
+
+    return true;
 
   }
 }
