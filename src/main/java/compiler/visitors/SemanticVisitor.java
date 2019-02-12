@@ -48,16 +48,15 @@ import antlr.BasicParser.WhileStatContext;
 import antlr.BasicParserBaseVisitor;
 import compiler.visitors.Identifiers.Function;
 import compiler.visitors.NodeElements.ArrayElem;
+import compiler.visitors.NodeElements.Ident;
 import compiler.visitors.NodeElements.ListExpr;
 import compiler.visitors.NodeElements.RHS.ArrayLiter;
 import compiler.visitors.NodeElements.NodeElem;
 import compiler.visitors.NodeElements.RHS.FuncCall;
-import compiler.visitors.NodeElements.LHS.IdentLHS;
 import compiler.visitors.NodeElements.PairElem;
 import compiler.visitors.NodeElements.RHS.PairExp;
 import compiler.visitors.NodeElements.Types.ArrType;
 import compiler.visitors.NodeElements.Types.BasicType;
-import compiler.visitors.NodeElements.RHS.IdentExprRHS;
 import compiler.visitors.NodeElements.RHS.Pair;
 import compiler.visitors.NodeElements.Types.BasicType.TYPE;
 import compiler.visitors.NodeElements.Types.GenericType;
@@ -135,7 +134,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
     ListExpr paramList = new ListExpr();
     String txt = ctx.param(0).getText();
     System.out.println(txt);
-    ctx.param().forEach(p -> paramList.add(new IdentExprRHS(p.IDENT().getText(), (Type) visit(p))));
+    ctx.param().forEach(p -> paramList.add(new Ident(p.IDENT().getText(), (Type) visit(p))));
     return paramList;
   }
 
@@ -303,7 +302,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
               + varName + " is not defined in this scope");
       variable = new Variable(new GenericType());
     }
-    return new IdentExprRHS(varName, variable.type());
+    return new Ident(varName, variable.type());
   }
 
   @Override
@@ -493,7 +492,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
               + varName + " is not defined in this scope");
       variable = new Variable(new GenericType());
     }
-    return new IdentLHS(variable.type());
+    return new Ident(varName, variable.type());
   }
 
   @Override
