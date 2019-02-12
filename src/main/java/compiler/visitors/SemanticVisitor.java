@@ -100,7 +100,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
     return currentASTNode;
   }
 
-  public void addFuncDefToST(ProgContext ctx) {
+  private void addFuncDefToST(ProgContext ctx) {
     for (int i = 0; i < ctx.func().size(); i++) {
       String funcName = ctx.func(i).IDENT().toString();
       if (currentST.lookUpAllFunc(funcName) != null) {
@@ -115,7 +115,6 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
       if (param_listContext != null) {
         params = (TypeList) visit(ctx.func(i).param_list());
       }
-      currentST.setDict(new HashMap<>());
       currentST.addFunc(funcName, new Function(params, type));
     }
   }
@@ -146,7 +145,10 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
   @Override
   public Returnable visitParam(ParamContext ctx) {
     Type paramType = (Type) visit(ctx.type());
-    currentST.addVar(ctx.IDENT().getText(), new Variable(paramType));
+    if (currentST.getEncSymTable() != null) {
+      // don't add parameters to main symbol table
+      currentST.addVar(ctx.IDENT().getText(), new Variable(paramType));
+    }
     return paramType;
   }
 
@@ -206,7 +208,6 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
 
     currentASTNode
         .add(new WhileNode(condition, stat.astNode(), stat.symbolTable()));
-
     return null;
   }
 
@@ -437,7 +438,9 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
   @Override
   public Returnable visitReturnStat(ReturnStatContext ctx) {
     Expr expr = (Expr) visit(ctx.expr());
-    if (!currentST.isInFunctionScope()) {
+    Type exprType = expr.type();
+
+    if (!currentST.functionScope()) {
       parser.notifyErrorListeners(
           "Semantic error at line: " + ctx.start.getLine() + ", character:"
               + ctx.expr().getStart().getCharPositionInLine()
@@ -446,7 +449,6 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
     }
 
     Type funcDefinitionReturn = (currentST.lookUpAllVar("return")).type();
-    Type exprType = expr.type();
 
     if (!funcDefinitionReturn.equals(exprType)) {
       parser.notifyErrorListeners(
@@ -491,23 +493,19 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
 
   @Override
   public Returnable visitFuncCall(FuncCallContext ctx) {
-    //return super.visitFuncCall(ctx);
     String funcName = ctx.IDENT().getText();
     Function function = currentST.lookUpAllFunc(funcName);
+    TypeList args = new TypeList();
 
     if (function == null) {
       parser.notifyErrorListeners(
           "Semantic error at line: " + ctx.start.getLine() + " : function "
               + funcName + " is not defined in this scope");
-      // variable = new Variable(new BasicType(TYPE.RECOVERY));
-      return null;
+      return new FuncCall(funcName, args, new GenericType());
     } else {
-
-      TypeList args = new TypeList();
       if (ctx.arg_list() != null) {
         args = (TypeList) visit(ctx.arg_list());
       }
-
       TypeList params = function.getParamList();
       if (!args.equals(params)) {
         parser.notifyErrorListeners(
@@ -557,8 +555,8 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
   }
 
   @Override
-  public Returnable visitPairElemLhs(PairElemLhsContext ctx) {
-    Expr expr = (Expr) visit(ctx.pair_elem().expr());
+  public Returnable visitPair_elem(Pair_elemContext ctx) {
+    Expr expr = (Expr) visit(ctx.expr());
     if (!(expr.type() instanceof PairType)) {
       parser.notifyErrorListeners(
           "Semantic error at line: " + ctx.start.getLine()
@@ -566,20 +564,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
               + expr.type().toString() + ", should be pair");
       return null;
     }
-    return getPairElem(expr, ctx.pair_elem());
-  }
-
-  @Override
-  public Returnable visitPairElemRhs(PairElemRhsContext ctx) {
-    Expr expr = (Expr) visit(ctx.pair_elem().expr());
-    if (!(expr.type() instanceof PairType)) {
-      parser.notifyErrorListeners(
-          "Semantic error at line: " + ctx.start.getLine()
-              + " : type of argument is "
-              + expr.type().toString() + ", should be pair");
-      return null;
-    }
-    return getPairElem(expr, ctx.pair_elem());
+    return getPairElem(expr, ctx);
   }
 
   @Override
@@ -587,7 +572,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
     return new PairExp(new PairType(new GenericType(), new GenericType()));
   }
 
-  public Returnable getPairElem(Expr expr, Pair_elemContext ctx) {
+  private Returnable getPairElem(Expr expr, Pair_elemContext ctx) {
     Type type;
     int pos;
     if (ctx.SND() == null) {
@@ -600,13 +585,13 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
     return new PairElem(type, pos);
   }
 
-  public ScopeData visitStatInNewScope(StatContext stat) {
+  private ScopeData visitStatInNewScope(StatContext stat) {
     ASTNode ASTNode = enterScope();
     visit(stat);
     return exitScope(ASTNode);
   }
 
-  public ScopeData visitFuncStatInNewScope(String funcName,
+  private ScopeData visitFuncStatInNewScope(String funcName,
       StatContext stat,
       Param_listContext paramListContext,
       Type funcReturnType) {
@@ -627,7 +612,9 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
   }
 
   private ASTNode enterScope() {
+    boolean inFuncScope = currentST.functionScope();
     currentST = new SymbolTable(currentST);
+    currentST.setFunctionScope(inFuncScope);
     ASTNode parentASTNode = currentASTNode;
     currentASTNode = new ASTNode();
     return parentASTNode;
