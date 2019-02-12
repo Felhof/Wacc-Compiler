@@ -16,7 +16,7 @@ param:
       type IDENT ;
 
 stat:
-      SKP #todo
+      SKP #skipStat
     | type IDENT ASS assign_rhs #varDeclarationStat
     | assign_lhs ASS assign_rhs #assignStat
     | READ assign_lhs #readStat
