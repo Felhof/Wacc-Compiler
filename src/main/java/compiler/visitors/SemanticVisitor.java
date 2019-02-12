@@ -483,23 +483,19 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
 
   @Override
   public Returnable visitFuncCall(FuncCallContext ctx) {
-    //return super.visitFuncCall(ctx);
     String funcName = ctx.IDENT().getText();
     Function function = currentST.lookUpAllFunc(funcName);
+    TypeList args = new TypeList();
 
     if (function == null) {
       parser.notifyErrorListeners(
           "Semantic error at line: " + ctx.start.getLine() + " : function "
               + funcName + " is not defined in this scope");
-      // variable = new Variable(new BasicType(TYPE.RECOVERY));
-      return null;
+      return new FuncCall(funcName, args, new GenericType());
     } else {
-
-      TypeList args = new TypeList();
       if (ctx.arg_list() != null) {
         args = (TypeList) visit(ctx.arg_list());
       }
-
       TypeList params = function.getParamList();
       if (!args.equals(params)) {
         parser.notifyErrorListeners(
@@ -549,8 +545,8 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
   }
 
   @Override
-  public Returnable visitPairElemLhs(PairElemLhsContext ctx) {
-    Expr expr = (Expr) visit(ctx.pair_elem().expr());
+  public Returnable visitPair_elem(Pair_elemContext ctx) {
+    Expr expr = (Expr) visit(ctx.expr());
     if (!(expr.type() instanceof PairType)) {
       parser.notifyErrorListeners(
           "Semantic error at line: " + ctx.start.getLine()
@@ -558,20 +554,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
               + expr.type().toString() + ", should be pair");
       return null;
     }
-    return getPairElem(expr, ctx.pair_elem());
-  }
-
-  @Override
-  public Returnable visitPairElemRhs(PairElemRhsContext ctx) {
-    Expr expr = (Expr) visit(ctx.pair_elem().expr());
-    if (!(expr.type() instanceof PairType)) {
-      parser.notifyErrorListeners(
-          "Semantic error at line: " + ctx.start.getLine()
-              + " : type of argument is "
-              + expr.type().toString() + ", should be pair");
-      return null;
-    }
-    return getPairElem(expr, ctx.pair_elem());
+    return getPairElem(expr, ctx);
   }
 
   @Override
