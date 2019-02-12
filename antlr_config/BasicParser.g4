@@ -77,7 +77,7 @@ expr:
     | IDENT #identExp
     | array_elem #arrayExp
     | unary_oper expr #unaryExp
- //   | expr binary_oper expr #binaryExp
+    | OPEN expr CLOSE  #bracketExp
     | expr MUL expr #binaryExp
     | expr DIV expr #binaryExp
     | expr MOD expr #binaryExp
@@ -90,8 +90,7 @@ expr:
     | expr EQUAL expr #binaryExp
     | expr NOTEQUAL expr #binaryExp
     | expr AND expr #binaryExp
-    | expr OR expr #binaryExp
-    | OPEN expr CLOSE  #bracketExp ;
+    | expr OR expr #binaryExp;
 
 
 
