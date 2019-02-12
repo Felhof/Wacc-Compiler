@@ -4,8 +4,16 @@ import compiler.visitors.NodeElements.Types.Type;
 
 public class IdentExprRHS extends Expr {
 
-  public IdentExprRHS(Type type) {
+  private String varName;
+
+  public IdentExprRHS(String varName, Type type) {
     super(type);
+    this.varName = varName;
   }
 
+  @Override
+  public String toString() {
+    return "IdentExprRHS: " +
+         varName;
+  }
 }
