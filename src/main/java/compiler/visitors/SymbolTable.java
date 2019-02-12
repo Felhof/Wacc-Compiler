@@ -1,16 +1,15 @@
 package compiler.visitors;
 
-import compiler.visitors.Identifiers.Function;
-import compiler.visitors.Identifiers.Identifier;
-import compiler.visitors.Identifiers.Variable;
+import compiler.visitors.Identifiers.FuncTypes;
+import compiler.visitors.NodeElements.Types.Type;
 import java.util.HashMap;
 
 public class SymbolTable {
 
   private boolean functionScope;
   private SymbolTable encSymTable;
-  private HashMap<String, Variable> varDict;
-  private HashMap<String, Function> funcDict;
+  private HashMap<String, Type> varDict;
+  private HashMap<String, FuncTypes> funcDict;
 
   public SymbolTable(SymbolTable encSymTable) {
     this.encSymTable = encSymTable;
@@ -19,26 +18,26 @@ public class SymbolTable {
     functionScope = false;
   }
 
-  public void addVar(String name, Variable ident) {
+  public void addVar(String name, Type ident) {
     varDict.put(name, ident);
   }
 
-  public void addFunc(String name, Function func) {
+  public void addFunc(String name, FuncTypes func) {
     funcDict.put(name, func);
   }
 
-  public Variable lookUpAllVar(String name) {
-    return (Variable) genericLookUpAll(name, "var");
+  public Type lookUpAllVar(String name) {
+    return (Type) genericLookUpAll(name, "var");
   }
 
-  public Function lookUpAllFunc(String name) {
-    return (Function) genericLookUpAll(name, "func");
+  public FuncTypes lookUpAllFunc(String name) {
+    return (FuncTypes) genericLookUpAll(name, "func");
   }
 
-  public Identifier genericLookUpAll(String name, String type) {
+  public Returnable genericLookUpAll(String name, String type) {
     SymbolTable currST = this;
     while (currST != null) {
-      Identifier identifier;
+      Returnable identifier;
       if (type.equals("var")) {
         identifier = currST.lookUpVarScope(name);
       } else {
@@ -52,11 +51,11 @@ public class SymbolTable {
     return null;
   }
 
-  public Variable lookUpVarScope(String name) {
+  public Type lookUpVarScope(String name) {
     return this.varDict.get(name);
   }
 
-  public Function lookUpFuncScope(String name) {
+  public FuncTypes lookUpFuncScope(String name) {
     return this.funcDict.get(name);
   }
 

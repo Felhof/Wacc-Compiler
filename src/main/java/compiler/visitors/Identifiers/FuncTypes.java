@@ -4,11 +4,11 @@ import compiler.visitors.NodeElements.Types.Type;
 import compiler.visitors.Returnable;
 import java.util.List;
 
-public class Function implements Identifier, Returnable {
+public class FuncTypes implements Returnable {
   private List<Type> paramTypeList;
   private Type returnType;
 
-  public Function(List<Type> paramTypeList,
+  public FuncTypes(List<Type> paramTypeList,
       Type returnType) {
     this.paramTypeList = paramTypeList;
     this.returnType = returnType;
@@ -18,7 +18,7 @@ public class Function implements Identifier, Returnable {
     return paramTypeList;
   }
 
-  public Type getType() {
+  public Type getReturnType() {
     return returnType;
   }
 }

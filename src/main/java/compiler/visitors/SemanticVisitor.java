@@ -46,7 +46,7 @@ import antlr.BasicParser.UnaryExpContext;
 import antlr.BasicParser.VarDeclarationStatContext;
 import antlr.BasicParser.WhileStatContext;
 import antlr.BasicParserBaseVisitor;
-import compiler.visitors.Identifiers.Function;
+import compiler.visitors.Identifiers.FuncTypes;
 import compiler.visitors.NodeElements.ArrayElem;
 import compiler.visitors.NodeElements.Ident;
 import compiler.visitors.NodeElements.ListExpr;
@@ -72,7 +72,6 @@ import compiler.visitors.NodeElements.RHS.CharExpr;
 import compiler.visitors.NodeElements.RHS.Expr;
 import compiler.visitors.NodeElements.RHS.IntExpr;
 import compiler.visitors.NodeElements.RHS.StringExpr;
-import compiler.visitors.Identifiers.Variable;
 import compiler.visitors.Nodes.WhileNode;
 import compiler.visitors.Nodes.ReadNode;
 import java.util.List;
@@ -112,7 +111,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
       if (param_listContext != null) {
         params = (ListExpr) visit(ctx.func(i).param_list());
       }
-      currentST.addFunc(funcName, new Function(params.getExprTypes(), type));
+      currentST.addFunc(funcName, new FuncTypes(params.getExprTypes(), type));
     }
   }
 
@@ -144,7 +143,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
     Type paramType = (Type) visit(ctx.type());
     if (currentST.getEncSymTable() != null) {
       // don't add parameters to main symbol table
-      currentST.addVar(ctx.IDENT().getText(), new Variable(paramType));
+      currentST.addVar(ctx.IDENT().getText(), paramType);
     }
     return paramType;
   }
@@ -213,7 +212,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
     String varName = ctx.IDENT().getText();
 
     Type varType = (Type) visit(ctx.type());
-    Variable var = currentST.lookUpVarScope(varName);
+    Type varTypeDef = currentST.lookUpVarScope(varName);
     NodeElem rhs = (NodeElem) visit(ctx.assign_rhs()); // simple case
 
     if (!isAssignSameType(varType, rhs)) {
@@ -225,12 +224,12 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
               + ", actual: " + rhs.type().toString() + ")");
     }
 
-    if (var != null) {
+    if (varTypeDef != null) {
       parser
           .notifyErrorListeners("Semantic error at line " + ctx.start.getLine()
               + ". Variable name is already declared in scope");
     } else {
-      currentST.addVar(varName, new Variable(varType));
+      currentST.addVar(varName, varType);
       currentASTNode.add(new VarDeclareNode(varType, varName, rhs));
     }
     return null;
@@ -296,14 +295,14 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
   @Override
   public Returnable visitIdentExp(IdentExpContext ctx) {
     String varName = ctx.IDENT().getText();
-    Variable variable = currentST.lookUpAllVar(varName);
-    if (variable == null) {
+    Type varTypeDef = currentST.lookUpAllVar(varName);
+    if (varTypeDef == null) {
       parser.notifyErrorListeners(
           "Semantic error at line: " + ctx.start.getLine() + " : variable "
               + varName + " is not defined in this scope");
-      variable = new Variable(new GenericType());
+      varTypeDef = new GenericType();
     }
-    return new Ident(varName, variable.type());
+    return new Ident(varName, varTypeDef);
   }
 
   @Override
@@ -321,23 +320,23 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
     String varName = ctx.IDENT().getText();
     int dimensionAccessed = ctx.expr().size();
 
-    Variable var = currentST.lookUpAllVar(varName);
-    if (var == null) {
+    Type varTypeDef = currentST.lookUpAllVar(varName);
+    if (varTypeDef == null) {
       parser
           .notifyErrorListeners("Semantic error at line " + ctx.start.getLine()
               + ". Variable name is not declared in scope");
     }
-    else if (!(var.type() instanceof ArrType)) {
+    else if (!(varTypeDef instanceof ArrType)) {
       parser
           .notifyErrorListeners("Semantic error at line " + ctx.start.getLine() + ":" + ctx.start.getCharPositionInLine()
-              + " Incompatible type at " + varName + " (expected: Any[], actual: " + var.type().toString());
+              + " Incompatible type at " + varName + " (expected: Any[], actual: " + varTypeDef.toString());
     }
-    else if (((ArrType) var.type()).dimension() < dimensionAccessed) {
+    else if (((ArrType) varTypeDef).dimension() < dimensionAccessed) {
       parser
           .notifyErrorListeners("Semantic error at line " + ctx.start.getLine() + ":" + ctx.start.getCharPositionInLine()
               + " Incompatible type at " + varName
-              + " (expected: " + var.type().toString()
-              + ", actual: " + ((ArrType) var.type()).elemType()
+              + " (expected: " + varTypeDef.toString()
+              + ", actual: " + ((ArrType) varTypeDef).elemType()
               + ArrType.bracketsString(dimensionAccessed));
     }
     else {
@@ -345,7 +344,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
       for (int i = 0; i < dimensionAccessed; i++) {
         indexes[i] = (Expr) visit(ctx.expr(i));
       }
-      return new ArrayElem(((ArrType) var.type()).getArrayElem(dimensionAccessed), varName,
+      return new ArrayElem(((ArrType) varTypeDef).getArrayElem(dimensionAccessed), varName,
           indexes);
 //      return new ArrayElem(var.type(), varName,
 //          (Expr[]) ctx.expr().stream().map(this::visit).toArray());
@@ -453,7 +452,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
       return null;
     }
 
-    Type funcDefinitionReturn = (currentST.lookUpAllVar("return")).type();
+    Type funcDefinitionReturn = currentST.lookUpAllVar("return");
 
     if (!funcDefinitionReturn.equals(exprType)) {
       parser.notifyErrorListeners(
@@ -486,23 +485,23 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
   @Override
   public Returnable visitIdentLhs(IdentLhsContext ctx) {
     String varName = ctx.IDENT().getText();
-    Variable variable = currentST.lookUpAllVar(varName);
-    if (variable == null) {
+    Type varTypeDef = currentST.lookUpAllVar(varName);
+    if (varTypeDef == null) {
       parser.notifyErrorListeners(
           "Semantic error at line: " + ctx.start.getLine() + " : variable "
               + varName + " is not defined in this scope");
-      variable = new Variable(new GenericType());
+      varTypeDef = new GenericType();
     }
-    return new Ident(varName, variable.type());
+    return new Ident(varName, varTypeDef);
   }
 
   @Override
   public Returnable visitFuncCall(FuncCallContext ctx) {
     String funcName = ctx.IDENT().getText();
-    Function function = currentST.lookUpAllFunc(funcName);
+    FuncTypes funcTypes = currentST.lookUpAllFunc(funcName);
     ListExpr args = new ListExpr();
 
-    if (function == null) {
+    if (funcTypes == null) {
       parser.notifyErrorListeners(
           "Semantic error at line: " + ctx.start.getLine() + " : function "
               + funcName + " is not defined in this scope");
@@ -511,7 +510,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
       if (ctx.arg_list() != null) {
         args = (ListExpr) visit(ctx.arg_list());
       }
-      List<Type> paramsTypes = function.getParamTypes();
+      List<Type> paramsTypes = funcTypes.getParamTypes();
       if (!ListExpr.hasSameTypes(args.getExprTypes(),paramsTypes)) {
         parser.notifyErrorListeners(
             "Semantic error at line: " + ctx.start.getLine() + " : function "
@@ -519,7 +518,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
                 + "expected: " + paramsTypes.toString() + ", " + "actual: " + args
                 .toString());
       }
-      return new FuncCall(funcName, args, function.getType());
+      return new FuncCall(funcName, args, funcTypes.getReturnType());
     }
   }
 
@@ -603,7 +602,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
 
     ASTNode ASTNode = enterScope();
     currentST.setFunctionScope(true);
-    currentST.addVar("return", new Variable(funcReturnType));
+    currentST.addVar("return", funcReturnType);
 
     ListExpr paramList = new ListExpr();
     if (paramListContext != null) {
