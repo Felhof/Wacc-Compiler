@@ -16,9 +16,9 @@ import org.antlr.v4.runtime.tree.ParseTree;
 public class Main {
 
   public static void main(String[] args) {
-    //ASTNode ast = compileProg(args[0]); // uncomment for labTS test
-    ASTNode ast = compileProg("src/test/valid/array/arrayNested.wacc");
-    System.out.println(ast.toString());
+    ASTNode ast = compileProg(args[0]); // uncomment for labTS test
+    //ASTNode ast = compileProg("src/test/valid/array/arrayNested.wacc");
+    //System.out.println(ast.toString());
     System.exit(0);
   }
 
