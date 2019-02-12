@@ -9,7 +9,7 @@ public class FuncNode implements Node {
   private String name;
   private ListExpr paramList;
   private ParentNode parentNode;
-  private SymbolTable ST;
+  private SymbolTable symbolTable;
 
   public FuncNode(Type returnType, String name,
       ListExpr paramList, ParentNode parentNode, SymbolTable st) {
@@ -17,7 +17,7 @@ public class FuncNode implements Node {
     this.name = name;
     this.paramList = paramList;
     this.parentNode = parentNode;
-    ST = st;
+    symbolTable = st;
   }
 
   @Override
