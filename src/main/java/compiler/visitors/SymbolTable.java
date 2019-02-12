@@ -6,10 +6,10 @@ import compiler.visitors.Identifiers.Variable;
 import java.util.HashMap;
 
 public class SymbolTable {
-  boolean functionScope;
-  SymbolTable encSymTable;
-  HashMap<String, Variable> dict;
-  HashMap<String, Function> funcDict;
+  private boolean functionScope;
+  private SymbolTable encSymTable;
+  private HashMap<String, Variable> dict;
+  private HashMap<String, Function> funcDict;
 
   public SymbolTable(SymbolTable encSymTable) {
     this.encSymTable = encSymTable;
@@ -68,11 +68,6 @@ public class SymbolTable {
 
   public void setFunctionScope(boolean functionScope) {
     this.functionScope = functionScope;
-  }
-
-  public void setDict(
-      HashMap<String, Variable> dict) {
-    this.dict = dict;
   }
 
   public boolean functionScope() {
