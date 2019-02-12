@@ -18,7 +18,7 @@ param:
 stat:
       SKP #todo
     | type IDENT ASS assign_rhs #varDeclarationStat
-    | assign_lhs ASS assign_rhs #assignLhs
+    | assign_lhs ASS assign_rhs #assignStat
     | READ assign_lhs #readStat
     | FREE expr #freeStat
     | RETURN expr #returnStat
@@ -52,13 +52,13 @@ pair_elem:
 type:
       base_type #baseType
     | type OPENSQ CLOSESQ #arrayType
+    | STRING #stringType
     | pair_type #pairType;
 
 base_type:
       INT
     | BOOL
-    | CHAR
-    | STRING ;
+    | CHAR ;
 
 pair_type:
       PAIR OPEN pair_elem_type COMMA pair_elem_type CLOSE ;

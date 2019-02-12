@@ -9,17 +9,18 @@ job 2:
   stage: test
   script:
   - make
-  - mvn test -Dtest=AllInvalidSyntacticTests,SymbolTableUnitTests
-  - mvn test '-Dtest=SemanticInvalidTests#SemanticArray
-                                         +SemanticExit
-                                         +SemanticExpression
-                                         +SemanticIf
-                                         +SemanticPrint
-                                         +SemanticRead
-                                         +SemanticScope
-                                         +SemanticVariables
-                                         +SemanticWhile
-                                         +SemanticPairs'
+  - mvn test
+#  - mvn test -Dtest=AllInvalidSyntacticTests,SymbolTableUnitTests
+#  - mvn test '-Dtest=SemanticInvalidTests#SemanticArray
+#                                         +SemanticExit
+#                                         +SemanticExpression
+#                                         +SemanticIf
+#                                         +SemanticPrint
+#                                         +SemanticRead
+#                                         +SemanticScope
+#                                         +SemanticVariables
+#                                         +SemanticWhile
+#                                         +SemanticPairs'
     #- mvn test '-Dtest=!InvalidTests#Expression+Variables' # mvn test
     #      -Dgroups="<Test Category>"
     #only:

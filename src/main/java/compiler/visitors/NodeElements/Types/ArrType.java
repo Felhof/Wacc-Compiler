@@ -10,6 +10,11 @@ public class ArrType extends Type {
     this.dimension = 1;
   }
 
+  public ArrType(Type elemType, int dimension) {
+    this.elemType = elemType;
+    this.dimension = dimension;
+  }
+
   public Type elemType() {
     return elemType;
   }
@@ -22,6 +27,8 @@ public class ArrType extends Type {
     this.dimension++;
     return this;
   }
+
+
 
   @Override
   public boolean equals(Type type) {
@@ -37,6 +44,16 @@ public class ArrType extends Type {
 
   public static String bracketsString(int dim) {
     return (dim > 0) ? ("[]" + bracketsString(dim - 1)) : "";
+  }
+
+  public static Type getArrayType(Type elemType) {
+    return (elemType instanceof ArrType) ?
+        ((ArrType) elemType).addDimension() : new ArrType(elemType);
+  }
+
+  public Type getArrayElem(int indexes) {
+    return (indexes == this.dimension) ? elemType() :
+        new ArrType(this.elemType, dimension - indexes);
   }
 
 }

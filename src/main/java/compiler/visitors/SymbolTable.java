@@ -66,17 +66,6 @@ public class SymbolTable {
     return encSymTable;
   }
 
-  public boolean isInFunctionScope() {
-    SymbolTable currST = this;
-    while (currST != null) {
-      if (currST.functionScope) {
-        return true;
-      }
-      currST = currST.getEncSymTable();
-    }
-    return false;
-  }
-
   public void setFunctionScope(boolean functionScope) {
     this.functionScope = functionScope;
   }
@@ -86,8 +75,7 @@ public class SymbolTable {
     this.dict = dict;
   }
 
-  public void setFuncDict(
-      HashMap<String, Function> funcDict) {
-    this.funcDict = funcDict;
+  public boolean functionScope() {
+    return functionScope;
   }
 }
