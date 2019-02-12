@@ -7,7 +7,7 @@ import antlr.BasicParser.ArrayTypeContext;
 import antlr.BasicParser.Array_elemContext;
 import antlr.BasicParser.Array_literContext;
 import antlr.BasicParser.AssignArrayContext;
-import antlr.BasicParser.AssignLhsContext;
+import antlr.BasicParser.AssignStatContext;
 import antlr.BasicParser.BaseTypeContext;
 import antlr.BasicParser;
 import antlr.BasicParser.BinaryExpContext;
@@ -219,8 +219,11 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
 
     if (!isAssignSameType(varType, rhs)) {
       parser
-          .notifyErrorListeners("Semantic error at line " + ctx.start.getLine()
-              + ". Type mismatch");
+          .notifyErrorListeners("Semantic error at line "
+              + ctx.start.getLine() + " Incompatible type at "
+              + ctx.assign_rhs().getText()
+              + " (expected: " + varType.toString()
+              + ", actual: " + rhs.type().toString() + ")");
     }
 
     if (var != null) {
@@ -336,7 +339,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
       for (int i = 0; i < ctx.expr().size(); i++) {
         indexes[i] = (Expr) visit(ctx.expr(i));
       }
-      return new ArrayElem(var.type(), varName, indexes);
+      return new ArrayElem(((ArrType) var.type()).elemType(), varName, indexes);
 //      return new ArrayElem(var.type(), varName,
 //          (Expr[]) ctx.expr().stream().map(this::visit).toArray());
     }
@@ -371,7 +374,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
       }
       elems[i] = expr;
     }
-    return new ArrayLiter(elems, elemType);
+    return new ArrayLiter(elems, ArrType.getArrayType(elemType));
   }
 
   @Override
@@ -451,9 +454,8 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
     return null;
   }
 
-  //TODO
   @Override
-  public Returnable visitAssignLhs(AssignLhsContext ctx) {
+  public Returnable visitAssignStat(AssignStatContext ctx) {
     NodeElem lhs = (NodeElem) visit(ctx.assign_lhs());
     NodeElem rhs = (NodeElem) visit(ctx.assign_rhs());
     if (!lhs.type().equals(rhs.type())) {
@@ -464,7 +466,6 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
               + lhs.type().toString()
               + ", actual: " + rhs.type().toString() + ")");
     }
-
     currentASTNode.add(new VarAssignNode(lhs, rhs));
     return null;
   }

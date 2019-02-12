@@ -39,4 +39,9 @@ public class ArrType extends Type {
     return (dim > 0) ? ("[]" + bracketsString(dim - 1)) : "";
   }
 
+  public static Type getArrayType(Type elemType) {
+    return (elemType instanceof ArrType) ?
+        ((ArrType) elemType).addDimension() : new ArrType(elemType);
+  }
+
 }

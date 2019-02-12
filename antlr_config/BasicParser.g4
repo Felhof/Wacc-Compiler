@@ -18,7 +18,7 @@ param:
 stat:
       SKP #todo
     | type IDENT ASS assign_rhs #varDeclarationStat
-    | assign_lhs ASS assign_rhs #assignLhs
+    | assign_lhs ASS assign_rhs #assignStat
     | READ assign_lhs #readStat
     | FREE expr #freeStat
     | RETURN expr #returnStat
