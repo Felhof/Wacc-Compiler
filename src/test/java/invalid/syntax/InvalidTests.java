@@ -137,7 +137,7 @@ public class InvalidTests {
   @Test
   public void Expression() {
     checkCompilationFails("src/test/java/invalid/syntax/expressions.txt");
-    //checkLinenumberIsCorrect("expressions.txt");
+    checkLinenumberIsCorrect("expressions.txt");
   }
 
   @Category(functionInv.class)

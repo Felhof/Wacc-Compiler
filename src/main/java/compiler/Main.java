@@ -8,6 +8,7 @@ import compiler.visitors.SemanticVisitor;
 import java.io.IOException;
 import antlr.*;
 import compiler.visitors.FormatVisitor;
+import compiler.visitors.UnaryOpVisitor;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -50,8 +51,12 @@ public class Main {
 
     ReturnFunctionVisitor returnFunctionVisitor = new ReturnFunctionVisitor(parser);
     returnFunctionVisitor.visit(tree);
-    FormatVisitor syntaxVisitor = new FormatVisitor(parser);
-    syntaxVisitor.visit(tree);
+    FormatVisitor formatVisitor = new FormatVisitor(parser);
+    formatVisitor.visit(tree);
+
+    UnaryOpVisitor unaryOpVisitor = new UnaryOpVisitor(parser);
+    unaryOpVisitor.visit(tree);
+
     syntaxErrorsExit(syntaxErrorListener.getNbSyntaxErrors());
 
     return semanticCheck(parser,tree);

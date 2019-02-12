@@ -92,6 +92,10 @@ public class FormatVisitor extends BasicParserBaseVisitor<Boolean>{
 
   @Override
   public Boolean visitBinaryExp(BinaryExpContext ctx){
+
+    visit(ctx.expr(0));
+    visit(ctx.expr(1));
+
     negativeExpr = false;
 
     return true;
