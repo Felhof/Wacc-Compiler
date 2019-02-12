@@ -131,9 +131,6 @@ char_liter:
 str_liter:
       STRING_LITER;
 
-character:
-        CHAR_LITER | ESCAPED_CHAR ;
-
 array_liter:
       OPENSQ (expr (COMMA expr)*)? CLOSESQ ;
 
