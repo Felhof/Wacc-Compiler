@@ -13,15 +13,11 @@ public class BinExpr extends Expr {
   private final static Type intType = new BasicType(BasicType.TYPE.INT);
   private final static Type charType = new BasicType(BasicType.TYPE.CHAR);
   private final static Type boolType = new BasicType(BasicType.TYPE.BOOL);
-  private final static Type stringType = new BasicType(BasicType.TYPE.STRING);
-
 
   private final static List<Type> typesInt = Arrays.asList(intType);
   private final static List<Type> typesIntChar =
       Arrays.asList(intType, charType);
   private final static List<Type> typesBool = Arrays.asList(boolType);
-  private final static List<Type> typesAny =
-      Arrays.asList(intType, charType, boolType, stringType);
 
   private BINOP operator;
   private Expr lhs;
@@ -65,8 +61,8 @@ public class BinExpr extends Expr {
     MOD("%", typesInt, intType), PLUS("+", typesInt, intType),
     MINUS("-", typesInt, intType), GT(">", typesIntChar, boolType),
     GE(">=", typesIntChar, boolType), LT("<", typesIntChar, boolType),
-    LE("<=", typesIntChar, boolType), EQUAL("==", typesAny, boolType),
-    NOTEQUAL("!=", typesAny, boolType), AND("&&", typesBool, boolType),
+    LE("<=", typesIntChar, boolType), EQUAL("==", null, boolType),
+    NOTEQUAL("!=", null, boolType), AND("&&", typesBool, boolType),
     OR("||", typesBool, boolType);
 
     private String op;
