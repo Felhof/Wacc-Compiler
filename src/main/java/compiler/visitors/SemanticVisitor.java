@@ -26,9 +26,7 @@ import antlr.BasicParser.NewPairContext;
 import antlr.BasicParser.NewScopeStatContext;
 import antlr.BasicParser.PairElemArrayTypeContext;
 import antlr.BasicParser.PairElemBaseTypeContext;
-import antlr.BasicParser.PairElemLhsContext;
 import antlr.BasicParser.PairElemPairTypeContext;
-import antlr.BasicParser.PairElemRhsContext;
 import antlr.BasicParser.PairExpContext;
 import antlr.BasicParser.PairTypeContext;
 import antlr.BasicParser.Pair_elemContext;
@@ -50,6 +48,7 @@ import antlr.BasicParser.WhileStatContext;
 import antlr.BasicParserBaseVisitor;
 import compiler.visitors.Identifiers.Function;
 import compiler.visitors.NodeElements.ArrayElem;
+import compiler.visitors.NodeElements.ListExpr;
 import compiler.visitors.NodeElements.RHS.ArrayLiter;
 import compiler.visitors.NodeElements.NodeElem;
 import compiler.visitors.NodeElements.RHS.FuncCall;
@@ -60,7 +59,6 @@ import compiler.visitors.NodeElements.Types.ArrType;
 import compiler.visitors.NodeElements.Types.BasicType;
 import compiler.visitors.NodeElements.RHS.IdentExprRHS;
 import compiler.visitors.NodeElements.RHS.Pair;
-import compiler.visitors.NodeElements.TypeList;
 import compiler.visitors.NodeElements.Types.BasicType.TYPE;
 import compiler.visitors.NodeElements.Types.GenericType;
 import compiler.visitors.NodeElements.Types.PairType;
@@ -78,7 +76,6 @@ import compiler.visitors.NodeElements.RHS.StringExpr;
 import compiler.visitors.Identifiers.Variable;
 import compiler.visitors.Nodes.WhileNode;
 import compiler.visitors.Nodes.ReadNode;
-import java.util.HashMap;
 
 public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
 
@@ -111,9 +108,9 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
       }
       Type type = (Type) visit(ctx.func(i).type());
       Param_listContext param_listContext = ctx.func(i).param_list();
-      TypeList params = new TypeList();
+      ListExpr params = new ListExpr();
       if (param_listContext != null) {
-        params = (TypeList) visit(ctx.func(i).param_list());
+        params = (ListExpr) visit(ctx.func(i).param_list());
       }
       currentST.addFunc(funcName, new Function(params, type));
     }
@@ -135,10 +132,10 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
 
   @Override
   public Returnable visitParam_list(Param_listContext ctx) {
-    TypeList paramList = new TypeList();
+    ListExpr paramList = new ListExpr();
     String txt = ctx.param(0).getText();
     System.out.println(txt);
-    ctx.param().forEach(p -> paramList.add((Type) visit(p)));
+    ctx.param().forEach(p -> paramList.add(new IdentExprRHS(p.IDENT().getText(), (Type) visit(p))));
     return paramList;
   }
 
@@ -300,7 +297,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
               + varName + " is not defined in this scope");
       variable = new Variable(new GenericType());
     }
-    return new IdentExprRHS(variable.type());
+    return new IdentExprRHS(varName, variable.type());
   }
 
   @Override
@@ -497,7 +494,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
   public Returnable visitFuncCall(FuncCallContext ctx) {
     String funcName = ctx.IDENT().getText();
     Function function = currentST.lookUpAllFunc(funcName);
-    TypeList args = new TypeList();
+    ListExpr args = new ListExpr();
 
     if (function == null) {
       parser.notifyErrorListeners(
@@ -506,10 +503,10 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
       return new FuncCall(funcName, args, new GenericType());
     } else {
       if (ctx.arg_list() != null) {
-        args = (TypeList) visit(ctx.arg_list());
+        args = (ListExpr) visit(ctx.arg_list());
       }
-      TypeList params = function.getParamList();
-      if (!args.equals(params)) {
+      ListExpr params = function.getParamList();
+      if (!args.hasSameTypes(params)) {
         parser.notifyErrorListeners(
             "Semantic error at line: " + ctx.start.getLine() + " : function "
                 + funcName + " has conflicting parameters and arguments, "
@@ -522,8 +519,8 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
 
   @Override
   public Returnable visitArg_list(Arg_listContext ctx) {
-    TypeList argsList = new TypeList();
-    ctx.expr().forEach(e -> argsList.add(((Expr) visit(e)).type()));
+    ListExpr argsList = new ListExpr();
+    ctx.expr().forEach(e -> argsList.add(((Expr) visit(e))));
     return argsList;
   }
 
@@ -602,9 +599,9 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
     currentST.setFunctionScope(true);
     currentST.addVar("return", new Variable(funcReturnType));
 
-    TypeList paramList = new TypeList();
+    ListExpr paramList = new ListExpr();
     if (paramListContext != null) {
-      paramList = (TypeList) visit(paramListContext);
+      paramList = (ListExpr) visit(paramListContext);
     }
 
     currentST.addFunc(funcName, new Function(paramList, funcReturnType));
@@ -642,7 +639,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
 
     private ASTNode astNode;
     private SymbolTable symbolTable;
-    private TypeList paramList;
+    private ListExpr paramList;
 
     public ScopeData(ASTNode astNode, SymbolTable symbolTable) {
       this.astNode = astNode;
@@ -651,7 +648,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
     }
 
     public ScopeData(ASTNode astNode, SymbolTable symbolTable,
-        TypeList paramList) {
+        ListExpr paramList) {
       this.astNode = astNode;
       this.symbolTable = symbolTable;
       this.paramList = paramList;
@@ -665,7 +662,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
       return symbolTable;
     }
 
-    public TypeList paramList() {
+    public ListExpr paramList() {
       return paramList;
     }
 

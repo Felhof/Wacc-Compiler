@@ -1,5 +1,6 @@
 package compiler.visitors.Nodes;
 
+import compiler.visitors.NodeElements.ListExpr;
 import compiler.visitors.NodeElements.TypeList;
 import compiler.visitors.NodeElements.Types.Type;
 import compiler.visitors.SymbolTable;
@@ -7,12 +8,12 @@ import compiler.visitors.SymbolTable;
 public class FuncNode implements Node {
   private Type returnType;
   private String name;
-  private TypeList paramList;
+  private ListExpr paramList;
   private ASTNode astNode;
   private SymbolTable ST;
 
   public FuncNode(Type returnType, String name,
-      TypeList paramList, ASTNode astNode, SymbolTable st) {
+      ListExpr paramList, ASTNode astNode, SymbolTable st) {
     this.returnType = returnType;
     this.name = name;
     this.paramList = paramList;

@@ -14,4 +14,11 @@ public class Pair extends Expr implements Returnable {
     this.sndExpr = sndExpr;
   }
 
+  @Override
+  public String toString() {
+    return "Pair" +
+        "["+ fstExpr.toString() +
+        ", " + sndExpr.toString() +
+        "]";
+  }
 }
