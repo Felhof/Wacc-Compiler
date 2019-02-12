@@ -258,7 +258,10 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
   public Returnable visitBinaryExp(BinaryExpContext ctx) {
     Expr lhs = (Expr) visit(ctx.expr(0));
     Expr rhs = (Expr) visit(ctx.expr(1));
-    BinExpr binExpr = new BinExpr(lhs, BINOP.get(ctx.binary_oper().getText()),
+
+    String op = ctx.getChild(1).getText();
+
+    BinExpr binExpr = new BinExpr(lhs, BINOP.get(op),
         rhs);
     String errorMessage = binExpr.isTypeCompatible();
     if (errorMessage != null) {
