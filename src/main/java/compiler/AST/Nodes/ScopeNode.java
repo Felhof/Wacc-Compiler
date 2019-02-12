@@ -6,16 +6,16 @@ public class ScopeNode implements Node {
 
   SymbolTable symbolTable;
 
-  public ScopeNode(ASTNode astNode,
+  public ScopeNode(ParentNode parentNode,
       SymbolTable symbolTable) {
-    this.astNode = astNode;
+    this.parentNode = parentNode;
     this.symbolTable = symbolTable;
   }
 
-  private ASTNode astNode;
+  private ParentNode parentNode;
 
   @Override
   public String toString() {
-    return "NewScopeNode:" + astNode.toString();
+    return "NewScopeNode:" + parentNode.toString();
   }
 }

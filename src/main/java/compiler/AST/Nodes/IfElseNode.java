@@ -5,13 +5,13 @@ import compiler.AST.SymbolTable.SymbolTable;
 
 public class IfElseNode implements Node {
   private Expr condition;
-  private ASTNode thenStat;
-  private ASTNode elseStat;
+  private ParentNode thenStat;
+  private ParentNode elseStat;
   private SymbolTable thenST;
   private SymbolTable elseST;
 
-  public IfElseNode(Expr condition, ASTNode thenStat, SymbolTable thenST,
-      ASTNode elseStat, SymbolTable elseST) {
+  public IfElseNode(Expr condition, ParentNode thenStat, SymbolTable thenST,
+      ParentNode elseStat, SymbolTable elseST) {
     this.condition = condition;
     this.thenStat = thenStat;
     this.elseStat = elseStat;

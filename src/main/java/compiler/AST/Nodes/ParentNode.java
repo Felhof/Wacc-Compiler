@@ -3,11 +3,11 @@ package compiler.AST.Nodes;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ASTNode implements Node {
+public class ParentNode implements Node {
 
   private List<Node> children;
 
-  public ASTNode() {
+  public ParentNode() {
     children = new ArrayList<>();
   }
 

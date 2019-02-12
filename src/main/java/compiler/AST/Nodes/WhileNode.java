@@ -6,10 +6,10 @@ import compiler.AST.SymbolTable.SymbolTable;
 public class WhileNode implements Node {
 
   private Expr condition;
-  private ASTNode stat;
+  private ParentNode stat;
   private SymbolTable statST;
 
-  public WhileNode(Expr condition, ASTNode stat, SymbolTable statST) {
+  public WhileNode(Expr condition, ParentNode stat, SymbolTable statST) {
     this.condition = condition;
     this.stat = stat;
     this.statST = statST;

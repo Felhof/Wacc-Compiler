@@ -47,7 +47,7 @@ import antlr.BasicParser.VarDeclarationStatContext;
 import antlr.BasicParser.WhileStatContext;
 import antlr.BasicParserBaseVisitor;
 import compiler.AST.Nodes.AST;
-import compiler.AST.Nodes.ASTNode;
+import compiler.AST.Nodes.ParentNode;
 import compiler.AST.Nodes.ExitNode;
 import compiler.AST.Nodes.FreeNode;
 import compiler.AST.Nodes.FuncNode;
@@ -91,7 +91,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
 
   private BasicParser parser;
   private SymbolTable currentST;
-  private ASTNode currentASTNode;
+  private ParentNode currentParentNode;
 
   public SemanticVisitor(BasicParser parser) {
     this.parser = parser;
@@ -100,11 +100,11 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
 
   @Override
   public Returnable visitProg(ProgContext ctx) {
-    currentASTNode = new ASTNode();
+    currentParentNode = new ParentNode();
     addFuncDefToST(ctx);
     ctx.func().forEach(this::visitFunc);
     visit(ctx.stat(0));
-    return new AST(currentASTNode, currentST);
+    return new AST(currentParentNode, currentST);
   }
 
   private void addFuncDefToST(ProgContext ctx) {
@@ -133,7 +133,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
     ScopeData funcStat = visitFuncStatInNewScope(ctx.IDENT().getText(),
         ctx.stat(), ctx.param_list(), funcReturnType);
 
-    currentASTNode.add(new FuncNode(funcReturnType,
+    currentParentNode.add(new FuncNode(funcReturnType,
         ctx.IDENT().getText(),
         funcStat.paramList(), funcStat.astNode(),
         funcStat.symbolTable()));
@@ -168,13 +168,13 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
 
   @Override
   public Returnable visitPrintStat(PrintStatContext ctx) {
-    currentASTNode.add(new PrintNode(false, (Expr) visit(ctx.expr())));
+    currentParentNode.add(new PrintNode(false, (Expr) visit(ctx.expr())));
     return null;
   }
 
   @Override
   public Returnable visitPrintlnStat(PrintlnStatContext ctx) {
-    currentASTNode.add(new PrintNode(true, (Expr) visit(ctx.expr())));
+    currentParentNode.add(new PrintNode(true, (Expr) visit(ctx.expr())));
     return null;
   }
 
@@ -187,7 +187,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
           .getCharPositionInLine()
           + ": Incompatible type " + lhs.type().toString());
     }
-    currentASTNode.add(new ReadNode(lhs));
+    currentParentNode.add(new ReadNode(lhs));
     return null;
   }
 
@@ -200,7 +200,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
     ScopeData thenStat = visitStatInNewScope(ctx.stat(0));
     ScopeData elseStat = visitStatInNewScope(ctx.stat(1));
 
-    currentASTNode.add(new IfElseNode(condition, thenStat.astNode(),
+    currentParentNode.add(new IfElseNode(condition, thenStat.astNode(),
         thenStat.symbolTable(), elseStat.astNode(), elseStat.symbolTable()));
     return null;
   }
@@ -213,7 +213,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
 
     ScopeData stat = visitStatInNewScope(ctx.stat());
 
-    currentASTNode
+    currentParentNode
         .add(new WhileNode(condition, stat.astNode(), stat.symbolTable()));
     return null;
   }
@@ -241,7 +241,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
               + ". Variable name is already declared in scope");
     } else {
       currentST.addVar(varName, varType);
-      currentASTNode.add(new VarDeclareNode(varType, varName, rhs));
+      currentParentNode.add(new VarDeclareNode(varType, varName, rhs));
     }
     return null;
   }
@@ -446,7 +446,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
               + ", exit statement requires: INT, found: " + expr.type()
               .toString());
     }
-    currentASTNode.add(new ExitNode(expr));
+    currentParentNode.add(new ExitNode(expr));
     return null;
   }
 
@@ -473,7 +473,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
               + funcDefinitionReturn.toString()
               + ", actual: " + exprType.toString() + ")");
     }
-    currentASTNode.add(new ReturnNode(expr));
+    currentParentNode.add(new ReturnNode(expr));
     return null;
   }
 
@@ -489,7 +489,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
               + lhs.type().toString()
               + ", actual: " + rhs.type().toString() + ")");
     }
-    currentASTNode.add(new VarAssignNode(lhs, rhs));
+    currentParentNode.add(new VarAssignNode(lhs, rhs));
     return null;
   }
 
@@ -551,14 +551,14 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
               + ", free statement requires: pair(T1,T2) or T[], found: " + expr
               .type().toString());
     }
-    currentASTNode.add(new FreeNode(expr));
+    currentParentNode.add(new FreeNode(expr));
     return null;
   }
 
   @Override
   public Returnable visitNewScopeStat(NewScopeStatContext ctx) {
     ScopeData stat = visitStatInNewScope(ctx.stat());
-    currentASTNode.add(new ScopeNode(stat.astNode(), stat.symbolTable()));
+    currentParentNode.add(new ScopeNode(stat.astNode(), stat.symbolTable()));
     return null;
   }
 
@@ -601,9 +601,9 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
   }
 
   private ScopeData visitStatInNewScope(StatContext stat) {
-    ASTNode ASTNode = enterScope();
+    ParentNode ParentNode = enterScope();
     visit(stat);
-    return exitScope(ASTNode);
+    return exitScope(ParentNode);
   }
 
   private ScopeData visitFuncStatInNewScope(String funcName,
@@ -611,7 +611,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
       Param_listContext paramListContext,
       Type funcReturnType) {
 
-    ASTNode ASTNode = enterScope();
+    ParentNode ParentNode = enterScope();
     currentST.setFunctionScope(true);
     currentST.addVar("return", funcReturnType);
 
@@ -621,23 +621,23 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
     }
 
     visit(stat);
-    ScopeData sd = exitScope(ASTNode);
+    ScopeData sd = exitScope(ParentNode);
     return new ScopeData(sd.astNode(), sd.symbolTable(), paramList);
   }
 
-  private ASTNode enterScope() {
+  private ParentNode enterScope() {
     boolean inFuncScope = currentST.isFunctionScope();
     currentST = new SymbolTable(currentST);
     currentST.setFunctionScope(inFuncScope);
-    ASTNode parentASTNode = currentASTNode;
-    currentASTNode = new ASTNode();
-    return parentASTNode;
+    ParentNode parentParentNode = currentParentNode;
+    currentParentNode = new ParentNode();
+    return parentParentNode;
   }
 
-  private ScopeData exitScope(ASTNode parentASTNode) {
-    ScopeData scopeData = new ScopeData(currentASTNode, currentST);
+  private ScopeData exitScope(ParentNode parentParentNode) {
+    ScopeData scopeData = new ScopeData(currentParentNode, currentST);
     currentST = currentST.getEncSymTable();
-    currentASTNode = parentASTNode;
+    currentParentNode = parentParentNode;
     return scopeData;
   }
 
@@ -652,25 +652,25 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
 
   public class ScopeData {
 
-    private ASTNode astNode;
+    private ParentNode parentNode;
     private SymbolTable symbolTable;
     private ListExpr paramList;
 
-    public ScopeData(ASTNode astNode, SymbolTable symbolTable) {
-      this.astNode = astNode;
+    public ScopeData(ParentNode parentNode, SymbolTable symbolTable) {
+      this.parentNode = parentNode;
       this.symbolTable = symbolTable;
       paramList = null;
     }
 
-    public ScopeData(ASTNode astNode, SymbolTable symbolTable,
+    public ScopeData(ParentNode parentNode, SymbolTable symbolTable,
         ListExpr paramList) {
-      this.astNode = astNode;
+      this.parentNode = parentNode;
       this.symbolTable = symbolTable;
       this.paramList = paramList;
     }
 
-    public ASTNode astNode() {
-      return astNode;
+    public ParentNode astNode() {
+      return parentNode;
     }
 
     public SymbolTable symbolTable() {

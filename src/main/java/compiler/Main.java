@@ -3,7 +3,6 @@ package compiler;
 import compiler.AST.Nodes.AST;
 import compiler.listeners.SemanticErrorListener;
 import compiler.listeners.SyntaxErrorListener;
-import compiler.AST.Nodes.ASTNode;
 import compiler.visitors.ReturnFunctionVisitor;
 import compiler.visitors.SemanticVisitor;
 import java.io.IOException;
@@ -18,7 +17,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 public class Main {
 
   public static void main(String[] args) {
-    //ASTNode ast = compileProg(args[0]); // uncomment for labTS test
+    //ParentNode ast = compileProg(args[0]); // uncomment for labTS test
     AST ast = compileProg("src/test/valid/function/simple_functions"
         + "/functionSimple.wacc");
     //System.out.println(ast.toString());

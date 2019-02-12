@@ -8,15 +8,15 @@ public class FuncNode implements Node {
   private Type returnType;
   private String name;
   private ListExpr paramList;
-  private ASTNode astNode;
+  private ParentNode parentNode;
   private SymbolTable ST;
 
   public FuncNode(Type returnType, String name,
-      ListExpr paramList, ASTNode astNode, SymbolTable st) {
+      ListExpr paramList, ParentNode parentNode, SymbolTable st) {
     this.returnType = returnType;
     this.name = name;
     this.paramList = paramList;
-    this.astNode = astNode;
+    this.parentNode = parentNode;
     ST = st;
   }
 
@@ -25,7 +25,7 @@ public class FuncNode implements Node {
     return "FuncNode(" + returnType.toString() +
         ", name:'" + name +
         ", paramList:" + paramList.toString() +
-        ", astNode:" + astNode.toString() +
+        ", parentNode:" + parentNode.toString() +
         ')';
   }
 }
