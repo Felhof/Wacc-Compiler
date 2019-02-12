@@ -77,8 +77,23 @@ expr:
     | IDENT #identExp
     | array_elem #arrayExp
     | unary_oper expr #unaryExp
-    | expr binary_oper expr #binaryExp
+ //   | expr binary_oper expr #binaryExp
+    | expr MUL expr #binaryExp
+    | expr DIV expr #binaryExp
+    | expr MOD expr #binaryExp
+    | expr PLUS expr #binaryExp
+    | expr MINUS expr #binaryExp
+    | expr GT expr #binaryExp
+    | expr GE expr #binaryExp
+    | expr LT expr #binaryExp
+    | expr LE expr #binaryExp
+    | expr EQUAL expr #binaryExp
+    | expr NOTEQUAL expr #binaryExp
+    | expr AND expr #binaryExp
+    | expr OR expr #binaryExp
     | OPEN expr CLOSE  #bracketExp ;
+
+
 
 unary_oper:
       PLUS
