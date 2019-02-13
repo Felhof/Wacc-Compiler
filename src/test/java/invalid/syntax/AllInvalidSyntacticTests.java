@@ -24,7 +24,7 @@ public class AllInvalidSyntacticTests {
   @Parameter
   public String file;
 
-  public static String path = "src/test/java/invalid/syntax/all.txt";
+  public static String path = "src/test/java/invalid/syntax/paths/all.txt";
 
   @Parameters(name = "{index}: {0}")
   public static List<String> data() {

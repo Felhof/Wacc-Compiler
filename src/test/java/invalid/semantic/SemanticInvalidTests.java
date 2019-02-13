@@ -32,67 +32,67 @@ public class SemanticInvalidTests {
 
   @Test
   public void SemanticArray() {
-    checkCompilationFails("src/test/java/invalid/semantic/array.txt");
+    checkCompilationFails("src/test/java/invalid/semantic/paths/array.txt");
   }
 
   @Test
   public void SemanticExit() {
-    checkCompilationFails("src/test/java/invalid/semantic/exit.txt");
+    checkCompilationFails("src/test/java/invalid/semantic/paths/exit.txt");
   }
 
   @Test
   public void SemanticExpression() {
-    checkCompilationFails("src/test/java/invalid/semantic/expressions.txt");
+    checkCompilationFails("src/test/java/invalid/semantic/paths/expressions.txt");
   }
 
   @Test
   public void SemanticFunction() {
-    checkCompilationFails("src/test/java/invalid/semantic/function.txt");
+    checkCompilationFails("src/test/java/invalid/semantic/paths/function.txt");
   }
 
   @Test
   public void SemanticIf() {
-    checkCompilationFails("src/test/java/invalid/semantic/if.txt");
+    checkCompilationFails("src/test/java/invalid/semantic/paths/if.txt");
   }
 
   @Test
   public void SemanticIO() {
-    checkCompilationFails("src/test/java/invalid/semantic/io.txt");
+    checkCompilationFails("src/test/java/invalid/semantic/paths/io.txt");
   }
 
   @Test
   public void SemanticMultiple() {
-    checkCompilationFails("src/test/java/invalid/semantic/multiple.txt");
+    checkCompilationFails("src/test/java/invalid/semantic/paths/multiple.txt");
   }
 
   @Test
   public void SemanticPairs() {
-    checkCompilationFails("src/test/java/invalid/semantic/pairs.txt");
+    checkCompilationFails("src/test/java/invalid/semantic/paths/pairs.txt");
   }
 
   @Test
   public void SemanticPrint() {
-    checkCompilationFails("src/test/java/invalid/semantic/print.txt");
+    checkCompilationFails("src/test/java/invalid/semantic/paths/print.txt");
   }
 
   @Test
   public void SemanticRead() {
-    checkCompilationFails("src/test/java/invalid/semantic/read.txt");
+    checkCompilationFails("src/test/java/invalid/semantic/paths/read.txt");
   }
 
   @Test
   public void SemanticScope() {
-    checkCompilationFails("src/test/java/invalid/semantic/scope.txt");
+    checkCompilationFails("src/test/java/invalid/semantic/paths/scope.txt");
   }
 
   @Test
   public void SemanticVariables() {
-    checkCompilationFails("src/test/java/invalid/semantic/variables.txt");
+    checkCompilationFails("src/test/java/invalid/semantic/paths/variables.txt");
   }
 
   @Test
   public void SemanticWhile() {
-    checkCompilationFails("src/test/java/invalid/semantic/while.txt");
+    checkCompilationFails("src/test/java/invalid/semantic/paths/while.txt");
   }
 
 }

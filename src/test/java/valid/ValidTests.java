@@ -41,54 +41,54 @@ public class ValidTests {
   @Category(basicAndVariablesVal.class)
   @Test
   public void BasicAndVariables(){
-    checkCompilation("src/test/java/valid/basicAndVariables.txt");
+    checkCompilation("src/test/java/valid/paths/basicAndVariables.txt");
   }
 
   @Category(ifAndPairsVal.class)
   @Test
   public void IfAndPairs() {
-    checkCompilation("src/test/java/valid/ifAndPairs.txt");
+    checkCompilation("src/test/java/valid/paths/ifAndPairs.txt");
   }
 
   @Category(sequenceAndScopeVal.class)
   @Test
   public void SequenceAndScope() {
-    checkCompilation("src/test/java/valid/sequenceAndScope.txt");
+    checkCompilation("src/test/java/valid/paths/sequenceAndScope.txt");
   }
 
   @Category(arrayAndWhileVal.class)
   @Test
   public void ArrayAndWhile() {
-    checkCompilation("src/test/java/valid/arrayAndWhile.txt");
+    checkCompilation("src/test/java/valid/paths/arrayAndWhile.txt");
   }
 
   @Category(functionsVal.class)
   @Test
   public void Functions() {
-    checkCompilation("src/test/java/valid/functions.txt");
+    checkCompilation("src/test/java/valid/paths/functions.txt");
   }
 
   @Category(expressionsVal.class)
   @Test
   public void Expressions() {
-    checkCompilation("src/test/java/valid/expressions.txt");
+    checkCompilation("src/test/java/valid/paths/expressions.txt");
   }
 
   @Category(ioVal.class)
   @Test
   public void IO() {
-    checkCompilation("src/test/java/valid/io.txt");
+    checkCompilation("src/test/java/valid/paths/io.txt");
   }
 
   @Category(runtimeErrVal.class)
   @Test
   public void RuntimeErr(){
-    checkCompilation("src/test/java/valid/runtimeErr.txt");
+    checkCompilation("src/test/java/valid/paths/runtimeErr.txt");
   }
 
   @Category(advancedVal.class)
   @Test
   public void Advanced() {
-    checkCompilation("src/test/java/valid/advanced.txt");
+    checkCompilation("src/test/java/valid/paths/advanced.txt");
   }
 }
