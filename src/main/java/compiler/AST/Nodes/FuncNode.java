@@ -3,6 +3,7 @@ package compiler.AST.Nodes;
 import compiler.AST.NodeElements.ListExpr;
 import compiler.AST.Types.Type;
 import compiler.AST.SymbolTable.SymbolTable;
+import compiler.visitors.Returnable;
 
 public class FuncNode extends Node {
   private Type returnType;

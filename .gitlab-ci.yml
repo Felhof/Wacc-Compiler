@@ -8,8 +8,21 @@ job 1:
 job 2:
   stage: test
   script:
-  - make
-  - mvn test
+      - make
+      - mvn test -Dtest=AllValidTests
+job 3:
+  stage: test
+  script:
+      - make
+      - mvn test -Dtest=AllInvalidSyntacticTests
+job 4:
+  stage: test
+  script:
+      - make
+      - mvn test -Dtest=AllInvalidSemanticTests
+
+
+
 #  - mvn test -Dtest=AllInvalidSyntacticTests,SymbolTableUnitTests
 #  - mvn test '-Dtest=SemanticInvalidTests#SemanticArray
 #                                         +SemanticExit
