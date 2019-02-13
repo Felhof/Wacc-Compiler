@@ -35,7 +35,7 @@ public class InvalidTests {
   @Rule
   public final ExpectedSystemExit exit = ExpectedSystemExit.none();
 
-  private static final String path = "src/test/java/invalid/syntax/";
+  private static final String path = "src/test/java/invalid/syntax/paths/";
   private static final String messageDirectory = "errorMessages/";
 
   //Every Error Message begins with this
@@ -122,61 +122,61 @@ public class InvalidTests {
   @Category(arrayInv.class)
   @Test
   public void Array() {
-    checkCompilationFails("src/test/java/invalid/syntax/array.txt");
+    checkCompilationFails("src/test/java/invalid/syntax/paths/array.txt");
     checkLinenumberIsCorrect("array.txt");
   }
 
   @Category(basicInv.class)
   @Test
   public void Basic() {
-    checkCompilationFails("src/test/java/invalid/syntax/basic.txt");
+    checkCompilationFails("src/test/java/invalid/syntax/paths/basic.txt");
     checkLinenumberIsCorrect("basic.txt");
   }
 
   @Category(expressionInv.class)
   @Test
   public void Expression() {
-    checkCompilationFails("src/test/java/invalid/syntax/expressions.txt");
+    checkCompilationFails("src/test/java/invalid/syntax/paths/expressions.txt");
     checkLinenumberIsCorrect("expressions.txt");
   }
 
   @Category(functionInv.class)
   @Test
   public void Function() {
-    checkCompilationFails("src/test/java/invalid/syntax/function.txt");
+    checkCompilationFails("src/test/java/invalid/syntax/paths/function.txt");
   }
 
   @Category(ifInv.class)
   @Test
   public void If() {
-    checkCompilationFails("src/test/java/invalid/syntax/if.txt");
+    checkCompilationFails("src/test/java/invalid/syntax/paths/if.txt");
     checkLinenumberIsCorrect("if.txt");
   }
 
   @Category(sequenceInv.class)
   @Test
   public void Sequence() {
-    checkCompilationFails("src/test/java/invalid/syntax/sequence.txt");
+    checkCompilationFails("src/test/java/invalid/syntax/paths/sequence.txt");
     checkLinenumberIsCorrect("sequence.txt");
   }
 
   @Category(variablesInv.class)
   @Test
   public void Variables() {
-    checkCompilationFails("src/test/java/invalid/syntax/variables.txt");
+    checkCompilationFails("src/test/java/invalid/syntax/paths/variables.txt");
     //checkLinenumberIsCorrect("variables.txt");
   }
 
   @Category(whileInv.class)
   @Test
   public void While() {
-    checkCompilationFails("src/test/java/invalid/syntax/while.txt");
+    checkCompilationFails("src/test/java/invalid/syntax/paths/while.txt");
   }
 
   @Category(pairInv.class)
   @Test
   public void Pair(){
-    checkCompilationFails("src/test/java/invalid/syntax/pairs.txt");
+    checkCompilationFails("src/test/java/invalid/syntax/paths/pairs.txt");
     checkLinenumberIsCorrect("pairs.txt");
 
   }

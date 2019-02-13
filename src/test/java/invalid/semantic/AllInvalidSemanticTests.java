@@ -24,7 +24,7 @@ public class AllInvalidSemanticTests {
   @Parameter
   public String file;
 
-  public static String path = "src/test/java/invalid/semantic/all.txt";
+  public static String path = "src/test/java/invalid/semantic/paths/all.txt";
 
   @Parameters(name = "{index}: {0}")
   public static List<String> data() {
