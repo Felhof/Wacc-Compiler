@@ -5,7 +5,7 @@ import compiler.AST.Types.Type;
 import compiler.AST.SymbolTable.SymbolTable;
 import compiler.visitors.Returnable;
 
-public class FuncNode extends Node {
+public class FuncNode extends Node implements Returnable {
   private Type returnType;
   private String name;
   private ListExpr paramList;

@@ -138,8 +138,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
     return new FuncNode(funcReturnType,
         ctx.IDENT().getText(),
         funcStat.paramList(), funcStat.astNode(),
-        funcStat.symbolTable(), ctx.start.getLine()));
-    return null;
+        funcStat.symbolTable(), ctx.start.getLine());
   }
 
   @Override
