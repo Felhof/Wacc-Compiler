@@ -112,9 +112,8 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
     for (int i = 0; i < ctx.func().size(); i++) {
       String funcName = ctx.func(i).IDENT().toString();
       if (currentST.lookUpAllFunc(funcName) != null) {
-        parser.notifyErrorListeners(
-            "Semantic error at line: " + ctx.start.getLine() + " : function "
-                + funcName + " has already been defined in this scope");
+        parser.notifyErrorListeners(ctx.func(i).start,
+            identifierAlreadyDefinedMsg(annotateFunc(funcName)), null);
         continue;
       }
       Type type = (Type) visit(ctx.func(i).type());
@@ -180,10 +179,8 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
   public Returnable visitReadStat(ReadStatContext ctx) {
     NodeElem lhs = (NodeElem) visit(ctx.assign_lhs());
     if (!isReadableType(lhs)) {
-      parser.notifyErrorListeners("Semantic error at line: "
-          + ctx.start.getLine() + ":" + ctx.assign_lhs().start
-          .getCharPositionInLine()
-          + ": Incompatible type " + lhs.type().toString());
+      parser.notifyErrorListeners(ctx.assign_lhs().start,
+          incompatibleReadType(ctx.assign_lhs().getText(), lhs.type()),null);
     }
     currentParentNode.add(new ReadNode(lhs));
     return null;
@@ -225,17 +222,15 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
     NodeElem rhs = (NodeElem) visit(ctx.assign_rhs()); // simple case
 
     if (!isAssignSameType(varType, rhs)) {
-      parser
-          .notifyErrorListeners(ctx.assign_rhs().getStart(), " Incompatible type at "
-              + ctx.assign_rhs().getText()
-              + " (expected: " + varType.toString()
-              + ", actual: " + rhs.type().toString() + ")", null);
+      parser.notifyErrorListeners(ctx.assign_rhs().start,
+          incompatibleTypesMsg(ctx.assign_rhs().getText(), varType,
+              varTypeDef), null);
     }
 
     if (varTypeDef != null) {
       parser
-          .notifyErrorListeners("Semantic error at line " + ctx.start.getLine()
-              + ". Variable name is already declared in scope");
+          .notifyErrorListeners(ctx.IDENT().getSymbol(),
+              identifierAlreadyDefinedMsg(annotateVar(varName)), null);
     } else {
       currentST.addVar(varName, varType);
       currentParentNode.add(new VarDeclareNode(varType, varName, rhs));
@@ -274,8 +269,12 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
         rhs);
     String errorMessage = binExpr.isTypeCompatible();
     if (errorMessage != null) {
-      parser.notifyErrorListeners("Semantic error at line: "
-          + ctx.start.getLine() + ": " + errorMessage);
+      parser.notifyErrorListeners(ctx.start, errorMessage, null);
+    }
+    else if (!lhs.type().equals(rhs.type())) {
+      parser.notifyErrorListeners(ctx.expr(1).start,
+          incompatibleTypesMsg(ctx.expr(1).getText(), lhs.type(), rhs.type())
+          , null);
     }
     return binExpr;
   }
@@ -287,15 +286,9 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
         expr);
     String errorMessage = unaryExpr.isTypeCompatible();
     if (errorMessage != null) {
-      /*if(ctx.unary_oper().PLUS() != null){
-        parser.notifyErrorListeners("Syntactic error at line: "
-          + ctx.start.getLine() + ":" + ctx.expr().start.getCharPositionInLine()
-          + "-- missmatched input '" + ctx.expr().getText().charAt(0) + "' expecting INTEGER");
-      }*/
-
-      parser.notifyErrorListeners("Semantic error at line: "
-          + ctx.start.getLine() + ":" + ctx.expr().start.getCharPositionInLine()
-          + ": Incompatible type at " + ctx.expr().getText() + errorMessage);
+      parser.notifyErrorListeners(ctx.expr().start,
+          incompatibleMsg(ctx.expr().getText()) + errorMessage
+          , null);
     }
     return unaryExpr;
   }
@@ -305,9 +298,8 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
     String varName = ctx.IDENT().getText();
     Type varTypeDef = currentST.lookUpAllVar(varName);
     if (varTypeDef == null) {
-      parser.notifyErrorListeners(
-          "Semantic error at line: " + ctx.start.getLine() + " : variable "
-              + varName + " is not defined in this scope");
+      parser.notifyErrorListeners(ctx.start,
+          identifierNotDefinedMsg(annotateVar(ctx.getText())), null);
       varTypeDef = new GenericType();
     }
     return new Ident(varName, varTypeDef);
@@ -331,21 +323,20 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
     Type varTypeDef = currentST.lookUpAllVar(varName);
     if (varTypeDef == null) {
       parser
-          .notifyErrorListeners("Semantic error at line " + ctx.start.getLine()
-              + ". Variable name is not declared in scope");
+          .notifyErrorListeners(ctx.IDENT().getSymbol(),
+              identifierNotDefinedMsg(annotateVar(varName)), null);
     }
     else if (!(varTypeDef instanceof ArrType)) {
-      parser
-          .notifyErrorListeners("Semantic error at line " + ctx.start.getLine() + ":" + ctx.start.getCharPositionInLine()
-              + " Incompatible type at " + varName + " (expected: Any[], actual: " + varTypeDef.toString());
+      parser.notifyErrorListeners(ctx.IDENT().getSymbol(),
+          incompatibleTypesMsg(varName, new ArrType(new GenericType()),
+              varTypeDef), null);
     }
     else if (((ArrType) varTypeDef).dimension() < dimensionAccessed) {
-      parser
-          .notifyErrorListeners("Semantic error at line " + ctx.start.getLine() + ":" + ctx.start.getCharPositionInLine()
-              + " Incompatible type at " + varName
-              + " (expected: " + varTypeDef.toString()
-              + ", actual: " + ((ArrType) varTypeDef).elemType()
-              + ArrType.bracketsString(dimensionAccessed));
+      // TODO refactor
+      String msg = incompatibleTypesMsg(varName,
+          new ArrType(new GenericType()), varTypeDef);
+      parser.notifyErrorListeners(ctx.IDENT().getSymbol(), msg.substring(0,
+          msg.length() - 1) + ArrType.bracketsString(dimensionAccessed) + ')', null);
     }
     else {
       Expr[] indexes = new Expr[dimensionAccessed];
@@ -382,9 +373,8 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
         elemType = expr.type();
       }
       else if (!expr.type().equals(elemType)) {
-        parser.notifyErrorListeners("Incompatible type at " + e.getText()
-            + " (expected: " + elemType.toString()
-            + "actual: " + expr.type().toString() + ")");
+        parser.notifyErrorListeners(e.start, incompatibleTypesMsg(e.getText()
+            , elemType, expr.type()), null);
       }
       elems[i] = expr;
     }
@@ -453,10 +443,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
     Type exprType = expr.type();
 
     if (!currentST.isFunctionScope()) {
-      parser.notifyErrorListeners(
-          "Semantic error at line: " + ctx.start.getLine() + ", character:"
-              + ctx.expr().getStart().getCharPositionInLine()
-              + ", return statement is not in a function");
+      parser.notifyErrorListeners(ctx.start, globalReturnMsg(), null);
       return null;
     }
 
@@ -510,9 +497,8 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
     ListExpr args = new ListExpr();
 
     if (funcTypes == null) {
-      parser.notifyErrorListeners(
-          "Semantic error at line: " + ctx.start.getLine() + " : function "
-              + funcName + " is not defined in this scope");
+      parser.notifyErrorListeners(ctx.IDENT().getSymbol(),
+          identifierNotDefinedMsg(annotateFunc(funcName)), null);
       return new FuncCall(funcName, args, new GenericType());
     } else {
       if (ctx.arg_list() != null) {
@@ -690,5 +676,60 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
         (((BasicType) lhs.type()).type().equals(TYPE.INT)
             || ((BasicType) lhs.type()).type().equals(TYPE.CHAR));
   }
+
+  private String identifierAlreadyDefinedMsg(String offendingSymbol) {
+    return offendingSymbol + " is already defined in this scope.";
+  }
+
+  private String identifierNotDefinedMsg(String offendingSymbol) {
+    return offendingSymbol + " is not defined.";
+  }
+
+  private String globalReturnMsg() {
+    return "Return statement must be in a function scope";
+  }
+
+  private String incompatibleReadType(String offendingSymbol, Type actual) {
+    return "Incompatible type at " + offendingSymbol
+        + "(expected: Int or Char, actual: "
+        + actual.toString();
+  }
+
+  private String incompatibleTypesMsg(String offendingSymbol,
+      Type expected,
+      Type actual) {
+    return incompatibleMsg(offendingSymbol)
+        + "(expected: "
+        + ((expected instanceof ArrType) ? "Any[]" : expected.toString())
+        + ", actual: " + actual.toString()
+        + ")";
+  }
+
+  private String incompatibleTypeListMsg(String offendingSymbol,
+      List<Type> expected, List<Type> actual) {
+    StringBuilder sb = new StringBuilder();
+    sb.append(incompatibleMsg(offendingSymbol))
+        .append("(expected: ");
+    for(Type t : expected) {
+      sb.append((t instanceof ArrType) ? "Any[]" : t.toString());
+    }
+    sb.append(", actual: ");
+    actual.forEach(t -> sb.append(t.toString()));
+    sb.append(")");
+    return sb.toString();
+  }
+
+  private String incompatibleMsg(String offendingSymbol) {
+    return "Incompatible type at " + offendingSymbol;
+  }
+
+  private String annotateFunc(String identifier) {
+    return "Function " + identifier;
+  }
+
+  private String annotateVar(String identifier) {
+    return "Variable " + identifier;
+  }
+
 
 }

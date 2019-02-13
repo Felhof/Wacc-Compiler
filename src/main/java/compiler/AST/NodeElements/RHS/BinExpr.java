@@ -31,17 +31,14 @@ public class BinExpr extends Expr {
 
   public String isTypeCompatible() {
     if (!operator.op.equals("==") && !operator.op().equals("!="))  {
+      String tempReturn = "Binary Operator " + operator.op
+          + " cannot take as its ";
       if (!contains(operator.argTypes(), lhs.type())) {
-        return "Incompatible type " + lhs.type().toString();
+        return tempReturn + "LHS the type" + lhs.type().toString();
       }
       if (!contains(operator.argTypes(), rhs.type())) {
-        return "Incompatible type " + rhs.type().toString();
+        return tempReturn + "RHS the type" + rhs.type().toString();
       }
-    }
-    if (!lhs.type().equals(rhs.type())) {
-      return "Incompatible type at " + rhs.toString()
-          + " (expected: " + lhs.type().toString()
-          + ", actual: " + rhs.type().toString();
     }
     return null;
   }
