@@ -2,10 +2,11 @@ package compiler.AST.Nodes;
 
 import compiler.AST.NodeElements.RHS.Expr;
 
-public class ExitNode implements Node {
+public class ExitNode extends Node {
   private Expr exitStatus;
 
-  public ExitNode(Expr exitStatus) {
+  public ExitNode(Expr exitStatus, int lineNumber) {
+    super(lineNumber);
     this.exitStatus = exitStatus;
   }
 

@@ -2,13 +2,14 @@ package compiler.AST.Nodes;
 
 import compiler.AST.NodeElements.NodeElem;
 
-public class VarAssignNode implements Node {
+public class VarAssignNode extends Node {
 
   private NodeElem lhs;
   private NodeElem rhs;
 
   public VarAssignNode(NodeElem lhs,
-      NodeElem rhs) {
+      NodeElem rhs, int lineNumber) {
+    super(lineNumber);
     this.lhs = lhs;
     this.rhs = rhs;
   }

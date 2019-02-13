@@ -2,11 +2,12 @@ package compiler.AST.Nodes;
 
 import compiler.AST.NodeElements.NodeElem;
 
-public class ReadNode implements Node {
+public class ReadNode extends Node {
 
   private NodeElem lhs;
 
-  public ReadNode(NodeElem lhs) {
+  public ReadNode(NodeElem lhs, int lineNumber) {
+    super(lineNumber);
     this.lhs = lhs;
   }
 

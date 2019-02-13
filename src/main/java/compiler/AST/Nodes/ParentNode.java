@@ -3,11 +3,12 @@ package compiler.AST.Nodes;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ParentNode implements Node {
+public class ParentNode extends Node {
 
   private List<Node> children;
 
-  public ParentNode() {
+  public ParentNode(int lineNumber) {
+    super(lineNumber);
     children = new ArrayList<>();
   }
 

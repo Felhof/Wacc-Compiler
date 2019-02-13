@@ -3,7 +3,7 @@ package compiler.AST.Nodes;
 import compiler.AST.NodeElements.RHS.Expr;
 import compiler.AST.SymbolTable.SymbolTable;
 
-public class IfElseNode implements Node {
+public class IfElseNode extends Node {
   private Expr condition;
   private ParentNode thenStat;
   private ParentNode elseStat;
@@ -11,7 +11,8 @@ public class IfElseNode implements Node {
   private SymbolTable elseST;
 
   public IfElseNode(Expr condition, ParentNode thenStat, SymbolTable thenST,
-      ParentNode elseStat, SymbolTable elseST) {
+      ParentNode elseStat, SymbolTable elseST, int lineNumber) {
+    super(lineNumber);
     this.condition = condition;
     this.thenStat = thenStat;
     this.elseStat = elseStat;
