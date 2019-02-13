@@ -14,9 +14,8 @@ public class GenericType extends Type {
     return true;
   }
 
-
   @Override
   public String toString() {
-    return "Any";
+    return "ANY";
   }
 }
