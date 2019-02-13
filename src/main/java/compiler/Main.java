@@ -18,7 +18,7 @@ public class Main {
 
   public static void main(String[] args) {
     //ParentNode ast = compileProg(args[0]); // uncomment for labTS test
-    AST ast = compileProg("src/test/invalid/semanticErr/exit/globalReturn.wacc");
+    AST ast = compileProg("src/test/invalid/semanticErr/expressions/exprTypeErr.wacc");
     //System.out.println(ast.toString());
     System.exit(0);
   }

@@ -34,10 +34,10 @@ public class BinExpr extends Expr {
       String tempReturn = "Binary Operator " + operator.op
           + " cannot take as its ";
       if (!contains(operator.argTypes(), lhs.type())) {
-        return tempReturn + "LHS the type" + lhs.type().toString();
+        return tempReturn + "LHS the type " + lhs.type().toString();
       }
       if (!contains(operator.argTypes(), rhs.type())) {
-        return tempReturn + "RHS the type" + rhs.type().toString();
+        return tempReturn + "RHS the type " + rhs.type().toString();
       }
     }
     return null;

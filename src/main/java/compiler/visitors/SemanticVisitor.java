@@ -224,7 +224,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
     if (!isAssignSameType(varType, rhs)) {
       parser.notifyErrorListeners(ctx.assign_rhs().start,
           incompatibleTypesMsg(ctx.assign_rhs().getText(), varType,
-              varTypeDef), null);
+              rhs.type()), null);
     }
 
     if (varTypeDef != null) {
@@ -691,7 +691,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
 
   private String incompatibleReadType(String offendingSymbol, Type actual) {
     return "Incompatible type at " + offendingSymbol
-        + "(expected: Int or Char, actual: "
+        + " (expected: Int or Char, actual: "
         + actual.toString();
   }
 
@@ -699,7 +699,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
       Type expected,
       Type actual) {
     return incompatibleMsg(offendingSymbol)
-        + "(expected: "
+        + " (expected: "
         + ((expected instanceof ArrType) ? "Any[]" : expected.toString())
         + ", actual: " + actual.toString()
         + ")";
@@ -709,7 +709,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
       List<Type> expected, List<Type> actual) {
     StringBuilder sb = new StringBuilder();
     sb.append(incompatibleMsg(offendingSymbol))
-        .append("(expected: ");
+        .append(" (expected: ");
     for(Type t : expected) {
       sb.append((t instanceof ArrType) ? "Any[]" : t.toString());
     }
