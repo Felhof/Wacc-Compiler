@@ -713,10 +713,10 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
     sb.append(incompatibleMsg(offendingSymbol))
         .append(" (expected: ");
     for(Type t : expected) {
-      sb.append((t instanceof ArrType) ? "Any[]" : t.toString());
+      sb.append((t instanceof ArrType) ? "Any[]" : t.toString()).append(" ");
     }
     sb.append(", actual: ");
-    actual.forEach(t -> sb.append(t.toString()));
+    actual.forEach(t -> sb.append(t.toString()).append(" "));
     sb.append(")");
     return sb.toString();
   }
