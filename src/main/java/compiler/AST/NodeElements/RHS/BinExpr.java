@@ -1,6 +1,8 @@
 package compiler.AST.NodeElements.RHS;
 
-import compiler.AST.Types.BasicType;
+import compiler.AST.Types.BoolType;
+import compiler.AST.Types.CharType;
+import compiler.AST.Types.IntType;
 import compiler.AST.Types.Type;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -9,9 +11,9 @@ import java.util.Map;
 
 public class BinExpr extends Expr {
 
-  private final static Type intType = new BasicType(BasicType.TYPE.INT);
-  private final static Type charType = new BasicType(BasicType.TYPE.CHAR);
-  private final static Type boolType = new BasicType(BasicType.TYPE.BOOL);
+  private final static Type intType = IntType.getInstance();
+  private final static Type charType = CharType.getInstance();
+  private final static Type boolType = BoolType.getInstance();
 
   private final static List<Type> typesInt = Arrays.asList(intType);
   private final static List<Type> typesIntChar =

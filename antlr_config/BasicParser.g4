@@ -4,7 +4,7 @@ options {
   tokenVocab=BasicLexer;
 }
 
-prog: BEG (func)* stat (SEMICOL stat)* END EOF;
+prog: BEG (func)* stat END EOF;
 
 func:
       type IDENT OPEN (param_list)? CLOSE IS stat END ;

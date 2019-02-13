@@ -1,12 +1,12 @@
 package compiler.AST.NodeElements.RHS;
 
-import compiler.AST.Types.BasicType;
+import compiler.AST.Types.BoolType;
 
 public class BoolExpr extends Expr {
   private boolean value;
 
   public BoolExpr(String value) {
-    super(new BasicType(BasicType.TYPE.BOOL));
+    super(BoolType.getInstance());
     this.value = value.equals("true");
   }
 

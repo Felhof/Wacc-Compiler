@@ -8,4 +8,17 @@ public abstract class Type implements Returnable {
     return false;
   }
 
+  public static Type getBasicType(String type) {
+    switch (type) {
+      case "int":
+        return IntType.getInstance();
+      case "char":
+        return CharType.getInstance();
+      case "bool":
+        return BoolType.getInstance();
+      default:
+        return GenericType.getInstance();
+    }
+  }
+
 }

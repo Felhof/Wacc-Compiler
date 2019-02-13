@@ -1,12 +1,12 @@
 package compiler.AST.NodeElements.RHS;
 
-import compiler.AST.Types.BasicType;
+import compiler.AST.Types.IntType;
 
 public class IntExpr extends Expr {
   private String value;
 
   public IntExpr(String value) {
-    super(new BasicType(BasicType.TYPE.INT));
+    super(IntType.getInstance());
     this.value = value;
   }
 

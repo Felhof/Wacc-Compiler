@@ -18,8 +18,7 @@ public class Main {
 
   public static void main(String[] args) {
     //ParentNode ast = compileProg(args[0]); // uncomment for labTS test
-    AST ast = compileProg("src/test/valid/function/simple_functions"
-        + "/functionSimple.wacc");
+    AST ast = compileProg("src/test/valid/basic/exit/exit-1.wacc");
     //System.out.println(ast.toString());
     System.exit(0);
   }
@@ -61,7 +60,7 @@ public class Main {
     syntaxErrorsExit(syntaxErrorListener.getNbSyntaxErrors());
 
     return semanticCheck(parser,tree);
-    //return null;
+    //return -;
   }
 
   public static AST semanticCheck(BasicParser parser, ParseTree tree) {

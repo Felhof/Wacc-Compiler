@@ -1,5 +1,4 @@
-import compiler.AST.Types.BasicType;
-import compiler.AST.Types.BasicType.TYPE;
+import compiler.AST.Types.IntType;
 import compiler.AST.Types.Type;
 import compiler.AST.SymbolTable.SymbolTable;
 import org.junit.Test;
@@ -9,7 +8,7 @@ import static org.hamcrest.core.IsNull.notNullValue;
 
 public class SymbolTableUnitTests {
 
-  Type varTypeDef = new BasicType(TYPE.INT);
+  Type varTypeDef = IntType.getInstance();
   SymbolTable st = new SymbolTable(null);
 
   @Test
