@@ -13,4 +13,9 @@ public class CharType extends Type {
   public boolean equals(Type type) {
     return instance == type;
   }
+
+  @Override
+  public String toString() {
+    return "CHAR";
+  }
 }
