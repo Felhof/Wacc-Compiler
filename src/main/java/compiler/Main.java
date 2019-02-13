@@ -17,9 +17,9 @@ import org.antlr.v4.runtime.tree.ParseTree;
 public class Main {
 
   public static void main(String[] args) {
-    //ParentNode ast = compileProg(args[0]); // uncomment for labTS test
-    AST ast = compileProg("src/test/valid/function/simple_functions"
-        + "/functionSimple.wacc");
+    AST ast = compileProg(args[0]); // uncomment for labTS test
+    //AST ast = compileProg("src/test/valid/function/simple_functions"
+    //    + "/functionSimple.wacc");
     //System.out.println(ast.toString());
     System.exit(0);
   }
