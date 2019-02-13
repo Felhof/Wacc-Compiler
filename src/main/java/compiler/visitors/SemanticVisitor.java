@@ -47,6 +47,7 @@ import antlr.BasicParser.VarDeclarationStatContext;
 import antlr.BasicParser.WhileStatContext;
 import antlr.BasicParserBaseVisitor;
 import compiler.AST.Nodes.AST;
+import compiler.AST.Nodes.Node;
 import compiler.AST.Nodes.ParentNode;
 import compiler.AST.Nodes.ExitNode;
 import compiler.AST.Nodes.FreeNode;
@@ -102,8 +103,8 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
   public Returnable visitProg(ProgContext ctx) {
     currentParentNode = new ParentNode();
     addFuncDefToST(ctx);
-    ctx.func().forEach(this::visitFunc);
-    visit(ctx.stat(0));
+    ctx.func().forEach(f -> currentParentNode.add((Node) visit(f)));
+    visit(ctx.stat());
     return new AST(currentParentNode, currentST);
   }
 
@@ -114,7 +115,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
         parser.notifyErrorListeners(
             "Semantic error at line: " + ctx.start.getLine() + " : function "
                 + funcName + " has already been defined in this scope");
-        return;
+        continue;
       }
       Type type = (Type) visit(ctx.func(i).type());
       Param_listContext param_listContext = ctx.func(i).param_list();
@@ -133,18 +134,15 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
     ScopeData funcStat = visitFuncStatInNewScope(ctx.IDENT().getText(),
         ctx.stat(), ctx.param_list(), funcReturnType);
 
-    currentParentNode.add(new FuncNode(funcReturnType,
+    return new FuncNode(funcReturnType,
         ctx.IDENT().getText(),
         funcStat.paramList(), funcStat.astNode(),
-        funcStat.symbolTable()));
-    return null;
+        funcStat.symbolTable());
   }
 
   @Override
   public Returnable visitParam_list(Param_listContext ctx) {
     ListExpr paramList = new ListExpr();
-    String txt = ctx.param(0).getText();
-    System.out.println(txt);
     ctx.param().forEach(p -> paramList.add(new Ident(p.IDENT().getText(), (Type) visit(p))));
     return paramList;
   }
@@ -228,11 +226,10 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
 
     if (!isAssignSameType(varType, rhs)) {
       parser
-          .notifyErrorListeners("Semantic error at line "
-              + ctx.start.getLine() + " Incompatible type at "
+          .notifyErrorListeners(ctx.assign_rhs().getStart(), " Incompatible type at "
               + ctx.assign_rhs().getText()
               + " (expected: " + varType.toString()
-              + ", actual: " + rhs.type().toString() + ")");
+              + ", actual: " + rhs.type().toString() + ")", null);
     }
 
     if (varTypeDef != null) {

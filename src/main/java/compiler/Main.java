@@ -18,8 +18,7 @@ public class Main {
 
   public static void main(String[] args) {
     //ParentNode ast = compileProg(args[0]); // uncomment for labTS test
-    AST ast = compileProg("src/test/valid/function/simple_functions"
-        + "/functionSimple.wacc");
+    AST ast = compileProg("src/test/invalid/semanticErr/variables/basicTypeErr01.wacc");
     //System.out.println(ast.toString());
     System.exit(0);
   }
@@ -70,25 +69,19 @@ public class Main {
     parser.addErrorListener(semanticErrorListener);
     SemanticVisitor semanticVisitor = new SemanticVisitor(parser);
     AST ast = (AST) semanticVisitor.visit(tree);
-    semanticErrorsExit(semanticErrorListener.getNbSemanticErrors());
+    semanticErrorListener.printCompilationStatus();
     return ast;
   }
 
   public static void syntaxErrorsExit(int nbSyntaxErrors) {
     if (nbSyntaxErrors > 0) {
       System.err.println(nbSyntaxErrors +" syntax error(s)");
-      System.out.println("Exit code 100 returned");
+      System.err.println("Exit code 100 returned");
       System.exit(100);
     }
   }
 
-  public static void semanticErrorsExit(int nbSematicErrors) {
-    if (nbSematicErrors > 0) {
-      System.err.println(nbSematicErrors +" semantic error(s)");
-      System.out.println("Exit code 200 returned");
-      System.exit(200);
-    }
-  }
+
 
 }
 
