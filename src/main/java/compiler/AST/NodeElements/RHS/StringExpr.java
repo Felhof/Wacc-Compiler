@@ -1,15 +1,14 @@
 package compiler.AST.NodeElements.RHS;
 
 import compiler.AST.Types.ArrType;
-import compiler.AST.Types.BasicType;
-import compiler.AST.Types.BasicType.TYPE;
+import compiler.AST.Types.CharType;
 
 public class StringExpr extends Expr {
 
   private final String value;
 
   public StringExpr(String value) {
-    super(new ArrType(new BasicType(TYPE.CHAR)));
+    super(new ArrType(CharType.getInstance()));
     this.value = value;
   }
 

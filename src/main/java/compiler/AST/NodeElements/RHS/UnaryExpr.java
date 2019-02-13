@@ -1,16 +1,18 @@
 package compiler.AST.NodeElements.RHS;
 
 import compiler.AST.Types.ArrType;
-import compiler.AST.Types.BasicType;
+import compiler.AST.Types.BoolType;
+import compiler.AST.Types.CharType;
+import compiler.AST.Types.IntType;
 import compiler.AST.Types.Type;
 import java.util.HashMap;
 import java.util.Map;
 
 public class UnaryExpr extends Expr {
 
-  private final static Type intType = new BasicType(BasicType.TYPE.INT);
-  private final static Type charType = new BasicType(BasicType.TYPE.CHAR);
-  private final static Type boolType = new BasicType(BasicType.TYPE.BOOL);
+  private final static Type intType = IntType.getInstance();
+  private final static Type charType = CharType.getInstance();
+  private final static Type boolType = BoolType.getInstance();
   private final static Type arrayType = new Type() {
     @Override
     public boolean equals(Type type) {

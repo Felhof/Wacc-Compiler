@@ -1,13 +1,13 @@
 package compiler.AST.NodeElements.RHS;
 
-import compiler.AST.Types.BasicType;
+import compiler.AST.Types.CharType;
 
 public class CharExpr extends Expr {
 
   private String value;
 
   public CharExpr(String value) {
-    super(new BasicType(BasicType.TYPE.CHAR));
+    super(CharType.getInstance());
     this.value = value.substring(1, value.length() - 1);
 
   }
