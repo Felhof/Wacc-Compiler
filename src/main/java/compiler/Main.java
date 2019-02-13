@@ -3,12 +3,10 @@ package compiler;
 import compiler.AST.Nodes.AST;
 import compiler.listeners.SemanticErrorListener;
 import compiler.listeners.SyntaxErrorListener;
-import compiler.visitors.ReturnFunctionVisitor;
 import compiler.visitors.SemanticVisitor;
+import compiler.visitors.SyntaxVisitor;
 import java.io.IOException;
 import antlr.*;
-import compiler.visitors.FormatVisitor;
-import compiler.visitors.UnaryOpVisitor;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -18,9 +16,6 @@ public class Main {
 
   public static void main(String[] args) {
     AST ast = compileProg(args[0]); // uncomment for labTS test
-    //AST ast = compileProg("src/test/valid/function/simple_functions"
-    //    + "/functionSimple.wacc");
-    //System.out.println(ast.toString());
     System.exit(0);
   }
 
@@ -48,20 +43,12 @@ public class Main {
     parser.addErrorListener(syntaxErrorListener);
 
     ParseTree tree = parser.prog();
-    // System.out.println(tree.toStringTree(parser));
 
-    ReturnFunctionVisitor returnFunctionVisitor = new ReturnFunctionVisitor(parser);
-    returnFunctionVisitor.visit(tree);
-    FormatVisitor formatVisitor = new FormatVisitor(parser);
-    formatVisitor.visit(tree);
-
-    UnaryOpVisitor unaryOpVisitor = new UnaryOpVisitor(parser);
-    unaryOpVisitor.visit(tree);
-
-    syntaxErrorsExit(syntaxErrorListener.getNbSyntaxErrors());
+    SyntaxVisitor syntaxVisitor = new SyntaxVisitor(parser);
+    syntaxVisitor.visit(tree);
+    syntaxErrorListener.printCompilationStatus();
 
     return semanticCheck(parser,tree);
-    //return null;
   }
 
   public static AST semanticCheck(BasicParser parser, ParseTree tree) {
@@ -73,16 +60,6 @@ public class Main {
     semanticErrorListener.printCompilationStatus();
     return ast;
   }
-
-  public static void syntaxErrorsExit(int nbSyntaxErrors) {
-    if (nbSyntaxErrors > 0) {
-      System.err.println(nbSyntaxErrors +" syntax error(s)");
-      System.err.println("Exit code 100 returned");
-      System.exit(100);
-    }
-  }
-
-
 
 }
 
