@@ -101,7 +101,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
 
   @Override
   public Returnable visitProg(ProgContext ctx) {
-    currentParentNode = new ParentNode();
+    currentParentNode = new ParentNode(ctx.start.getLine());
     addFuncDefToST(ctx);
     ctx.func().forEach(this::visitFunc);
     visit(ctx.stat());
@@ -137,7 +137,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
     currentParentNode.add(new FuncNode(funcReturnType,
         ctx.IDENT().getText(),
         funcStat.paramList(), funcStat.astNode(),
-        funcStat.symbolTable()));
+        funcStat.symbolTable(), ctx.start.getLine()));
     return null;
   }
 
@@ -170,13 +170,13 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
 
   @Override
   public Returnable visitPrintStat(PrintStatContext ctx) {
-    currentParentNode.add(new PrintNode(false, (Expr) visit(ctx.expr())));
+    currentParentNode.add(new PrintNode(false, (Expr) visit(ctx.expr()), ctx.start.getLine()));
     return null;
   }
 
   @Override
   public Returnable visitPrintlnStat(PrintlnStatContext ctx) {
-    currentParentNode.add(new PrintNode(true, (Expr) visit(ctx.expr())));
+    currentParentNode.add(new PrintNode(true, (Expr) visit(ctx.expr()), ctx.start.getLine()));
     return null;
   }
 
@@ -189,7 +189,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
           .getCharPositionInLine()
           + ": Incompatible type " + lhs.type().toString());
     }
-    currentParentNode.add(new ReadNode(lhs));
+    currentParentNode.add(new ReadNode(lhs, ctx.start.getLine()));
     return null;
   }
 
@@ -203,7 +203,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
     ScopeData elseStat = visitStatInNewScope(ctx.stat(1));
 
     currentParentNode.add(new IfElseNode(condition, thenStat.astNode(),
-        thenStat.symbolTable(), elseStat.astNode(), elseStat.symbolTable()));
+        thenStat.symbolTable(), elseStat.astNode(), elseStat.symbolTable(), ctx.start.getLine()));
     return null;
   }
 
@@ -216,7 +216,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
     ScopeData stat = visitStatInNewScope(ctx.stat());
 
     currentParentNode
-        .add(new WhileNode(condition, stat.astNode(), stat.symbolTable()));
+        .add(new WhileNode(condition, stat.astNode(), stat.symbolTable(), ctx.start.getLine()));
     return null;
   }
 
@@ -243,7 +243,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
               + ". Variable name is already declared in scope");
     } else {
       currentST.addVar(varName, varType);
-      currentParentNode.add(new VarDeclareNode(varType, varName, rhs));
+      currentParentNode.add(new VarDeclareNode(varType, varName, rhs, ctx.start.getLine()));
     }
     return null;
   }
@@ -448,7 +448,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
               + ", exit statement requires: INT, found: " + expr.type()
               .toString());
     }
-    currentParentNode.add(new ExitNode(expr));
+    currentParentNode.add(new ExitNode(expr, ctx.start.getLine()));
     return null;
   }
 
@@ -475,7 +475,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
               + funcDefinitionReturn.toString()
               + ", actual: " + exprType.toString() + ")");
     }
-    currentParentNode.add(new ReturnNode(expr));
+    currentParentNode.add(new ReturnNode(expr, ctx.start.getLine()));
     return null;
   }
 
@@ -491,7 +491,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
               + lhs.type().toString()
               + ", actual: " + rhs.type().toString() + ")");
     }
-    currentParentNode.add(new VarAssignNode(lhs, rhs));
+    currentParentNode.add(new VarAssignNode(lhs, rhs, ctx.start.getLine()));
     return null;
   }
 
@@ -554,14 +554,14 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
               + ", free statement requires: pair(T1,T2) or T[], found: " + expr
               .type().toString());
     }
-    currentParentNode.add(new FreeNode(expr));
+    currentParentNode.add(new FreeNode(expr, ctx.start.getLine()));
     return null;
   }
 
   @Override
   public Returnable visitNewScopeStat(NewScopeStatContext ctx) {
     ScopeData stat = visitStatInNewScope(ctx.stat());
-    currentParentNode.add(new ScopeNode(stat.astNode(), stat.symbolTable()));
+    currentParentNode.add(new ScopeNode(stat.astNode(), stat.symbolTable(), ctx.start.getLine()));
     return null;
   }
 
@@ -600,11 +600,11 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
       type = ((PairType) expr.type()).getSnd();
       pos = 2;
     }
-    return new PairElem(type, pos);
+    return new PairElem(type, expr, pos);
   }
 
   private ScopeData visitStatInNewScope(StatContext stat) {
-    ParentNode ParentNode = enterScope();
+    ParentNode ParentNode = enterScope(stat.start.getLine());
     visit(stat);
     return exitScope(ParentNode);
   }
@@ -614,7 +614,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
       Param_listContext paramListContext,
       Type funcReturnType) {
 
-    ParentNode ParentNode = enterScope();
+    ParentNode ParentNode = enterScope(stat.start.getLine());
     currentST.setFunctionScope(true);
     currentST.addVar("return", funcReturnType);
 
@@ -628,12 +628,12 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
     return new ScopeData(sd.astNode(), sd.symbolTable(), paramList);
   }
 
-  private ParentNode enterScope() {
+  private ParentNode enterScope(int lineNumber) {
     boolean inFuncScope = currentST.isFunctionScope();
     currentST = new SymbolTable(currentST);
     currentST.setFunctionScope(inFuncScope);
     ParentNode parentParentNode = currentParentNode;
-    currentParentNode = new ParentNode();
+    currentParentNode = new ParentNode(lineNumber);
     return parentParentNode;
   }
 
@@ -652,7 +652,6 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
               + "BOOL, actual:" + condition.type().toString() + ")");
     }
   }
-
 
   public class ScopeData {
 

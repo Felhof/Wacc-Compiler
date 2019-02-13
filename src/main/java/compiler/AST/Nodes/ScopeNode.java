@@ -2,12 +2,13 @@ package compiler.AST.Nodes;
 
 import compiler.AST.SymbolTable.SymbolTable;
 
-public class ScopeNode implements Node {
+public class ScopeNode extends Node {
 
   SymbolTable symbolTable;
 
   public ScopeNode(ParentNode parentNode,
-      SymbolTable symbolTable) {
+      SymbolTable symbolTable, int lineNumber) {
+    super(lineNumber);
     this.parentNode = parentNode;
     this.symbolTable = symbolTable;
   }

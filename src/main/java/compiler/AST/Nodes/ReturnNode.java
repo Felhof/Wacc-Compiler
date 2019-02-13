@@ -2,10 +2,11 @@ package compiler.AST.Nodes;
 
 import compiler.AST.NodeElements.RHS.Expr;
 
-public class ReturnNode implements Node {
+public class ReturnNode extends Node {
   private Expr expr;
 
-  public ReturnNode(Expr expr) {
+  public ReturnNode(Expr expr, int lineNumber) {
+    super(lineNumber);
     this.expr = expr;
   }
 

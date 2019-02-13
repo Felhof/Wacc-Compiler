@@ -4,7 +4,7 @@ import compiler.AST.NodeElements.ListExpr;
 import compiler.AST.Types.Type;
 import compiler.AST.SymbolTable.SymbolTable;
 
-public class FuncNode implements Node {
+public class FuncNode extends Node {
   private Type returnType;
   private String name;
   private ListExpr paramList;
@@ -12,7 +12,8 @@ public class FuncNode implements Node {
   private SymbolTable symbolTable;
 
   public FuncNode(Type returnType, String name,
-      ListExpr paramList, ParentNode parentNode, SymbolTable st) {
+      ListExpr paramList, ParentNode parentNode, SymbolTable st, int lineNumber) {
+    super(lineNumber);
     this.returnType = returnType;
     this.name = name;
     this.paramList = paramList;
