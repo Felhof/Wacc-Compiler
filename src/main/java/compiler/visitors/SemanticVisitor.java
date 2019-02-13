@@ -86,6 +86,7 @@ import compiler.AST.NodeElements.RHS.IntExpr;
 import compiler.AST.NodeElements.RHS.StringExpr;
 import compiler.AST.Nodes.WhileNode;
 import compiler.AST.Nodes.ReadNode;
+import java.util.Arrays;
 import java.util.List;
 
 public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
@@ -180,7 +181,9 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
     NodeElem lhs = (NodeElem) visit(ctx.assign_lhs());
     if (!isReadableType(lhs)) {
       parser.notifyErrorListeners(ctx.assign_lhs().start,
-          incompatibleReadType(ctx.assign_lhs().getText(), lhs.type()),null);
+          incompatibleTypeMultiChoiceMsg(ctx.assign_lhs().getText(),
+              Arrays.asList(new BasicType(TYPE.INT), new BasicType(TYPE.CHAR)),
+              lhs.type()), null);
     }
     currentParentNode.add(new ReadNode(lhs));
     return null;
@@ -426,12 +429,10 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
   @Override
   public Returnable visitExitStat(ExitStatContext ctx) {
     Expr expr = (Expr) visit(ctx.expr());
+    Type intType = new BasicType(BasicType.TYPE.INT);
     if (!expr.type().equals(new BasicType(BasicType.TYPE.INT))) {
-      parser.notifyErrorListeners(
-          "Semantic error at line: " + ctx.start.getLine() + " at character: "
-              + ctx.expr().getStop().getCharPositionInLine()
-              + ", exit statement requires: INT, found: " + expr.type()
-              .toString());
+      parser.notifyErrorListeners(ctx.expr().start,
+          incompatibleTypesMsg(ctx.expr().getText(), intType, expr.type()), null);
     }
     currentParentNode.add(new ExitNode(expr));
     return null;
@@ -450,12 +451,9 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
     Type funcDefinitionReturn = currentST.lookUpAllVar("return");
 
     if (!funcDefinitionReturn.equals(exprType)) {
-      parser.notifyErrorListeners(
-          "Semantic error at line: " + ctx.start.getLine() + ", character:"
-              + ctx.expr().getStart().getCharPositionInLine()
-              + ", type mismatch: " + " (expected: "
-              + funcDefinitionReturn.toString()
-              + ", actual: " + exprType.toString() + ")");
+      parser.notifyErrorListeners(ctx.expr().start,
+          incompatibleTypesMsg(ctx.expr().getText(), funcDefinitionReturn,
+              exprType), null);
     }
     currentParentNode.add(new ReturnNode(expr));
     return null;
@@ -466,12 +464,9 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
     NodeElem lhs = (NodeElem) visit(ctx.assign_lhs());
     NodeElem rhs = (NodeElem) visit(ctx.assign_rhs());
     if (!lhs.type().equals(rhs.type())) {
-      parser.notifyErrorListeners(
-          "Semantic error at line: " + ctx.start.getLine() + ", character:"
-              + ctx.stop.getCharPositionInLine()
-              + ", type mismatch: " + " (expected: "
-              + lhs.type().toString()
-              + ", actual: " + rhs.type().toString() + ")");
+      parser.notifyErrorListeners(ctx.assign_rhs().start,
+          incompatibleTypesMsg(ctx.assign_rhs().getText(), lhs.type(), rhs.type()),
+          null);
     }
     currentParentNode.add(new VarAssignNode(lhs, rhs));
     return null;
@@ -482,9 +477,9 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
     String varName = ctx.IDENT().getText();
     Type varTypeDef = currentST.lookUpAllVar(varName);
     if (varTypeDef == null) {
-      parser.notifyErrorListeners(
-          "Semantic error at line: " + ctx.start.getLine() + " : variable "
-              + varName + " is not defined in this scope");
+      parser.notifyErrorListeners(ctx.start,
+          identifierNotDefinedMsg(annotateVar(varName)),
+          null);
       varTypeDef = new GenericType();
     }
     return new Ident(varName, varTypeDef);
@@ -506,11 +501,10 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
       }
       List<Type> paramsTypes = funcTypes.getParamTypes();
       if (!ListExpr.hasSameTypes(args.getExprTypes(),paramsTypes)) {
-        parser.notifyErrorListeners(
-            "Semantic error at line: " + ctx.start.getLine() + " : function "
-                + funcName + " has conflicting parameters and arguments, "
-                + "expected: " + paramsTypes.toString() + ", " + "actual: " + args
-                .toString());
+        parser.notifyErrorListeners(ctx.arg_list().start,
+            incompatibleTypeListMsg(ctx.arg_list().getText(), paramsTypes,
+                args.getExprTypes()),
+            null);
       }
       return new FuncCall(funcName, args, funcTypes.getReturnType());
     }
@@ -528,11 +522,12 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
     Expr expr = (Expr) visit(ctx.expr());
     if (!(expr.type() instanceof ArrType) && !(expr
         .type() instanceof PairType)) {
-      parser.notifyErrorListeners(
-          "Semantic error at line: " + ctx.start.getLine() + " at character: "
-              + ctx.expr().getStop().getCharPositionInLine()
-              + ", free statement requires: pair(T1,T2) or T[], found: " + expr
-              .type().toString());
+      parser.notifyErrorListeners(ctx.expr().start,
+          incompatibleTypeMultiChoiceMsg(ctx.expr().getText(),
+              Arrays.asList(new PairType(new GenericType(),
+                  new GenericType()), new ArrType(new GenericType())) ,
+              expr.type()),
+          null);
     }
     currentParentNode.add(new FreeNode(expr));
     return null;
@@ -556,10 +551,11 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
   public Returnable visitPair_elem(Pair_elemContext ctx) {
     Expr expr = (Expr) visit(ctx.expr());
     if (!(expr.type() instanceof PairType)) {
-      parser.notifyErrorListeners(
-          "Semantic error at line: " + ctx.start.getLine()
-              + " : type of argument is "
-              + expr.type().toString() + ", should be pair");
+      parser.notifyErrorListeners(ctx.expr().start,
+          incompatibleTypesMsg(ctx.expr().getText(),
+              new PairType(new GenericType(), new GenericType()),
+              expr.type()),
+          null);
       return null;
     }
     return getPairElem(expr, ctx);
@@ -626,10 +622,9 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
 
   private void checkBoolExpr(ExprContext ctx, Expr condition) {
     if (!condition.type().equals(new BasicType(BasicType.TYPE.BOOL))) {
-      parser.notifyErrorListeners(
-          "Semantic error at line " + ctx.start.getLine()
-              + ": Incompatible type at " + ctx.getText() + " (expected: "
-              + "BOOL, actual:" + condition.type().toString() + ")");
+      parser.notifyErrorListeners(ctx.start,
+          incompatibleTypesMsg(ctx.getText(), new BasicType(TYPE.BOOL),
+              condition.type()), null);
     }
   }
 
@@ -689,10 +684,19 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
     return "Return statement must be in a function scope";
   }
 
-  private String incompatibleReadType(String offendingSymbol, Type actual) {
-    return "Incompatible type at " + offendingSymbol
-        + " (expected: Int or Char, actual: "
-        + actual.toString();
+  private String incompatibleTypeMultiChoiceMsg(String offendingSymbol,
+      List<Type> expected,
+      Type actual) {
+    StringBuilder sb = new StringBuilder();
+    sb.append(incompatibleMsg(offendingSymbol)).append(" (expected: ");
+    for (int i = 0; i < expected.size(); i++) {
+      sb.append((expected.get(i) instanceof ArrType) ? "Any[]" : expected.get(i).toString());
+      if (i < expected.size() - 1) {
+        sb.append(" or ");
+      }
+    }
+    sb.append(", actual: ").append(actual.toString()).append(")");
+    return sb.toString();
   }
 
   private String incompatibleTypesMsg(String offendingSymbol,
