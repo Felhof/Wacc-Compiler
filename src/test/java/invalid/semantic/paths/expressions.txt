@@ -1,8 +1,8 @@
-src/test/invalid/semanticErr/expressions/unaryOpTypeMismatch.wacc
-src/test/invalid/semanticErr/expressions/moreArrExpr.wacc
-src/test/invalid/semanticErr/expressions/mixedOpTypeErr.wacc
-src/test/invalid/semanticErr/expressions/lessPairExpr.wacc
-src/test/invalid/semanticErr/expressions/intOpTypeErr.wacc
-src/test/invalid/semanticErr/expressions/IncompatibleTypesbinOpExpr.wacc
-src/test/invalid/semanticErr/expressions/exprTypeErr.wacc
-src/test/invalid/semanticErr/expressions/boolOpTypeErr.wacc
+src/test/examples/invalid/semanticErr/expressions/unaryOpTypeMismatch.wacc
+src/test/examples/invalid/semanticErr/expressions/moreArrExpr.wacc
+src/test/examples/invalid/semanticErr/expressions/mixedOpTypeErr.wacc
+src/test/examples/invalid/semanticErr/expressions/lessPairExpr.wacc
+src/test/examples/invalid/semanticErr/expressions/intOpTypeErr.wacc
+src/test/examples/invalid/semanticErr/expressions/IncompatibleTypesbinOpExpr.wacc
+src/test/examples/invalid/semanticErr/expressions/exprTypeErr.wacc
+src/test/examples/invalid/semanticErr/expressions/boolOpTypeErr.wacc

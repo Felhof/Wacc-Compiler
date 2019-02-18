@@ -1,1 +1,1 @@
-src/test/invalid/semanticErr/scope/badScopeRedefine.wacc
+src/test/examples/invalid/semanticErr/scope/badScopeRedefine.wacc

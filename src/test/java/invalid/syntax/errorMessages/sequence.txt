@@ -1,5 +1,0 @@
-src/test/java/invalid/syntax/errorMessages/sequence/doubleSeq.txt
-src/test/java/invalid/syntax/errorMessages/sequence/emptySeq.txt
-src/test/java/invalid/syntax/errorMessages/sequence/endSeq.txt
-src/test/java/invalid/syntax/errorMessages/sequence/extraSeq.txt
-src/test/java/invalid/syntax/errorMessages/sequence/missingSeq.txt

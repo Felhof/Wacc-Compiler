@@ -1,4 +1,4 @@
-src/test/invalid/syntaxErr/if/ifiErr.wacc
-src/test/invalid/syntaxErr/if/ifNoelse.wacc
-src/test/invalid/syntaxErr/if/ifNofi.wacc
-src/test/invalid/syntaxErr/if/ifNothen.wacc
+src/test/examples/invalid/syntaxErr/if/ifiErr.wacc
+src/test/examples/invalid/syntaxErr/if/ifNoelse.wacc
+src/test/examples/invalid/syntaxErr/if/ifNofi.wacc
+src/test/examples/invalid/syntaxErr/if/ifNothen.wacc

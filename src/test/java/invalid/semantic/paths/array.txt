@@ -1,1 +1,1 @@
-src/test/invalid/semanticErr/array/differentElemtypeArray.wacc
+src/test/examples/invalid/semanticErr/array/differentElemtypeArray.wacc

@@ -24,6 +24,8 @@ interface advancedVal{}
 
 public class ValidTests {
 
+  String path = "src/test/java/valid/paths/";
+
   public static void checkCompilation(String filenames) {
     try(BufferedReader br = new BufferedReader(new FileReader(filenames))) {
       for(String line; (line = br.readLine()) != null; ) {
@@ -41,54 +43,54 @@ public class ValidTests {
   @Category(basicAndVariablesVal.class)
   @Test
   public void BasicAndVariables(){
-    checkCompilation("src/test/java/valid/paths/basicAndVariables.txt");
+    checkCompilation(path + "basicAndVariables.txt");
   }
 
   @Category(ifAndPairsVal.class)
   @Test
   public void IfAndPairs() {
-    checkCompilation("src/test/java/valid/paths/ifAndPairs.txt");
+    checkCompilation(path + "ifAndPairs.txt");
   }
 
   @Category(sequenceAndScopeVal.class)
   @Test
   public void SequenceAndScope() {
-    checkCompilation("src/test/java/valid/paths/sequenceAndScope.txt");
+    checkCompilation(path + "sequenceAndScope.txt");
   }
 
   @Category(arrayAndWhileVal.class)
   @Test
   public void ArrayAndWhile() {
-    checkCompilation("src/test/java/valid/paths/arrayAndWhile.txt");
+    checkCompilation(path + "arrayAndWhile.txt");
   }
 
   @Category(functionsVal.class)
   @Test
   public void Functions() {
-    checkCompilation("src/test/java/valid/paths/functions.txt");
+    checkCompilation(path + "functions.txt");
   }
 
   @Category(expressionsVal.class)
   @Test
   public void Expressions() {
-    checkCompilation("src/test/java/valid/paths/expressions.txt");
+    checkCompilation(path + "expressions.txt");
   }
 
   @Category(ioVal.class)
   @Test
   public void IO() {
-    checkCompilation("src/test/java/valid/paths/io.txt");
+    checkCompilation(path + "io.txt");
   }
 
   @Category(runtimeErrVal.class)
   @Test
   public void RuntimeErr(){
-    checkCompilation("src/test/java/valid/paths/runtimeErr.txt");
+    checkCompilation(path + "runtimeErr.txt");
   }
 
   @Category(advancedVal.class)
   @Test
   public void Advanced() {
-    checkCompilation("src/test/java/valid/paths/advanced.txt");
+    checkCompilation(path + "advanced.txt");
   }
 }

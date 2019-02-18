@@ -1,5 +1,5 @@
-src/test/invalid/syntaxErr/sequence/doubleSeq.wacc
-src/test/invalid/syntaxErr/sequence/emptySeq.wacc
-src/test/invalid/syntaxErr/sequence/endSeq.wacc
-src/test/invalid/syntaxErr/sequence/extraSeq.wacc
-src/test/invalid/syntaxErr/sequence/missingSeq.wacc
+src/test/examples/invalid/syntaxErr/sequence/doubleSeq.wacc
+src/test/examples/invalid/syntaxErr/sequence/emptySeq.wacc
+src/test/examples/invalid/syntaxErr/sequence/endSeq.wacc
+src/test/examples/invalid/syntaxErr/sequence/extraSeq.wacc
+src/test/examples/invalid/syntaxErr/sequence/missingSeq.wacc

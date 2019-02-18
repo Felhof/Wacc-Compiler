@@ -1,4 +1,0 @@
-src/test/java/invalid/syntax/errorMessages/if/ifiErr.txt
-src/test/java/invalid/syntax/errorMessages/if/ifNoelse.txt
-src/test/java/invalid/syntax/errorMessages/if/ifNofi.txt
-src/test/java/invalid/syntax/errorMessages/if/ifNothen.txt

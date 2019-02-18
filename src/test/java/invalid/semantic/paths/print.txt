@@ -1,1 +1,1 @@
-src/test/invalid/semanticErr/print/printTypeErr01.wacc
+src/test/examples/invalid/semanticErr/print/printTypeErr01.wacc

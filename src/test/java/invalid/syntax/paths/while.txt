@@ -1,5 +1,5 @@
-src/test/invalid/syntaxErr/while/donoErr.wacc
-src/test/invalid/syntaxErr/while/dooErr.wacc
-src/test/invalid/syntaxErr/while/whileNodo.wacc
-src/test/invalid/syntaxErr/while/whileNodone.wacc
-src/test/invalid/syntaxErr/while/whilErr.wacc
+src/test/examples/invalid/syntaxErr/while/donoErr.wacc
+src/test/examples/invalid/syntaxErr/while/dooErr.wacc
+src/test/examples/invalid/syntaxErr/while/whileNodo.wacc
+src/test/examples/invalid/syntaxErr/while/whileNodone.wacc
+src/test/examples/invalid/syntaxErr/while/whilErr.wacc

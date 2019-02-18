@@ -1,1 +1,1 @@
-src/test/invalid/semanticErr/IO/readTypeErr.wacc
+src/test/examples/invalid/semanticErr/IO/readTypeErr.wacc
