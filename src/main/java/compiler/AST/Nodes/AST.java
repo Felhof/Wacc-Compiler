@@ -12,4 +12,11 @@ public class AST implements ASTData {
     this.symbolTable = symbolTable;
   }
 
+  public ParentNode root() {
+    return root;
+  }
+
+  public SymbolTable symbolTable() {
+    return symbolTable;
+  }
 }

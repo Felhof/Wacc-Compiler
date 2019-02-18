@@ -6,4 +6,5 @@ public abstract class Node {
   public Node(int lineNumber) {
     this.lineNumber = lineNumber;
   }
+
 }

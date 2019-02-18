@@ -1,7 +1,9 @@
 package compiler;
 
 import compiler.AST.Nodes.AST;
+import compiler.instr.Instr;
 import compiler.listeners.ErrorListener;
+import compiler.visitors.ASTVisitor;
 import compiler.visitors.SemanticVisitor;
 import compiler.visitors.SyntaxVisitor;
 
@@ -10,6 +12,7 @@ import java.io.PrintWriter;
 
 import antlr.*;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -69,11 +72,13 @@ public class Main {
 
     String assemblyFile = filename + ".s";
 
+    ASTVisitor codeGenerator = new ASTVisitor();
+    List<Instr> instructions = codeGenerator.generate(ast);
+
     try {
 
       PrintWriter writer = new PrintWriter(assemblyFile, StandardCharsets.UTF_8);
-
-      // TODO generate code
+      // write instructions in writer
 
 //      // Test
 //      writer.println(".text");
