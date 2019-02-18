@@ -5,12 +5,11 @@ import compiler.listeners.ErrorListener;
 import compiler.visitors.SemanticVisitor;
 import compiler.visitors.SyntaxVisitor;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 
 import antlr.*;
+import java.nio.charset.StandardCharsets;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -20,6 +19,7 @@ public class Main {
 
   public static void main(String[] args) {
     AST ast = compileProg(args[0]); // uncomment for labTS test
+    generateCode(ast, extractFileName(args[0]));
     System.exit(0);
   }
 
@@ -65,46 +65,40 @@ public class Main {
     return ast;
   }
 
+  public static void generateCode(AST ast, String filename){
 
-  //Returns assembly code for exit-basic for testing purposes
-  public static String GenerateCode(String name, AST ast){
-
-    String file = name + ".s";
+    String assemblyFile = filename + ".s";
 
     try {
 
-      //Generate Assembly Code here
-      PrintWriter writer = new PrintWriter(file, "UTF-8");
-      writer.println(".text");
-      writer.println(".global main");
-      writer.println("main:");
-      writer.println("\tPUSH {lr}");
-      writer.println("\tLDR r4, =7");
-      writer.println("\tMOV r0, r4");
-      writer.println("\tBL exit");
-      writer.println("\tLDR r0, =0");
-      writer.println("\tPOP {pc}");
-      writer.println("\t.ltorg");
+      PrintWriter writer = new PrintWriter(assemblyFile, StandardCharsets.UTF_8);
+
+      // TODO generate code
+
+//      // Test
+//      writer.println(".text");
+//      writer.println(".global main");
+//      writer.println("main:");
+//      writer.println("\tPUSH {lr}");
+//      writer.println("\tLDR r4, =7");
+//      writer.println("\tMOV r0, r4");
+//      writer.println("\tBL exit");
+//      writer.println("\tLDR r0, =0");
+//      writer.println("\tPOP {pc}");
+//      writer.println("\t.ltorg");
+
       writer.close();
 
-      //Cross Compile
-      Process p = new ProcessBuilder("arm-linux-gnueabi-gcc", "-o", name,
-              "-mcpu=arm1176jzf-s", "-mtune=arm1176jzf-s", file).start();
-
-      p.waitFor();
-      System.out.println(p.exitValue());
-
-    } catch (FileNotFoundException e) {
-      e.printStackTrace();
-    } catch (UnsupportedEncodingException e) {
-      e.printStackTrace();
     } catch (IOException e) {
       e.printStackTrace();
-    } catch (InterruptedException e) {
-      e.printStackTrace();
     }
+  }
 
-    return name;
+  private static String extractFileName(String path) {
+    int slash = path.lastIndexOf('/');
+    int point = path.lastIndexOf('.');
+    return path.substring((slash == -1) ? 0 : slash + 1, (point == -1) ?
+        path.length() -1 : point);
   }
 
 }

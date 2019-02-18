@@ -11,59 +11,47 @@ import static org.hamcrest.core.Is.is;
 
 public class CodegenTests {
 
-  String path = "src/test/examples/valid/basic/exit/";
+  @Test
+  public void ExitCodeTest(){
 
-  String[] names = {"exit-1", "exitBasic", "exitBasic2", "exitWrap"};
-  int[] expectedexitCode = {255, 7, 42, 0};
+    String path = "src/test/examples/valid/basic/exit/";
+    String[] fileNames = {"exit-1", "exitBasic", "exitBasic2", "exitWrap"};
+    int[] expectedExitCode = {255, 7, 42, 0};
 
-  //Tests all basic?exit files
-  //Will work whe we have code generation
-  public void ExitStatus(){
-
-    for(int i = 0; i < names.length; i++) {
-      AST ast = Main.compileProg(path + names[i] + ".wacc");
-
-      String file = Main.GenerateCode(names[i], ast);
+    for (int i = 0; i < fileNames.length; i++) {
+      String filename = fileNames[i];
+      AST ast = Main.compileProg(path + filename + ".wacc");
+      Main.generateCode(ast, filename);
 
       try {
 
-        ProcessBuilder pb = new ProcessBuilder("qemu-arm", "-L", "/usr/arm-linux-gnueabi/", file);
-        final Process p = pb.start();
-        p.waitFor();
+        // Assembler
+        Process assembler = new ProcessBuilder("arm-linux-gnueabi-gcc", "-o",
+            filename, "-mcpu=arm1176jzf-s", "-mtune=arm1176jzf-s",
+            filename + ".s").start();
+        assembler.waitFor();
+        //System.out.println(assembler.exitValue());
 
-        assertThat(p.exitValue(), is(expectedexitCode[i]));
+        // Emulator
+        Process emulator = new ProcessBuilder("qemu-arm", "-L", "/usr"
+            + "/arm-linux-gnueabi/", filename).start();
+        emulator.waitFor();
 
-        //This might be usefull when we want the output:
-        /*
-        BufferedReader br=new BufferedReader(new InputStreamReader(p.getInputStream()));
-        String line;
-        StringBuilder sb = new StringBuilder();
-        while((line=br.readLine())!=null) sb.append(line);
+        assertThat(emulator.exitValue(), is(expectedExitCode[i]));
 
-        System.out.println(sb.toString());*/
+//        //This might be usefull when we want the output:
+//
+//        BufferedReader br=new BufferedReader(new InputStreamReader(emulator
+//        .getInputStream()));
+//        String line;
+//        StringBuilder sb = new StringBuilder();
+//        while((line=br.readLine())!=null) sb.append(line);
+//
+//        System.out.println(sb.toString());
 
       } catch (IOException | InterruptedException e) {
         e.printStackTrace();
       }
-    }
-  }
-
-
-  //Tests exit basic
-  @Test
-  public void BasicTest(){
-    String file = Main.GenerateCode("exitBasic", null);
-
-    try {
-
-      ProcessBuilder pb = new ProcessBuilder("qemu-arm", "-L", "/usr/arm-linux-gnueabi/", file);
-      final Process p = pb.start();
-      p.waitFor();
-
-      assertThat(p.exitValue(), is(7));
-
-    } catch (IOException | InterruptedException e) {
-      e.printStackTrace();
     }
   }
 
