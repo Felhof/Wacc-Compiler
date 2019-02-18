@@ -1,8 +1,7 @@
 package compiler;
 
 import compiler.AST.Nodes.AST;
-import compiler.listeners.SemanticErrorListener;
-import compiler.listeners.SyntaxErrorListener;
+import compiler.listeners.ErrorListener;
 import compiler.visitors.SemanticVisitor;
 import compiler.visitors.SyntaxVisitor;
 import java.io.IOException;
@@ -39,7 +38,7 @@ public class Main {
     BasicParser parser = new BasicParser(stream);
 
     parser.removeErrorListeners();
-    SyntaxErrorListener syntaxErrorListener = new SyntaxErrorListener();
+    ErrorListener syntaxErrorListener = new ErrorListener("Syntax");
     parser.addErrorListener(syntaxErrorListener);
 
     ParseTree tree = parser.prog();
@@ -53,7 +52,7 @@ public class Main {
 
   public static AST semanticCheck(BasicParser parser, ParseTree tree) {
     parser.removeErrorListeners();
-    SemanticErrorListener semanticErrorListener = new SemanticErrorListener();
+    ErrorListener semanticErrorListener = new ErrorListener("Semantic");
     parser.addErrorListener(semanticErrorListener);
     SemanticVisitor semanticVisitor = new SemanticVisitor(parser);
     AST ast = (AST) semanticVisitor.visit(tree);

@@ -4,12 +4,15 @@ import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 
-public class SemanticErrorListener extends BaseErrorListener {
-  private int nbSemanticErrors = 0;
-  StringBuilder sb;
+public class ErrorListener extends BaseErrorListener {
+  private String type;
+  private int nbOfErrors;
+  private StringBuilder sb;
 
-  public SemanticErrorListener() {
-    sb = new StringBuilder();
+  public ErrorListener(String type) {
+    this.type = type;
+    this.nbOfErrors = 0;
+    this.sb = new StringBuilder();
   }
 
   @Override
@@ -21,23 +24,25 @@ public class SemanticErrorListener extends BaseErrorListener {
   {
     charPositionInLine++;
 
-    sb.append("Semantic Error at ")
+    sb.append(type)
+        .append(" Error at ")
         .append(line).append(":")
         .append(charPositionInLine)
         .append(" -- ")
         .append(msg)
         .append('\n');
 
-    nbSemanticErrors++;
+    nbOfErrors++;
   }
 
   public void printCompilationStatus() {
-    if (nbSemanticErrors > 0) {
-      System.err.println("Compilation failed! " + nbSemanticErrors + " "
-          + "Semantic error" + ((nbSemanticErrors > 1) ? "s" : ""));
-      System.err.println("Exit code 200 returned");
+    if (nbOfErrors > 0) {
+      int exitCode = type.equals("Syntax") ? 100 : 200;
+      System.err.println("Compilation failed! " + nbOfErrors + " "
+          + type + " error" + ((nbOfErrors > 1) ? "s" : ""));
+      System.err.println("Exit code " + exitCode + " returned");
       System.err.println(sb.toString());
-      System.exit(200);
+      System.exit(exitCode);
     }
   }
 }

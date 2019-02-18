@@ -1,9 +1,9 @@
 package compiler.AST.NodeElements.RHS;
 
 import compiler.AST.Types.PairType;
-import compiler.visitors.Returnable;
+import compiler.visitors.ASTData;
 
-public class Pair extends Expr implements Returnable {
+public class Pair extends Expr implements ASTData {
 
   private Expr fstExpr;
   private Expr sndExpr;

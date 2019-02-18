@@ -1,8 +1,8 @@
 package compiler.AST.Types;
 
-import compiler.visitors.Returnable;
+import compiler.visitors.ASTData;
 
-public abstract class Type implements Returnable {
+public abstract class Type implements ASTData {
 
   public boolean equals(Type type) {
     return false;

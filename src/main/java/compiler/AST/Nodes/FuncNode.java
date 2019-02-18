@@ -3,9 +3,9 @@ package compiler.AST.Nodes;
 import compiler.AST.NodeElements.ListExpr;
 import compiler.AST.Types.Type;
 import compiler.AST.SymbolTable.SymbolTable;
-import compiler.visitors.Returnable;
+import compiler.visitors.ASTData;
 
-public class FuncNode extends Node implements Returnable {
+public class FuncNode extends Node implements ASTData {
   private Type returnType;
   private String name;
   private ListExpr paramList;

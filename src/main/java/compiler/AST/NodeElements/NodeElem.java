@@ -1,9 +1,9 @@
 package compiler.AST.NodeElements;
 
 import compiler.AST.Types.Type;
-import compiler.visitors.Returnable;
+import compiler.visitors.ASTData;
 
-public abstract class NodeElem implements Returnable {
+public abstract class NodeElem implements ASTData {
   protected Type type;
 
   public NodeElem(Type type) {

@@ -1,10 +1,10 @@
 package compiler.AST.SymbolTable;
 
 import compiler.AST.Types.Type;
-import compiler.visitors.Returnable;
+import compiler.visitors.ASTData;
 import java.util.List;
 
-public class FuncTypes implements Returnable {
+public class FuncTypes implements ASTData {
   private List<Type> paramTypeList;
   private Type returnType;
 

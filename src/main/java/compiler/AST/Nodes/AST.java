@@ -1,9 +1,9 @@
 package compiler.AST.Nodes;
 
 import compiler.AST.SymbolTable.SymbolTable;
-import compiler.visitors.Returnable;
+import compiler.visitors.ASTData;
 
-public class AST implements Returnable {
+public class AST implements ASTData {
   private ParentNode root;
   private SymbolTable symbolTable;
 

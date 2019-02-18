@@ -1,7 +1,7 @@
 package compiler.AST.SymbolTable;
 
 import compiler.AST.Types.Type;
-import compiler.visitors.Returnable;
+import compiler.visitors.ASTData;
 import java.util.HashMap;
 
 public class SymbolTable {
@@ -34,10 +34,10 @@ public class SymbolTable {
     return (FuncTypes) genericLookUpAll(name, "func");
   }
 
-  public Returnable genericLookUpAll(String name, String type) {
+  public ASTData genericLookUpAll(String name, String type) {
     SymbolTable currST = this;
     while (currST != null) {
-      Returnable identifier;
+      ASTData identifier;
       if (type.equals("var")) {
         identifier = currST.lookUpVarScope(name);
       } else {

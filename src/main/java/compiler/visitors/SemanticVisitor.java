@@ -90,7 +90,7 @@ import compiler.AST.Nodes.ReadNode;
 import java.util.Arrays;
 import java.util.List;
 
-public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
+public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
 
   private BasicParser parser;
   private SymbolTable currentST;
@@ -102,7 +102,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
   }
 
   @Override
-  public Returnable visitProg(ProgContext ctx) {
+  public ASTData visitProg(ProgContext ctx) {
     currentParentNode = new ParentNode(ctx.start.getLine());
     addFuncDefToST(ctx);
     ctx.func().forEach(f -> currentParentNode.add((Node) visit(f)));
@@ -129,7 +129,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
   }
 
   @Override
-  public Returnable visitFunc(FuncContext ctx) {
+  public ASTData visitFunc(FuncContext ctx) {
     Type funcReturnType = (Type) visit(ctx.type());
 
     ScopeData funcStat = visitFuncStatInNewScope(ctx.IDENT().getText(),
@@ -142,14 +142,14 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
   }
 
   @Override
-  public Returnable visitParam_list(Param_listContext ctx) {
+  public ASTData visitParam_list(Param_listContext ctx) {
     ListExpr paramList = new ListExpr();
     ctx.param().forEach(p -> paramList.add(new Ident(p.IDENT().getText(), (Type) visit(p))));
     return paramList;
   }
 
   @Override
-  public Returnable visitParam(ParamContext ctx) {
+  public ASTData visitParam(ParamContext ctx) {
     Type paramType = (Type) visit(ctx.type());
     if (currentST.getEncSymTable() != null) {
       // don't add parameters to main symbol table
@@ -159,26 +159,26 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
   }
 
   @Override
-  public Returnable visitRecursiveStat(RecursiveStatContext ctx) {
+  public ASTData visitRecursiveStat(RecursiveStatContext ctx) {
     visit(ctx.stat(0));
     visit(ctx.stat(1));
     return null;
   }
 
   @Override
-  public Returnable visitPrintStat(PrintStatContext ctx) {
+  public ASTData visitPrintStat(PrintStatContext ctx) {
     currentParentNode.add(new PrintNode(false, (Expr) visit(ctx.expr()), ctx.start.getLine()));
     return null;
   }
 
   @Override
-  public Returnable visitPrintlnStat(PrintlnStatContext ctx) {
+  public ASTData visitPrintlnStat(PrintlnStatContext ctx) {
     currentParentNode.add(new PrintNode(true, (Expr) visit(ctx.expr()), ctx.start.getLine()));
     return null;
   }
 
   @Override
-  public Returnable visitReadStat(ReadStatContext ctx) {
+  public ASTData visitReadStat(ReadStatContext ctx) {
     NodeElem lhs = (NodeElem) visit(ctx.assign_lhs());
     if (!isReadableType(lhs)) {
       parser.notifyErrorListeners(ctx.assign_lhs().start,
@@ -191,7 +191,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
   }
 
   @Override
-  public Returnable visitIfStat(IfStatContext ctx) {
+  public ASTData visitIfStat(IfStatContext ctx) {
 
     Expr condition = (Expr) visit(ctx.expr());
     checkBoolExpr(ctx.expr(), condition);
@@ -205,7 +205,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
   }
 
   @Override
-  public Returnable visitWhileStat(WhileStatContext ctx) {
+  public ASTData visitWhileStat(WhileStatContext ctx) {
 
     Expr condition = (Expr) visit(ctx.expr());
     checkBoolExpr(ctx.expr(), condition);
@@ -218,7 +218,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
   }
 
   @Override
-  public Returnable visitVarDeclarationStat(VarDeclarationStatContext ctx) {
+  public ASTData visitVarDeclarationStat(VarDeclarationStatContext ctx) {
     String varName = ctx.IDENT().getText();
 
     Type varType = (Type) visit(ctx.type());
@@ -243,27 +243,27 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
   }
 
   @Override
-  public Returnable visitBoolExp(BoolExpContext ctx) {
+  public ASTData visitBoolExp(BoolExpContext ctx) {
     return new BoolExpr(ctx.bool_liter().getText());
   }
 
   @Override
-  public Returnable visitIntExp(IntExpContext ctx) {
+  public ASTData visitIntExp(IntExpContext ctx) {
     return new IntExpr(ctx.INTEGER().getText());
   }
 
   @Override
-  public Returnable visitCharExp(CharExpContext ctx) {
+  public ASTData visitCharExp(CharExpContext ctx) {
     return new CharExpr(ctx.char_liter().getText());
   }
 
   @Override
-  public Returnable visitStrExp(StrExpContext ctx) {
+  public ASTData visitStrExp(StrExpContext ctx) {
     return new StringExpr(ctx.str_liter().getText());
   }
 
   @Override
-  public Returnable visitBinaryExp(BinaryExpContext ctx) {
+  public ASTData visitBinaryExp(BinaryExpContext ctx) {
     Expr lhs = (Expr) visit(ctx.expr(0));
     Expr rhs = (Expr) visit(ctx.expr(1));
 
@@ -284,7 +284,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
   }
 
   @Override
-  public Returnable visitUnaryExp(UnaryExpContext ctx) {
+  public ASTData visitUnaryExp(UnaryExpContext ctx) {
     Expr expr = (Expr) visit(ctx.expr());
     UnaryExpr unaryExpr = new UnaryExpr(UNOP.get(ctx.unary_oper().getText()),
         expr);
@@ -298,7 +298,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
   }
 
   @Override
-  public Returnable visitIdentExp(IdentExpContext ctx) {
+  public ASTData visitIdentExp(IdentExpContext ctx) {
     String varName = ctx.IDENT().getText();
     Type varTypeDef = currentST.lookUpAllVar(varName);
     if (varTypeDef == null) {
@@ -310,17 +310,17 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
   }
 
   @Override
-  public Returnable visitArrayElemLhs(ArrayElemLhsContext ctx) {
+  public ASTData visitArrayElemLhs(ArrayElemLhsContext ctx) {
     return visit(ctx.array_elem());
   }
 
   @Override
-  public Returnable visitArrayExp(ArrayExpContext ctx) {
+  public ASTData visitArrayExp(ArrayExpContext ctx) {
     return visit(ctx.array_elem());
   }
 
   @Override
-  public Returnable visitArray_elem(Array_elemContext ctx) {
+  public ASTData visitArray_elem(Array_elemContext ctx) {
     String varName = ctx.IDENT().getText();
     int dimensionAccessed = ctx.expr().size();
 
@@ -357,7 +357,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
   }
 
   @Override
-  public Returnable visitNewPair(NewPairContext ctx) {
+  public ASTData visitNewPair(NewPairContext ctx) {
     Expr fst = (Expr) visit(ctx.expr(0));
     Expr snd = (Expr) visit(ctx.expr(1));
 
@@ -365,7 +365,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
   }
 
   @Override
-  public Returnable visitAssignArray(AssignArrayContext ctx) {
+  public ASTData visitAssignArray(AssignArrayContext ctx) {
     Array_literContext context = ctx.array_liter();
     Expr[] elems = new Expr[context.expr().size()];
 
@@ -387,24 +387,24 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
   }
 
   @Override
-  public Returnable visitBaseType(BaseTypeContext ctx) {
+  public ASTData visitBaseType(BaseTypeContext ctx) {
     return Type.getBasicType(ctx.getText());
   }
 
   @Override
-  public Returnable visitArrayType(ArrayTypeContext ctx) {
+  public ASTData visitArrayType(ArrayTypeContext ctx) {
     Type elemType = (Type) visit(ctx.type());
     return (elemType instanceof ArrType) ?
         ((ArrType) elemType).addDimension() : new ArrType(elemType);
   }
 
   @Override
-  public Returnable visitStringType(StringTypeContext ctx) {
+  public ASTData visitStringType(StringTypeContext ctx) {
     return new ArrType(CharType.getInstance());
   }
 
   @Override
-  public Returnable visitPairType(PairTypeContext ctx) {
+  public ASTData visitPairType(PairTypeContext ctx) {
     Pair_typeContext context = ctx.pair_type();
     Type lhs = (Type) visit(context.pair_elem_type(0));
     Type rhs = (Type) visit(context.pair_elem_type(1));
@@ -412,22 +412,22 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
   }
 
   @Override
-  public Returnable visitPairElemBaseType(PairElemBaseTypeContext ctx) {
+  public ASTData visitPairElemBaseType(PairElemBaseTypeContext ctx) {
     return Type.getBasicType(ctx.getText());
   }
 
   @Override
-  public Returnable visitPairElemArrayType(PairElemArrayTypeContext ctx) {
+  public ASTData visitPairElemArrayType(PairElemArrayTypeContext ctx) {
     return new ArrType((Type) visit(ctx.type()));
   }
 
   @Override
-  public Returnable visitPairElemPairType(PairElemPairTypeContext ctx) {
+  public ASTData visitPairElemPairType(PairElemPairTypeContext ctx) {
     return new PairType(GenericType.getInstance(), GenericType.getInstance());
   }
 
   @Override
-  public Returnable visitExitStat(ExitStatContext ctx) {
+  public ASTData visitExitStat(ExitStatContext ctx) {
     Expr expr = (Expr) visit(ctx.expr());
     Type intType = IntType.getInstance();
     if (!expr.type().equals(IntType.getInstance())) {
@@ -439,7 +439,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
   }
 
   @Override
-  public Returnable visitReturnStat(ReturnStatContext ctx) {
+  public ASTData visitReturnStat(ReturnStatContext ctx) {
     Expr expr = (Expr) visit(ctx.expr());
     Type exprType = expr.type();
 
@@ -460,7 +460,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
   }
 
   @Override
-  public Returnable visitAssignStat(AssignStatContext ctx) {
+  public ASTData visitAssignStat(AssignStatContext ctx) {
     NodeElem lhs = (NodeElem) visit(ctx.assign_lhs());
     NodeElem rhs = (NodeElem) visit(ctx.assign_rhs());
     if (!lhs.type().equals(rhs.type())) {
@@ -473,7 +473,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
   }
 
   @Override
-  public Returnable visitIdentLhs(IdentLhsContext ctx) {
+  public ASTData visitIdentLhs(IdentLhsContext ctx) {
     String varName = ctx.IDENT().getText();
     Type varTypeDef = currentST.lookUpAllVar(varName);
     if (varTypeDef == null) {
@@ -486,7 +486,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
   }
 
   @Override
-  public Returnable visitFuncCall(FuncCallContext ctx) {
+  public ASTData visitFuncCall(FuncCallContext ctx) {
     String funcName = ctx.IDENT().getText();
     FuncTypes funcTypes = currentST.lookUpAllFunc(funcName);
     ListExpr args = new ListExpr();
@@ -511,14 +511,14 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
   }
 
   @Override
-  public Returnable visitArg_list(Arg_listContext ctx) {
+  public ASTData visitArg_list(Arg_listContext ctx) {
     ListExpr argsList = new ListExpr();
     ctx.expr().forEach(e -> argsList.add(((Expr) visit(e))));
     return argsList;
   }
 
   @Override
-  public Returnable visitFreeStat(BasicParser.FreeStatContext ctx) {
+  public ASTData visitFreeStat(BasicParser.FreeStatContext ctx) {
     Expr expr = (Expr) visit(ctx.expr());
     if (!(expr.type() instanceof ArrType) && !(expr
         .type() instanceof PairType)) {
@@ -534,21 +534,21 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
   }
 
   @Override
-  public Returnable visitNewScopeStat(NewScopeStatContext ctx) {
+  public ASTData visitNewScopeStat(NewScopeStatContext ctx) {
     ScopeData stat = visitStatInNewScope(ctx.stat());
     currentParentNode.add(new ScopeNode(stat.astNode(), stat.symbolTable(), ctx.start.getLine()));
     return null;
   }
 
   @Override
-  public Returnable visitBracketExp(BracketExpContext ctx) {
+  public ASTData visitBracketExp(BracketExpContext ctx) {
     Expr expr = (Expr) visit(ctx.expr());
     expr.putBrackets();
     return expr;
   }
 
   @Override
-  public Returnable visitPair_elem(Pair_elemContext ctx) {
+  public ASTData visitPair_elem(Pair_elemContext ctx) {
     Expr expr = (Expr) visit(ctx.expr());
     if (!(expr.type() instanceof PairType)) {
       parser.notifyErrorListeners(ctx.expr().start,
@@ -562,11 +562,11 @@ public class SemanticVisitor extends BasicParserBaseVisitor<Returnable> {
   }
 
   @Override
-  public Returnable visitPairExp(PairExpContext ctx) {
+  public ASTData visitPairExp(PairExpContext ctx) {
     return new PairExp(new PairType(GenericType.getInstance(), GenericType.getInstance()));
   }
 
-  private Returnable getPairElem(Expr expr, Pair_elemContext ctx) {
+  private ASTData getPairElem(Expr expr, Pair_elemContext ctx) {
     Type type;
     int pos;
     if (ctx.SND() == null) {

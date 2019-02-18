@@ -2,12 +2,12 @@ package compiler.AST.NodeElements;
 
 import compiler.AST.NodeElements.RHS.Expr;
 import compiler.AST.Types.Type;
-import compiler.visitors.Returnable;
+import compiler.visitors.ASTData;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class ListExpr implements Returnable {
+public class ListExpr implements ASTData {
 
   private List<Expr> exprList;
 
