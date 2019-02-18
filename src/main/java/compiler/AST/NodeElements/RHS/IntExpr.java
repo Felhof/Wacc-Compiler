@@ -12,7 +12,7 @@ public class IntExpr extends Expr {
     this.value = value;
   }
 
-  public String getValue() {
+  public String value() {
     return value;
   }
 
@@ -23,6 +23,6 @@ public class IntExpr extends Expr {
 
   @Override
   public CodeGenData accept(ASTVisitor visitor) {
-    return visitor.transExp(this);
+    return visitor.visitIntExpr(this);
   }
 }

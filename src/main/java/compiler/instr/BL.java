@@ -10,6 +10,6 @@ public class BL extends Instr {
 
   @Override
   public String toString() {
-    return "BL " + label;
+    return "\tBL " + label;
   }
 }

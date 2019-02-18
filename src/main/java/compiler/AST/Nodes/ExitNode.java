@@ -17,13 +17,14 @@ public class ExitNode extends Node {
     return "ExitNode(" + exitStatus.toString() + ')';
   }
 
+  public Expr exitStatus() {
+    return exitStatus;
+  }
+
   @Override
   public CodeGenData accept(ASTVisitor visitor) {
     visitor.visitExit(this);
     return null;
   }
 
-  public Expr exitStatus() {
-    return exitStatus;
-  }
 }

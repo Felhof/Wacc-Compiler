@@ -1,22 +1,26 @@
 package compiler.instr;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class POP extends Instr {
 
-  List<Register> regsToPop;
+  List<REG> regsToPop;
 
-  public POP(List<Register> regsToPop) {
+  public POP(List<REG> regsToPop) {
     this.regsToPop = regsToPop;
+  }
+  public POP(REG regToPop) {
+    this.regsToPop = new ArrayList<>(Arrays.asList(regToPop));
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("POP {");
+    sb.append("\tPOP {");
     regsToPop.forEach(r -> sb.append(r.toString()).append(", "));
-    sb.deleteCharAt(sb.length() - 1);
-    sb.deleteCharAt(sb.length() - 1);
+    sb.delete(sb.length() - 2, sb.length());
     sb.append("}");
     return sb.toString();
   }
