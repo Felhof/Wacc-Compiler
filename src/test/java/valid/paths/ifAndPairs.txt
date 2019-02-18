@@ -9,12 +9,12 @@ src/test/examples/valid/if/ifFalse.wacc
 src/test/examples/valid/if/ifTrue.wacc
 src/test/examples/valid/if/whitespace.wacc
 src/test/examples/valid/pairs/checkRefPair.wacc
-src/test/examples/valid/pairs/checkRefPair.wacc~
+src/test/examples/valid/pairs/checkRefPair.wacc
 src/test/examples/valid/pairs/createPair02.wacc
 src/test/examples/valid/pairs/createPair03.wacc
 src/test/examples/valid/pairs/createPair.wacc
 src/test/examples/valid/pairs/createRefPair.wacc
-src/test/examples/valid/pairs/createRefPair.wacc~
+src/test/examples/valid/pairs/createRefPair.wacc
 src/test/examples/valid/pairs/free.wacc
 src/test/examples/valid/pairs/linkedList.wacc
 src/test/examples/valid/pairs/nestedPair.wacc
@@ -24,6 +24,6 @@ src/test/examples/valid/pairs/printNull.wacc
 src/test/examples/valid/pairs/printPairOfNulls.wacc
 src/test/examples/valid/pairs/printPair.wacc
 src/test/examples/valid/pairs/readPair.wacc
-src/test/examples/valid/pairs/readPair.wacc~
+src/test/examples/valid/pairs/readPair.wacc
 src/test/examples/valid/pairs/writeFst.wacc
 src/test/examples/valid/pairs/writeSnd.wacc
