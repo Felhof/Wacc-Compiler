@@ -16,6 +16,8 @@ public class CodegenTests {
   String[] names = {"exit-1", "exitBasic", "exitBasic2", "exitWrap"};
   int[] expectedexitCode = {255, 7, 42, 0};
 
+  //Tests all basic?exit files
+  //Will work whe we have code generation
   public void ExitStatus(){
 
     for(int i = 0; i < names.length; i++) {
@@ -44,8 +46,25 @@ public class CodegenTests {
         e.printStackTrace();
       }
     }
+  }
 
 
+  //Tests exit basic
+  @Test
+  public void BasicTest(){
+    String file = Main.GenerateCode("exitBasic", null);
+
+    try {
+
+      ProcessBuilder pb = new ProcessBuilder("qemu-arm", "-L", "/usr/arm-linux-gnueabi/", file);
+      final Process p = pb.start();
+      p.waitFor();
+
+      assertThat(p.exitValue(), is(7));
+
+    } catch (IOException | InterruptedException e) {
+      e.printStackTrace();
+    }
   }
 
 }

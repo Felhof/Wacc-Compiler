@@ -65,6 +65,8 @@ public class Main {
     return ast;
   }
 
+
+  //Returns assembly code for exit-basic for testing purposes
   public static String GenerateCode(String name, AST ast){
 
     String file = name + ".s";
@@ -73,10 +75,24 @@ public class Main {
 
       //Generate Assembly Code here
       PrintWriter writer = new PrintWriter(file, "UTF-8");
+      writer.println(".text");
+      writer.println(".global main");
+      writer.println("main:");
+      writer.println("\tPUSH {lr}");
+      writer.println("\tLDR r4, =7");
+      writer.println("\tMOV r0, r4");
+      writer.println("\tBL exit");
+      writer.println("\tLDR r0, =0");
+      writer.println("\tPOP {pc}");
+      writer.println("\t.ltorg");
+      writer.close();
 
       //Cross Compile
-      new ProcessBuilder("arm-linux-gnueabi-gcc", "-o", name,
+      Process p = new ProcessBuilder("arm-linux-gnueabi-gcc", "-o", name,
               "-mcpu=arm1176jzf-s", "-mtune=arm1176jzf-s", file).start();
+
+      p.waitFor();
+      System.out.println(p.exitValue());
 
     } catch (FileNotFoundException e) {
       e.printStackTrace();
@@ -84,9 +100,11 @@ public class Main {
       e.printStackTrace();
     } catch (IOException e) {
       e.printStackTrace();
+    } catch (InterruptedException e) {
+      e.printStackTrace();
     }
 
-    return file;
+    return name;
   }
 
 }
