@@ -70,13 +70,19 @@ public class Main {
     String file = name + ".s";
 
     try {
+
+      //Generate Assembly Code here
       PrintWriter writer = new PrintWriter(file, "UTF-8");
 
-
+      //Cross Compile
+      new ProcessBuilder("arm-linux-gnueabi-gcc", "-o", name,
+              "-mcpu=arm1176jzf-s", "-mtune=arm1176jzf-s", file).start();
 
     } catch (FileNotFoundException e) {
       e.printStackTrace();
     } catch (UnsupportedEncodingException e) {
+      e.printStackTrace();
+    } catch (IOException e) {
       e.printStackTrace();
     }
 
