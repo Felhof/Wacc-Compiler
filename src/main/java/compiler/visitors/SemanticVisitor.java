@@ -336,7 +336,6 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
               varTypeDef), null);
     }
     else if (((ArrType) varTypeDef).dimension() < dimensionAccessed) {
-      // TODO refactor
       String msg = incompatibleTypesMsg(varName,
           new ArrType(GenericType.getInstance()), varTypeDef);
       parser.notifyErrorListeners(ctx.IDENT().getSymbol(), msg.substring(0,
@@ -350,8 +349,6 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
       return new ArrayElem(
           ((ArrType) varTypeDef).getArrayElem(dimensionAccessed), varName,
           indexes);
-//      return new ArrayElem(var.type(), varName,
-//          (Expr[]) ctx.expr().stream().map(this::visit).toArray());
     }
     return null;
   }
