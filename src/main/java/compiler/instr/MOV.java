@@ -11,6 +11,6 @@ public class MOV extends Instr {
 
   @Override
   public String toString() {
-    return "mov " + rd.toString() + op2.toString();
+    return "MOV " + rd.toString() + ", " + op2.toString();
   }
 }

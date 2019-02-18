@@ -71,15 +71,12 @@ public class Main {
   }
 
   public static void generateCode(AST ast, String filename){
-
     String assemblyFile = filename + ".s";
-
     ASTVisitor codeGenerator = new ASTVisitor();
     List<Instr> instructions = codeGenerator.generate(ast);
+    instructions.forEach(System.out::println);
 
-    try {
-
-      PrintWriter writer = new PrintWriter(assemblyFile, StandardCharsets.UTF_8);
+//      PrintWriter writer = new PrintWriter(assemblyFile, StandardCharsets.UTF_8);
       // write instructions in writer
 
 //      // Test
@@ -93,12 +90,12 @@ public class Main {
 //      writer.println("\tLDR r0, =0");
 //      writer.println("\tPOP {pc}");
 //      writer.println("\t.ltorg");
-
-      writer.close();
-
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
+//
+//      writer.close();
+//
+//    } catch (IOException e) {
+//      e.printStackTrace();
+//    }
   }
 
   private static String extractFileName(String path) {

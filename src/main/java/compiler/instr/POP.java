@@ -14,7 +14,9 @@ public class POP extends Instr {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("POP {");
-    regsToPop.forEach(r -> sb.append(r.toString()));
+    regsToPop.forEach(r -> sb.append(r.toString()).append(", "));
+    sb.deleteCharAt(sb.length() - 1);
+    sb.deleteCharAt(sb.length() - 1);
     sb.append("}");
     return sb.toString();
   }

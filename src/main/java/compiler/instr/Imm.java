@@ -9,6 +9,6 @@ public class Imm implements Operand {
 
   @Override
   public String toString() {
-    return value;
+    return "=" + value;
   }
 }
