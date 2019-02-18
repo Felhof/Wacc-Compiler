@@ -2,6 +2,8 @@ package compiler.AST.NodeElements.RHS;
 
 import compiler.AST.Types.ArrType;
 import compiler.AST.Types.CharType;
+import compiler.visitors.ASTVisitor;
+import compiler.visitors.CodeGenData;
 
 public class StringExpr extends Expr {
 
@@ -21,4 +23,8 @@ public class StringExpr extends Expr {
     return "StringExpr(" + value + ')';
   }
 
+  @Override
+  public CodeGenData accept(ASTVisitor visitor) {
+    return null;
+  }
 }

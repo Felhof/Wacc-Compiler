@@ -2,6 +2,8 @@ package compiler.AST.NodeElements.RHS;
 
 import compiler.AST.Types.PairType;
 import compiler.visitors.ASTData;
+import compiler.visitors.ASTVisitor;
+import compiler.visitors.CodeGenData;
 
 public class Pair extends Expr implements ASTData {
 
@@ -20,5 +22,10 @@ public class Pair extends Expr implements ASTData {
         "["+ fstExpr.toString() +
         ", " + sndExpr.toString() +
         "]";
+  }
+
+  @Override
+  public CodeGenData accept(ASTVisitor visitor) {
+    return null;
   }
 }

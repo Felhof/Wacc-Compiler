@@ -1,6 +1,8 @@
 package compiler.AST.Nodes;
 
 import compiler.AST.NodeElements.RHS.Expr;
+import compiler.visitors.ASTVisitor;
+import compiler.visitors.CodeGenData;
 
 public class PrintNode extends Node {
   private boolean newLine;
@@ -15,5 +17,10 @@ public class PrintNode extends Node {
   @Override
   public String toString() {
     return "Print" + (newLine ? "ln " : " ") + expr.toString();
+  }
+
+  @Override
+  public CodeGenData accept(ASTVisitor visitor) {
+    return null;
   }
 }

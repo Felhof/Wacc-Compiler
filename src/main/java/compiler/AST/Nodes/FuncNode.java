@@ -4,8 +4,10 @@ import compiler.AST.NodeElements.ListExpr;
 import compiler.AST.Types.Type;
 import compiler.AST.SymbolTable.SymbolTable;
 import compiler.visitors.ASTData;
+import compiler.visitors.ASTVisitor;
+import compiler.visitors.CodeGenData;
 
-public class FuncNode extends Node implements ASTData {
+public class FuncNode extends Node {
   private Type returnType;
   private String name;
   private ListExpr paramList;
@@ -29,5 +31,10 @@ public class FuncNode extends Node implements ASTData {
         ", paramList:" + paramList.toString() +
         ", parentNode:" + parentNode.toString() +
         ')';
+  }
+
+  @Override
+  public CodeGenData accept(ASTVisitor visitor) {
+    return null;
   }
 }

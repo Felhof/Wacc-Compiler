@@ -1,5 +1,8 @@
 package compiler.AST.Types;
 
+import compiler.visitors.ASTVisitor;
+import compiler.visitors.CodeGenData;
+
 public class BoolType extends Type {
   private static BoolType instance = new BoolType();
 
@@ -17,5 +20,10 @@ public class BoolType extends Type {
   @Override
   public String toString() {
     return "BOOL";
+  }
+
+  @Override
+  public CodeGenData accept(ASTVisitor visitor) {
+    return null;
   }
 }

@@ -2,6 +2,8 @@ package compiler.AST.NodeElements;
 
 import compiler.AST.NodeElements.RHS.Expr;
 import compiler.AST.Types.Type;
+import compiler.visitors.ASTVisitor;
+import compiler.visitors.CodeGenData;
 
 public class ArrayElem extends Expr {
 
@@ -14,4 +16,8 @@ public class ArrayElem extends Expr {
     this.indexes = indexes;
   }
 
+  @Override
+  public CodeGenData accept(ASTVisitor visitor) {
+    return null;
+  }
 }

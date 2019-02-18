@@ -2,6 +2,8 @@ package compiler.AST.Nodes;
 
 import compiler.AST.NodeElements.NodeElem;
 import compiler.AST.Types.Type;
+import compiler.visitors.ASTVisitor;
+import compiler.visitors.CodeGenData;
 
 public class VarDeclareNode extends Node {
   private Type varType;
@@ -20,5 +22,10 @@ public class VarDeclareNode extends Node {
   public String toString() {
     return "VarDeclaration: " + varType.toString() + " "
         + varName + " = " + rhs.toString();
+  }
+
+  @Override
+  public CodeGenData accept(ASTVisitor visitor) {
+    return null;
   }
 }

@@ -1,6 +1,8 @@
 package compiler.AST.NodeElements.RHS;
 
 import compiler.AST.Types.Type;
+import compiler.visitors.ASTVisitor;
+import compiler.visitors.CodeGenData;
 
 public class PairExp extends Expr {
 
@@ -11,5 +13,10 @@ public class PairExp extends Expr {
   @Override
   public String toString() {
     return "PairLiter: null";
+  }
+
+  @Override
+  public CodeGenData accept(ASTVisitor visitor) {
+    return null;
   }
 }

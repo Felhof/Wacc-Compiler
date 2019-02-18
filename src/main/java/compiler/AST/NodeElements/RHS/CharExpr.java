@@ -1,6 +1,8 @@
 package compiler.AST.NodeElements.RHS;
 
 import compiler.AST.Types.CharType;
+import compiler.visitors.ASTVisitor;
+import compiler.visitors.CodeGenData;
 
 public class CharExpr extends Expr {
 
@@ -21,4 +23,8 @@ public class CharExpr extends Expr {
     return "CharExpr(" + value + ')';
   }
 
+  @Override
+  public CodeGenData accept(ASTVisitor visitor) {
+    return null;
+  }
 }

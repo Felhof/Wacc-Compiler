@@ -1,6 +1,8 @@
 package compiler.AST.Nodes;
 
 import compiler.AST.NodeElements.NodeElem;
+import compiler.visitors.ASTVisitor;
+import compiler.visitors.CodeGenData;
 
 public class VarAssignNode extends Node {
 
@@ -18,5 +20,10 @@ public class VarAssignNode extends Node {
   public String toString() {
     return "VarAssignment" + lhs.toString()
         + "= " + rhs.toString();
+  }
+
+  @Override
+  public CodeGenData accept(ASTVisitor visitor) {
+    return null;
   }
 }

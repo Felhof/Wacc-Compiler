@@ -21,8 +21,10 @@ import org.antlr.v4.runtime.tree.ParseTree;
 public class Main {
 
   public static void main(String[] args) {
-    AST ast = compileProg(args[0]); // uncomment for labTS test
-    generateCode(ast, extractFileName(args[0]));
+    // AST ast = compileProg(args[0]); // uncomment for labTS test
+    AST ast = compileProg("src/test/examples/valid/basic/exit/exitBasic.wacc");
+    //generateCode(ast, extractFileName(args[0]));
+    generateCode(ast, "src/test/examples/valid/basic/exit/exitBasic.wacc");
     System.exit(0);
   }
 

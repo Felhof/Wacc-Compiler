@@ -2,6 +2,8 @@ package compiler.AST.Nodes;
 
 import compiler.AST.NodeElements.RHS.Expr;
 import compiler.AST.SymbolTable.SymbolTable;
+import compiler.visitors.ASTVisitor;
+import compiler.visitors.CodeGenData;
 
 public class IfElseNode extends Node {
   private Expr condition;
@@ -25,5 +27,10 @@ public class IfElseNode extends Node {
     return "If (" + condition + ")" +
         "\n then: {" + thenStat.toString() + '}' +
         "\n else: {" + elseStat.toString()+ '}';
+  }
+
+  @Override
+  public CodeGenData accept(ASTVisitor visitor) {
+    return null;
   }
 }

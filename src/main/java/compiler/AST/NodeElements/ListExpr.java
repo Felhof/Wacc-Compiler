@@ -3,6 +3,8 @@ package compiler.AST.NodeElements;
 import compiler.AST.NodeElements.RHS.Expr;
 import compiler.AST.Types.Type;
 import compiler.visitors.ASTData;
+import compiler.visitors.ASTVisitor;
+import compiler.visitors.CodeGenData;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -43,5 +45,10 @@ public class ListExpr implements ASTData {
     sb.append("TypeList = ");
     exprList.forEach(e -> sb.append(e.toString()).append(" "));
     return sb.toString();
+  }
+
+  @Override
+  public CodeGenData accept(ASTVisitor visitor) {
+    return null;
   }
 }

@@ -1,3 +1,6 @@
 package compiler.visitors;
 
-public interface ASTData {}
+public interface ASTData {
+
+  CodeGenData accept(ASTVisitor visitor);
+}

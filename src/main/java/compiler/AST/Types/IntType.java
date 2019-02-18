@@ -1,5 +1,8 @@
 package compiler.AST.Types;
 
+import compiler.visitors.ASTVisitor;
+import compiler.visitors.CodeGenData;
+
 public class IntType extends Type {
   private static IntType instance = new IntType();
 
@@ -17,5 +20,10 @@ public class IntType extends Type {
   @Override
   public String toString() {
     return "INT";
+  }
+
+  @Override
+  public CodeGenData accept(ASTVisitor visitor) {
+    return null;
   }
 }

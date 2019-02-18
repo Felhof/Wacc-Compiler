@@ -3,6 +3,8 @@ package compiler.AST.NodeElements.RHS;
 import compiler.AST.NodeElements.NodeElem;
 import compiler.AST.Types.Type;
 import compiler.visitors.ASTData;
+import compiler.visitors.ASTVisitor;
+import compiler.visitors.CodeGenData;
 
 public class ArrayLiter extends NodeElem implements ASTData {
   private Expr[] elems;
@@ -16,4 +18,8 @@ public class ArrayLiter extends NodeElem implements ASTData {
     return elems.length == 0;
   }
 
+  @Override
+  public CodeGenData accept(ASTVisitor visitor) {
+    return null;
+  }
 }
