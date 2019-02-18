@@ -4,7 +4,12 @@ import compiler.AST.Nodes.AST;
 import compiler.listeners.ErrorListener;
 import compiler.visitors.SemanticVisitor;
 import compiler.visitors.SyntaxVisitor;
+
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+
 import antlr.*;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
@@ -58,6 +63,24 @@ public class Main {
     AST ast = (AST) semanticVisitor.visit(tree);
     semanticErrorListener.printCompilationStatus();
     return ast;
+  }
+
+  public static String GenerateCode(String name, AST ast){
+
+    String file = name + ".s";
+
+    try {
+      PrintWriter writer = new PrintWriter(file, "UTF-8");
+
+
+
+    } catch (FileNotFoundException e) {
+      e.printStackTrace();
+    } catch (UnsupportedEncodingException e) {
+      e.printStackTrace();
+    }
+
+    return file;
   }
 
 }
