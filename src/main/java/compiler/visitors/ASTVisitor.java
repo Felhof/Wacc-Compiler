@@ -38,6 +38,7 @@ public class ASTVisitor {
     availableRegs = REG.all;
     visitParentNode(root.root());
 
+    instructions.add(new MOV(R0, new Imm("0")));  //Cleaning R0 like the reference compiler
     instructions.add(new POP(PC));
     return instructions;
   }
