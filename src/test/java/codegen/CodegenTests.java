@@ -15,8 +15,8 @@ public class CodegenTests {
   public void ExitCodeTest(){
 
     String path = "src/test/examples/valid/basic/exit/";
-    String[] fileNames = { "exitBasic", "exitBasic2", "exitWrap"};
-    int[] expectedExitCode = { 7, 42, 0};
+    String[] fileNames = { "exit-1","exitBasic", "exitBasic2", "exitWrap"};
+    int[] expectedExitCode = { 255, 7, 42, 0};
 
     for (int i = 0; i < fileNames.length; i++) {
       String filename = fileNames[i];

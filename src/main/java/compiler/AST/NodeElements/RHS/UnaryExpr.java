@@ -51,6 +51,20 @@ public class UnaryExpr extends Expr {
 
   @Override
   public CodeGenData accept(ASTVisitor visitor) {
+
+    if(expr.type().equals(IntType.getInstance())){
+
+      String value = ((IntExpr)expr).value();
+
+      if(operator == UNOP.MINUS){
+        value = "-" + value;
+      }
+
+      return visitor.visitIntExpr(new IntExpr(value));
+    }
+
+    //TODO: handle other types
+
     return null;
   }
 
