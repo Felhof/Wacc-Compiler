@@ -4,6 +4,8 @@ import compiler.AST.Types.BoolType;
 import compiler.AST.Types.CharType;
 import compiler.AST.Types.IntType;
 import compiler.AST.Types.Type;
+import compiler.visitors.ASTVisitor;
+import compiler.visitors.CodeGenData;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -52,6 +54,11 @@ public class BinExpr extends Expr {
   @Override
   public String toString() {
     return "BinExpr(" + lhs.toString() + " " + operator.op().toString() + " " + rhs.toString() +")";
+  }
+
+  @Override
+  public CodeGenData accept(ASTVisitor visitor) {
+    return null;
   }
 
   public enum BINOP {

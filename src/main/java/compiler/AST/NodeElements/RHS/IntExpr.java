@@ -1,6 +1,8 @@
 package compiler.AST.NodeElements.RHS;
 
 import compiler.AST.Types.IntType;
+import compiler.visitors.ASTVisitor;
+import compiler.visitors.CodeGenData;
 
 public class IntExpr extends Expr {
   private String value;
@@ -10,7 +12,7 @@ public class IntExpr extends Expr {
     this.value = value;
   }
 
-  public String getValue() {
+  public String value() {
     return value;
   }
 
@@ -19,4 +21,8 @@ public class IntExpr extends Expr {
     return "IntExpr(" + value + ')';
   }
 
+  @Override
+  public CodeGenData accept(ASTVisitor visitor) {
+    return visitor.visitIntExpr(this);
+  }
 }

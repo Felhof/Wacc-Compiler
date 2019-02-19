@@ -2,6 +2,8 @@ package compiler.AST.Nodes;
 
 import compiler.AST.NodeElements.RHS.Expr;
 import compiler.AST.SymbolTable.SymbolTable;
+import compiler.visitors.ASTVisitor;
+import compiler.visitors.CodeGenData;
 
 public class WhileNode extends Node {
 
@@ -22,4 +24,8 @@ public class WhileNode extends Node {
         "\n {" + stat.toString() + '}';
   }
 
+  @Override
+  public CodeGenData accept(ASTVisitor visitor) {
+    return null;
+  }
 }

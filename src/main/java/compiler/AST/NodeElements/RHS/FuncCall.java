@@ -3,6 +3,8 @@ package compiler.AST.NodeElements.RHS;
 import compiler.AST.NodeElements.ListExpr;
 import compiler.AST.NodeElements.NodeElem;
 import compiler.AST.Types.Type;
+import compiler.visitors.ASTVisitor;
+import compiler.visitors.CodeGenData;
 
 public class FuncCall extends NodeElem {
   private String funcName;
@@ -20,5 +22,10 @@ public class FuncCall extends NodeElem {
     return "FuncCall:" +
         "funcName:" + funcName +
         ", arguments" + argsList.toString();
+  }
+
+  @Override
+  public CodeGenData accept(ASTVisitor visitor) {
+    return null;
   }
 }

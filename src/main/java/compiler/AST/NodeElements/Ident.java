@@ -2,6 +2,8 @@ package compiler.AST.NodeElements;
 
 import compiler.AST.NodeElements.RHS.Expr;
 import compiler.AST.Types.Type;
+import compiler.visitors.ASTVisitor;
+import compiler.visitors.CodeGenData;
 
 public class Ident extends Expr {
 
@@ -16,5 +18,10 @@ public class Ident extends Expr {
   public String toString() {
     return "Ident: " +
         varName;
+  }
+
+  @Override
+  public CodeGenData accept(ASTVisitor visitor) {
+    return null;
   }
 }

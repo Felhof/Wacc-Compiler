@@ -1,5 +1,8 @@
 package compiler.AST.Types;
 
+import compiler.visitors.ASTVisitor;
+import compiler.visitors.CodeGenData;
+
 public class ArrType extends Type {
 
   private Type elemType;
@@ -56,4 +59,8 @@ public class ArrType extends Type {
         new ArrType(this.elemType, dimension - indexes);
   }
 
+  @Override
+  public CodeGenData accept(ASTVisitor visitor) {
+    return null;
+  }
 }

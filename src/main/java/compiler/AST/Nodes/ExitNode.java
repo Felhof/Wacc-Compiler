@@ -1,6 +1,8 @@
 package compiler.AST.Nodes;
 
 import compiler.AST.NodeElements.RHS.Expr;
+import compiler.visitors.ASTVisitor;
+import compiler.visitors.CodeGenData;
 
 public class ExitNode extends Node {
   private Expr exitStatus;
@@ -14,4 +16,15 @@ public class ExitNode extends Node {
   public String toString() {
     return "ExitNode(" + exitStatus.toString() + ')';
   }
+
+  public Expr exitStatus() {
+    return exitStatus;
+  }
+
+  @Override
+  public CodeGenData accept(ASTVisitor visitor) {
+    visitor.visitExit(this);
+    return null;
+  }
+
 }

@@ -1,6 +1,8 @@
 package compiler.AST.Nodes;
 
-public abstract class Node {
+import compiler.visitors.ASTData;
+
+public abstract class Node implements ASTData {
   int lineNumber;
 
   public Node(int lineNumber) {

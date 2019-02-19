@@ -1,5 +1,8 @@
 package compiler.AST.Types;
 
+import compiler.visitors.ASTVisitor;
+import compiler.visitors.CodeGenData;
+
 public class GenericType extends Type {
 
   private static GenericType instance = new GenericType();
@@ -17,5 +20,10 @@ public class GenericType extends Type {
   @Override
   public String toString() {
     return "ANY";
+  }
+
+  @Override
+  public CodeGenData accept(ASTVisitor visitor) {
+    return null;
   }
 }

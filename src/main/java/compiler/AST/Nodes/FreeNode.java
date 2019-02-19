@@ -1,6 +1,8 @@
 package compiler.AST.Nodes;
 
 import compiler.AST.NodeElements.RHS.Expr;
+import compiler.visitors.ASTVisitor;
+import compiler.visitors.CodeGenData;
 
 public class FreeNode extends Node{
 
@@ -13,4 +15,9 @@ public class FreeNode extends Node{
 
   @Override
   public String toString(){ return "Freenode(" + freeExpr.toString() + ")"; }
+
+  @Override
+  public CodeGenData accept(ASTVisitor visitor) {
+    return null;
+  }
 }

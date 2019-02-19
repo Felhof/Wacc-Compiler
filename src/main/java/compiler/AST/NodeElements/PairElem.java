@@ -2,6 +2,8 @@ package compiler.AST.NodeElements;
 
 import compiler.AST.NodeElements.RHS.Expr;
 import compiler.AST.Types.Type;
+import compiler.visitors.ASTVisitor;
+import compiler.visitors.CodeGenData;
 
 public class PairElem extends NodeElem {
 
@@ -12,5 +14,10 @@ public class PairElem extends NodeElem {
     super(type);
     this.expr = expr;
     this.posInPair = posInPair;
+  }
+
+  @Override
+  public CodeGenData accept(ASTVisitor visitor) {
+    return null;
   }
 }

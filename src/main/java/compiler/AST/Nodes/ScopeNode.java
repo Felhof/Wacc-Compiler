@@ -1,6 +1,8 @@
 package compiler.AST.Nodes;
 
 import compiler.AST.SymbolTable.SymbolTable;
+import compiler.visitors.ASTVisitor;
+import compiler.visitors.CodeGenData;
 
 public class ScopeNode extends Node {
 
@@ -18,5 +20,10 @@ public class ScopeNode extends Node {
   @Override
   public String toString() {
     return "NewScopeNode:" + parentNode.toString();
+  }
+
+  @Override
+  public CodeGenData accept(ASTVisitor visitor) {
+    return null;
   }
 }

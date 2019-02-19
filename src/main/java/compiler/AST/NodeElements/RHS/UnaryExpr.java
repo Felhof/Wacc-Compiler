@@ -5,6 +5,8 @@ import compiler.AST.Types.BoolType;
 import compiler.AST.Types.CharType;
 import compiler.AST.Types.IntType;
 import compiler.AST.Types.Type;
+import compiler.visitors.ASTVisitor;
+import compiler.visitors.CodeGenData;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,6 +16,11 @@ public class UnaryExpr extends Expr {
   private final static Type charType = CharType.getInstance();
   private final static Type boolType = BoolType.getInstance();
   private final static Type arrayType = new Type() {
+    @Override
+    public CodeGenData accept(ASTVisitor visitor) {
+      return null;
+    }
+
     @Override
     public boolean equals(Type type) {
       return type instanceof ArrType;
@@ -39,6 +46,11 @@ public class UnaryExpr extends Expr {
       return " (expected: " + operator.argType.toString()
           + ", actual: " + expr.type().toString() + ")";
     }
+    return null;
+  }
+
+  @Override
+  public CodeGenData accept(ASTVisitor visitor) {
     return null;
   }
 

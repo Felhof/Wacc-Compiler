@@ -1,6 +1,8 @@
 package compiler.AST.Nodes;
 
 import compiler.AST.NodeElements.RHS.Expr;
+import compiler.visitors.ASTVisitor;
+import compiler.visitors.CodeGenData;
 
 public class ReturnNode extends Node {
   private Expr expr;
@@ -13,5 +15,10 @@ public class ReturnNode extends Node {
   @Override
   public String toString() {
     return "ReturnNode(" + expr.toString() + ')';
+  }
+
+  @Override
+  public CodeGenData accept(ASTVisitor visitor) {
+    return null;
   }
 }

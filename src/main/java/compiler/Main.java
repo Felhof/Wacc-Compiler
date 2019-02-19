@@ -1,7 +1,9 @@
 package compiler;
 
 import compiler.AST.Nodes.AST;
+import compiler.instr.Instr;
 import compiler.listeners.ErrorListener;
+import compiler.visitors.ASTVisitor;
 import compiler.visitors.SemanticVisitor;
 import compiler.visitors.SyntaxVisitor;
 
@@ -10,6 +12,7 @@ import java.io.PrintWriter;
 
 import antlr.*;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -18,8 +21,10 @@ import org.antlr.v4.runtime.tree.ParseTree;
 public class Main {
 
   public static void main(String[] args) {
-    AST ast = compileProg(args[0]); // uncomment for labTS test
-    generateCode(ast, extractFileName(args[0]));
+    //String path = args[0]; // uncomment for labTS test
+    String path = "src/test/examples/valid/basic/exit/exitBasic.wacc";
+    AST ast = compileProg(path);
+    generateCode(ast, extractFileName(path));
     System.exit(0);
   }
 
@@ -66,27 +71,20 @@ public class Main {
   }
 
   public static void generateCode(AST ast, String filename){
+    ASTVisitor codeGenerator = new ASTVisitor();
+    List<Instr> instructions = codeGenerator.generate(ast);
+
+    //instructions.forEach(System.out::println); //test
 
     String assemblyFile = filename + ".s";
-
     try {
-
+      // write instructions to assembly file
       PrintWriter writer = new PrintWriter(assemblyFile, StandardCharsets.UTF_8);
 
-      // TODO generate code
-
-//      // Test
-//      writer.println(".text");
-//      writer.println(".global main");
-//      writer.println("main:");
-//      writer.println("\tPUSH {lr}");
-//      writer.println("\tLDR r4, =7");
-//      writer.println("\tMOV r0, r4");
-//      writer.println("\tBL exit");
-//      writer.println("\tLDR r0, =0");
-//      writer.println("\tPOP {pc}");
-//      writer.println("\t.ltorg");
-
+      writer.println(".text");
+      writer.println(".global main\n");
+      instructions.forEach(i -> writer.println(i.toString()));
+      writer.println("\n\t.ltorg"); // assemble immediately
       writer.close();
 
     } catch (IOException e) {
