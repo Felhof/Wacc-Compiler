@@ -11,60 +11,8 @@ import static org.hamcrest.core.Is.is;
 
 public class CodegenTests {
 
-  @Test
-  public void ExitCodeTest(){
 
-    String path = "src/test/examples/valid/basic/exit/";
-    String[] fileNames = { "exit-1","exitBasic", "exitBasic2", "exitWrap"};
-    int[] expectedExitCode = { 255, 7, 42, 0};
-
-    for (int i = 0; i < fileNames.length; i++) {
-      String filename = fileNames[i];
-      AST ast = Main.compileProg(path + filename + ".wacc");
-      Main.generateCode(ast, filename);
-
-      try {
-
-        // Assembler
-        Process assembler = new ProcessBuilder("arm-linux-gnueabi-gcc", "-o",
-            filename, "-mcpu=arm1176jzf-s", "-mtune=arm1176jzf-s",
-            filename + ".s").start();
-        assembler.waitFor();
-        //System.out.println(assembler.exitValue());
-
-        // Emulator
-        Process emulator = new ProcessBuilder("qemu-arm", "-L", "/usr"
-            + "/arm-linux-gnueabi/", filename).start();
-        emulator.waitFor();
-
-        assertThat(emulator.exitValue(), is(expectedExitCode[i]));
-
-        //This might be usefull when we want the output:
-
-        BufferedReader br=new BufferedReader(new InputStreamReader(emulator
-        .getInputStream()));
-        String line;
-        StringBuilder sb = new StringBuilder();
-        while((line=br.readLine())!=null) sb.append(line);
-
-        System.out.println("Output " + i + ": " + sb.toString());
-
-      } catch (IOException | InterruptedException e) {
-        e.printStackTrace();
-      }
-    }
-  }
-
-  @Test
-  public void SkipTest(){
-    String path = "src/test/examples/valid/basic/skip/";
-    String[] fileNames = {"skip"};
-    int[] expectedExitCode = {0};
-
-    for (int i = 0; i < fileNames.length; i++) {
-      String filename = fileNames[i];
-      AST ast = Main.compileProg(path + filename + ".wacc");
-      Main.generateCode(ast, filename);
+  private Process assembleAndEmulate (String filename) {
 
       try {
 
@@ -80,23 +28,48 @@ public class CodegenTests {
                 + "/arm-linux-gnueabi/", filename).start();
         emulator.waitFor();
 
-        assertThat(emulator.exitValue(), is(expectedExitCode[i]));
-
-        //This might be usefull when we want the output:
-
-        BufferedReader br=new BufferedReader(new InputStreamReader(emulator
-                .getInputStream()));
-        String line;
-        StringBuilder sb = new StringBuilder();
-        while((line=br.readLine())!=null) sb.append(line);
-
-        System.out.println("Output " + i + ": " + sb.toString());
+        return emulator;
 
       } catch (IOException | InterruptedException e) {
         e.printStackTrace();
       }
-    }
 
+    return null;
+  }
+
+  @Test
+  public void ExitCodeTest(){
+
+    String path = "src/test/examples/valid/basic/exit/";
+    String[] fileNames = { "exit-1","exitBasic", "exitBasic2", "exitWrap"};
+    int[] expectedExitCodes = { 255, 7, 42, 0};
+
+
+    for (int i = 0; i < fileNames.length; i++) {
+      String filename = fileNames[i];
+      AST ast = Main.compileProg(path + filename + ".wacc");
+      Main.generateCode(ast, filename);
+
+      Process emulator = assembleAndEmulate(filename);
+
+      assertThat(emulator.exitValue(), is(expectedExitCodes[i]));
+    }
+  }
+
+  @Test
+  public void SkipTest(){
+    String path = "src/test/examples/valid/basic/skip/";
+    String[] fileNames = {"skip", "comment","skip"};
+
+    for (int i = 0; i < fileNames.length; i++) {
+      String filename = fileNames[i];
+      AST ast = Main.compileProg(path + filename + ".wacc");
+      Main.generateCode(ast, filename);
+
+      Process emulator = assembleAndEmulate(filename);
+
+      assertThat(emulator.exitValue(), is(0));
+    }
   }
 
   //Example of how we can test the printed output of a program
@@ -108,16 +81,7 @@ public class CodegenTests {
 
     try {
 
-      // Assembler
-      Process assembler = new ProcessBuilder("arm-linux-gnueabi-gcc", "-o",
-              filename, "-mcpu=arm1176jzf-s", "-mtune=arm1176jzf-s",
-              filename + ".s").start();
-      assembler.waitFor();
-
-      // Emulator
-      Process emulator = new ProcessBuilder("qemu-arm", "-L", "/usr"
-              + "/arm-linux-gnueabi/", filename).start();
-      emulator.waitFor();
+      Process emulator = assembleAndEmulate(filename);
 
       //Read each line of the output into the sb
       BufferedReader br=new BufferedReader(new InputStreamReader(emulator
@@ -131,7 +95,7 @@ public class CodegenTests {
 
 
 
-    } catch (IOException | InterruptedException e) {
+    } catch (IOException e) {
       e.printStackTrace();
     }
 
