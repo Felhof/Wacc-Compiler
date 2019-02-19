@@ -1,6 +1,7 @@
 package compiler.instr;
 
 
+import compiler.instr.Operand.Operand;
 import compiler.visitors.CodeGenData;
 import java.util.ArrayList;
 import java.util.Arrays;

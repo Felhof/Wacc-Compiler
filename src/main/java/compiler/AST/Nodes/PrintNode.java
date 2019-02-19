@@ -21,6 +21,13 @@ public class PrintNode extends Node {
 
   @Override
   public CodeGenData accept(ASTVisitor visitor) {
-    return null;
+
+
+    String field = visitor.addString(expr.toString(), newLine);
+
+     visitor.visitPrintExpression(field);
+
+     return null;
+
   }
 }

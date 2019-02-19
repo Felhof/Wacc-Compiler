@@ -1,9 +1,9 @@
-package compiler.instr;
+package compiler.instr.Operand;
 
-public class Imm implements Operand {
+public class Imm_LDR implements Operand {
   public String value;
 
-  public Imm(String value) {
+  public Imm_LDR(String value) {
     this.value = value;
   }
 

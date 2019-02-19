@@ -29,8 +29,8 @@ public class CodegenTests {
                 + "/arm-linux-gnueabi/", filename).start();
         emulator.waitFor();
 
-        new File(filename + ".s").delete();
-        new File(filename).delete();
+        //new File(filename + ".s").delete();
+        //new File(filename).delete();
 
         return emulator;
 
@@ -90,7 +90,7 @@ public class CodegenTests {
   @Test
   public void SequenceTest(){
     String path = "src/test/examples/valid/sequence/";
-    String[] simpleFilenames = {"basicSeq", "basicSeq2"};
+    String[] simpleFilenames = {"basicSeq", "basicSeq2","exitSimple"};
 
     //Simply test that they exit correctly
     Arrays.stream(simpleFilenames).forEach(filename -> {
@@ -107,11 +107,31 @@ public class CodegenTests {
 
     for(int i = 0; i < filenames.length; i++){
 
-      Process emulator = assembleAndEmulate(filenames[i]);
+      Process emulator = assembleAndEmulate(path + filenames[i]);
 
       checkPrintsAreCorrect(emulator, expectedOutput[i]);
     }
   }
+
+  @Test
+  public void PrintTest(){
+    String path = "src/test/examples/valid/IO/print/";
+
+    String[] filenames = {"print"};
+    String[][] expectedOutput = {{"Hello World!"}};
+
+
+    for(int i = 0; i < filenames.length; i++){
+
+      AST ast = Main.compileProg(path + filenames[i] + ".wacc");
+      Main.generateCode(ast, filenames[i]);
+
+      Process emulator = assembleAndEmulate(path + filenames[i]);
+
+      checkPrintsAreCorrect(emulator, expectedOutput[i]);
+    }
+  }
+
 
   //Example of how we can test the printed output of a program
   /*@Test
