@@ -12,7 +12,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 
 public class CodegenTests {
-  
+
   private Process assembleAndEmulate (String filename) {
 
       try {
@@ -36,6 +36,22 @@ public class CodegenTests {
       }
 
     return null;
+  }
+
+  private void checkPrintsAreCorrect(Process emulator, String[] expected){
+    try {
+
+      //Read each line of the output into the sb
+      BufferedReader br = new BufferedReader(new InputStreamReader(emulator
+              .getInputStream()));
+
+      for (String expectedLine : expected) {
+        String actualLine = br.readLine();
+        assertThat(actualLine, is(expectedLine));
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
   }
 
   @Test
@@ -90,20 +106,7 @@ public class CodegenTests {
 
       Process emulator = assembleAndEmulate(filenames[i]);
 
-      try {
-
-        //Read each line of the output into the sb
-        BufferedReader br = new BufferedReader(new InputStreamReader(emulator
-                .getInputStream()));
-
-        //StringBuilder sb = new StringBuilder();
-        for (String expectedLine : expectedOutput[i]) {
-          String actualLine = br.readLine();
-          assertThat(actualLine, is(expectedLine));
-        }
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
+      checkPrintsAreCorrect(emulator, expectedOutput[i]);
     }
   }
 
@@ -114,24 +117,9 @@ public class CodegenTests {
     String filename = "printTwoLines";
     String[] expectedLines = new String[]{"True is true", "False is false"};
 
-    try {
+    Process emulator = assembleAndEmulate(filename);
 
-      Process emulator = assembleAndEmulate(filename);
-
-      //Read each line of the output into the sb
-      BufferedReader br=new BufferedReader(new InputStreamReader(emulator
-              .getInputStream()));
-
-      //StringBuilder sb = new StringBuilder();
-      for(String expectedLine : expectedLines){
-        String actualLine = br.readLine();
-        assertThat(actualLine, is(expectedLine));
-      }
-
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-
+    checkPrintsAreCorrect(emulator, expectedLines);
   }
 
 }
