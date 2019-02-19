@@ -29,6 +29,9 @@ public class CodegenTests {
                 + "/arm-linux-gnueabi/", filename).start();
         emulator.waitFor();
 
+        new File(filename + ".s").delete();
+        new File(filename).delete();
+
         return emulator;
 
       } catch (IOException | InterruptedException e) {
@@ -111,7 +114,7 @@ public class CodegenTests {
   }
 
   //Example of how we can test the printed output of a program
-  @Test
+  /*@Test
   public void OutputTest(){
 
     String filename = "printTwoLines";
@@ -120,6 +123,6 @@ public class CodegenTests {
     Process emulator = assembleAndEmulate(filename);
 
     checkPrintsAreCorrect(emulator, expectedLines);
-  }
+  }*/
 
 }
