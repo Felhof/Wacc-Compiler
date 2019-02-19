@@ -1,9 +1,9 @@
 package compiler.instr;
 
 public class Imm implements Operand {
-  public String value;
+  public int value;
 
-  public Imm(String value) {
+  public Imm(int value) {
     this.value = value;
   }
 
@@ -11,4 +11,5 @@ public class Imm implements Operand {
   public String toString() {
     return "=" + value;
   }
+
 }

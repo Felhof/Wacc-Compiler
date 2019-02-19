@@ -77,7 +77,7 @@ public class CodegenTests {
   @Test
   public void SkipTest(){
     String path = "src/test/examples/valid/basic/skip/";
-    String[] filenames = {"skip", "comment","skip"};
+    String[] filenames = {"skip", "comment","commentInLine"};
 
     Arrays.stream(filenames).forEach(filename -> {
       AST ast = Main.compileProg(path + filename + ".wacc");
@@ -101,7 +101,8 @@ public class CodegenTests {
     });
 
     String[] filenames = {"exitSimple"};
-    String[][] expectedOutput = {{null}}; //exitSimple is not supposed to print anything
+    String[][] expectedOutput = {{}}; //exitSimple is not supposed to
+    // print anything
 
     //Test that their output is correct
 
@@ -113,16 +114,5 @@ public class CodegenTests {
     }
   }
 
-  //Example of how we can test the printed output of a program
-  /*@Test
-  public void OutputTest(){
-
-    String filename = "printTwoLines";
-    String[] expectedLines = new String[]{"True is true", "False is false"};
-
-    Process emulator = assembleAndEmulate(filename);
-
-    checkPrintsAreCorrect(emulator, expectedLines);
-  }*/
 
 }

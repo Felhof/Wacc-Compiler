@@ -5,10 +5,13 @@ import static compiler.instr.REG.PC;
 import static compiler.instr.REG.R0;
 
 import compiler.AST.NodeElements.RHS.IntExpr;
+import compiler.AST.NodeElements.RHS.UnaryExpr;
+import compiler.AST.NodeElements.RHS.UnaryExpr.UNOP;
 import compiler.AST.Nodes.AST;
 import compiler.AST.Nodes.ExitNode;
 import compiler.AST.Nodes.ParentNode;
 import compiler.AST.SymbolTable.SymbolTable;
+import compiler.AST.Types.IntType;
 import compiler.instr.BL;
 import compiler.instr.Imm;
 import compiler.instr.Instr;
@@ -38,7 +41,8 @@ public class ASTVisitor {
     availableRegs = REG.all;
     visitParentNode(root.root());
 
-    instructions.add(new LDR(R0, new Imm("0")));  //Cleaning R0 like the reference compiler
+    instructions.add(new LDR(R0, new Imm(0)));  //Cleaning R0 like the
+    // reference compiler
     instructions.add(new POP(PC));
     return instructions;
   }
@@ -57,9 +61,21 @@ public class ASTVisitor {
     instructions.add(new BL("exit"));
   }
 
+  public CodeGenData visitUnaryExpr(UnaryExpr expr) {
+
+    if(expr.type().equals(IntType.getInstance()) // Set int value to negative
+        && expr.operator() == UNOP.MINUS) {
+        ((IntExpr) expr.insideExpr()).setNegative();
+    }
+
+    //TODO: handle other types
+
+    return visit(expr.insideExpr());
+  }
+
   public CodeGenData visitIntExpr(IntExpr expr) {
     REG rd = availableRegs.remove(0);
-    instructions.add(new LDR(rd, new Imm(expr.value())));
+    instructions.add(new LDR(rd, new Imm(Integer.parseInt(expr.value()))));
     return rd;
   }
 
