@@ -25,4 +25,8 @@ public class IntExpr extends Expr {
   public CodeGenData accept(ASTVisitor visitor) {
     return visitor.visitIntExpr(this);
   }
+
+  public void setNegative() {
+    value = "-" + value;
+  }
 }

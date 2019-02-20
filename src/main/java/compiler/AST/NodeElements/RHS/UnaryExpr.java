@@ -1,8 +1,8 @@
 package compiler.AST.NodeElements.RHS;
 
-import compiler.AST.Types.ArrType;
 import compiler.AST.Types.BoolType;
 import compiler.AST.Types.CharType;
+import compiler.AST.Types.GenericType;
 import compiler.AST.Types.IntType;
 import compiler.AST.Types.Type;
 import compiler.visitors.ASTVisitor;
@@ -15,22 +15,7 @@ public class UnaryExpr extends Expr {
   private final static Type intType = IntType.getInstance();
   private final static Type charType = CharType.getInstance();
   private final static Type boolType = BoolType.getInstance();
-  private final static Type arrayType = new Type() {
-    @Override
-    public CodeGenData accept(ASTVisitor visitor) {
-      return null;
-    }
-
-    @Override
-    public boolean equals(Type type) {
-      return type instanceof ArrType;
-    }
-
-    @Override
-    public String toString() {
-      return "T[]";
-    }
-  };
+  private final static Type arrayType = GenericType.getInstance();
 
   private UNOP operator;
   private Expr expr;
@@ -49,23 +34,17 @@ public class UnaryExpr extends Expr {
     return null;
   }
 
+  public UNOP operator() {
+    return operator;
+  }
+
+  public Expr insideExpr() {
+    return expr;
+  }
+
   @Override
   public CodeGenData accept(ASTVisitor visitor) {
-
-    if(expr.type().equals(IntType.getInstance())){
-
-      String value = ((IntExpr)expr).value();
-
-      if(operator == UNOP.MINUS){
-        value = "-" + value;
-      }
-
-      return visitor.visitIntExpr(new IntExpr(value));
-    }
-
-    //TODO: handle other types
-
-    return null;
+    return visitor.visitUnaryExpr(this);
   }
 
   public enum UNOP {
