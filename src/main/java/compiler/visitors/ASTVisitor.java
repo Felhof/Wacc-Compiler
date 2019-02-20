@@ -97,7 +97,7 @@ public class ASTVisitor {
   }
 
   public CodeGenData visitIntExpr(IntExpr expr) {
-    REG rd = availableRegs.remove(0);
+    REG rd = useFreeReg();
     instructions.add(new LDR(rd, new Imm_INT_LDR(expr.value())));
     return rd;
   }
@@ -123,7 +123,7 @@ public class ASTVisitor {
 
   public CodeGenData visitStringExpr(StringExpr stringExpr) {
     String labelName = addStringField(stringExpr.getValue());
-    REG rd = availableRegs.remove(0);
+    REG rd = useFreeReg();
     instructions.add(new LDR(rd, new Imm_STRING_LDR(labelName)));
     return rd;
   }
@@ -136,7 +136,7 @@ public class ASTVisitor {
   }
 
   public CodeGenData visitCharExpr(CharExpr charExpr) {
-    REG rd = availableRegs.remove(0);
+    REG rd = useFreeReg();
     instructions.add(new MOV(rd, new Imm_STRING("'" + charExpr.getValue() + "'")));
     return rd;
   }
@@ -201,6 +201,10 @@ public class ASTVisitor {
     List<REG> regs = new ArrayList<>(allUsableRegs);
     regs.removeAll(availableRegs);
     return regs;
+  }
+
+  private REG useFreeReg() {
+    return availableRegs.remove(0);
   }
 
 }
