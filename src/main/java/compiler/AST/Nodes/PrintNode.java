@@ -18,6 +18,8 @@ public class PrintNode extends Node {
     return expr;
   }
 
+  public boolean newLine() {return newLine; }
+
   @Override
   public String toString() {
     return "Print" + (newLine ? "ln " : " ") + expr.toString();
