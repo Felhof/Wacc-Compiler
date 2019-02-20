@@ -126,7 +126,7 @@ public class CodegenTests {
       AST ast = Main.compileProg(path + filename + ".wacc");
       Main.generateCode(ast, outputFolder + filename);
       Process emulator = assembleAndEmulate(outputFolder + filename);
-      assertThat(emulator.exitValue(), is(0));
+      assertThat(emulator.exitValue(), is(5));
     });
   }
 

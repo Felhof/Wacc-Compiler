@@ -1,5 +1,6 @@
 package compiler.visitors;
 
+import compiler.AST.NodeElements.Ident;
 import compiler.AST.NodeElements.RHS.*;
 import compiler.AST.NodeElements.RHS.UnaryExpr.UNOP;
 import compiler.AST.Nodes.*;
@@ -164,17 +165,22 @@ public class ASTVisitor {
   public CodeGenData visitVarDeclareNode(VarDeclareNode varDeclareNode) {
     Type type = varDeclareNode.varType();
 
-    if (type.equals(IntType.getInstance()))
+    if (type.equals(IntType.getInstance())) {
       visitBasicTypeDeclare(varDeclareNode, 4);
+    }
 
-    if (type.equals(CharType.getInstance()) || type.equals(BoolType.getInstance()))
+    if (type.equals(CharType.getInstance()) || type
+        .equals(BoolType.getInstance())) {
       visitBasicTypeDeclare(varDeclareNode, 1);
+    }
 
-    if (type instanceof ArrType)
+    if (type instanceof ArrType) {
       visitArrayDeclare(varDeclareNode);
+    }
 
-    if (type instanceof PairType)
+    if (type instanceof PairType) {
       visitPairDeclare(varDeclareNode);
+    }
 
     return null;
   }
@@ -184,7 +190,8 @@ public class ASTVisitor {
     REG rd = (REG) visit(varDeclareNode.rhs());
     currentStackOffset -= offset;
     varToOffsetFromStack.put(varDeclareNode.varName(), currentStackOffset);
-    instructions.add(new STR(rd, new Addr(SP, true, new Imm_INT(currentStackOffset))));
+    instructions
+        .add(new STR(rd, new Addr(SP, true, new Imm_INT(currentStackOffset))));
     return null;
   }
 
@@ -265,5 +272,12 @@ public class ASTVisitor {
 
   private int toInt(String s) {
     return Integer.parseInt(s);
+  }
+
+  public CodeGenData visitIdent(Ident ident) {
+    REG rd = useFreeReg();
+    instructions.add(new LDR(rd, new Addr(SP, true,
+        new Imm_INT(varToOffsetFromStack.get(ident.varName())))));
+    return rd;
   }
 }

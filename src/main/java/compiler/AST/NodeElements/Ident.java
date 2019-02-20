@@ -20,8 +20,12 @@ public class Ident extends Expr {
         varName;
   }
 
+  public String varName() {
+    return varName;
+  }
+
   @Override
   public CodeGenData accept(ASTVisitor visitor) {
-    return null;
+    return visitor.visitIdent(this);
   }
 }
