@@ -97,18 +97,6 @@ public class CodegenTests {
       Process emulator = assembleAndEmulate(outputFolder + filename);
       assertThat(emulator.exitValue(), is(0));
     });
-
-    /*
-    String[] filenames = {"exitSimple"};
-    String[][] expectedOutput = {{}}; //exitSimple is not supposed to
-    // print anything
-
-    //Test that their output is correct
-
-    for (int i = 0; i < filenames.length; i++) {
-      Process emulator = assembleAndEmulate(path + filenames[i]);
-      checkPrintsAreCorrect(emulator, expectedOutput[i]);
-    }*/
   }
 
   @Test

@@ -22,18 +22,15 @@ import compiler.instr.MOV;
 import compiler.instr.POP;
 import compiler.instr.PUSH;
 import compiler.instr.REG;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+
+import java.util.*;
+import java.util.Collections;
 
 import static compiler.instr.REG.*;
 
 public class ASTVisitor {
   private List<Instr> instructions;
   private List<Instr> data;
-  private List<Instr> functions;
   private Set<String> specialLabels;
 
   private SymbolTable currentST;
@@ -42,9 +39,8 @@ public class ASTVisitor {
   public ASTVisitor() {
     this.instructions = new ArrayList<>();
     this.data = new ArrayList<>();
-    this.functions = new ArrayList<>();
     this.specialLabels = new HashSet<>();
-    availableRegs = REG.all;
+    availableRegs = new ArrayList<>(allUsableRegs);
   }
 
   public List<Instr> generate(AST root) {
@@ -71,7 +67,6 @@ public class ASTVisitor {
     }
 
     data.addAll(instructions);
-    data.addAll(functions);
     return data;
   }
 
@@ -112,16 +107,15 @@ public class ASTVisitor {
     // mov result into arg register
     instructions.add(new MOV(R0, rd));
 
-
     if(printNode.expr().type().equals(CharType.getInstance())) {
-      instructions.add(new BL("putchar"));
+      jumpToFunctionLabel("putchar");
     }else {
-      instructions.add(new BL("p_print_string"));
+      jumpToFunctionLabel("p_print_string");
       specialLabels.add("p_print_string");
     }
 
     if(printNode.newLine()) {
-      instructions.add(new BL("p_print_ln"));
+      jumpToFunctionLabel("p_print_ln");
       specialLabels.add("p_print_ln");
     }
     return null;
@@ -132,6 +126,13 @@ public class ASTVisitor {
     REG rd = availableRegs.remove(0);
     instructions.add(new LDR(rd, new Imm_STRING_LDR(labelName)));
     return rd;
+  }
+
+  public String addStringField(String string) {
+    String labelName = "msg_" + (data.size() - 1);
+    data.add(new LABEL(labelName));
+    data.add(new STRING_FIELD(string));
+    return labelName;
   }
 
   public CodeGenData visitCharExpr(CharExpr charExpr) {
@@ -155,23 +156,25 @@ public class ASTVisitor {
   private void addPrint(){
     String labelName = addStringField("\"%.*s\\0\"");
 
-    functions.addAll(Arrays.asList(
+    instructions.addAll(Arrays.asList(
         new LABEL("p_print_string"),
         new PUSH(LR),
         new LDR(R1, new Addr(R0)),
         new ADD(R2, R0, new Imm_INT("4")),
         new LDR(R0, new Imm_STRING_LDR(labelName)),
-        new ADD(R0, R0, new Imm_INT("4")),
-        new BL("printf"),
-        new MOV(R0, new Imm_INT("0")),
-        new BL("fflush"),
-        new POP(PC)));
+        new ADD(R0, R0, new Imm_INT("4"))));
+    jumpToFunctionLabel("printf");
+    instructions.addAll(Arrays.asList(
+            new MOV(R0, new Imm_INT("0")),
+            new BL("fflush"),
+            new POP(PC)));
+
   }
 
   private void addPrintln(){
     String labelName = addStringField("\"\\0\"");
 
-    functions.addAll(Arrays.asList(
+    instructions.addAll(Arrays.asList(
             new LABEL("p_print_ln"),
             new PUSH(LR),
             new LDR(R0, new Imm_STRING_LDR(labelName)),
@@ -182,12 +185,22 @@ public class ASTVisitor {
             new POP(PC)));
   }
 
-  private String addStringField(String string) {
-    String labelName = "msg_" + (data.size() / 2);
-    data.add(new LABEL(labelName));
-    data.add(new STRING_FIELD(string));
-    return labelName;
+  private void jumpToFunctionLabel(String label) {
+    List<REG> usedRegs = getUsedRegs();
+    if (!usedRegs.isEmpty()) {
+      instructions.add(new PUSH(usedRegs)); // save onto stack all used regs
+    }
+    instructions.add(new BL(label));
+    if (!usedRegs.isEmpty()) {
+      Collections.reverse(usedRegs);
+      instructions.add(new POP(usedRegs));  // restore previous regs from stack
+    }
   }
 
+  private List<REG> getUsedRegs() {
+    List<REG> regs = new ArrayList<>(allUsableRegs);
+    regs.removeAll(availableRegs);
+    return regs;
+  }
 
 }
