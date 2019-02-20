@@ -160,7 +160,6 @@ public class ASTVisitor {
     List<REG> usedRegs = getUsedRegs();
     if (!usedRegs.isEmpty()) {
       instructions.add(new PUSH(usedRegs)); // save onto stack all used regs
-      availableRegs = new ArrayList<>(allUsableRegs);
     }
       instructions.add(new BL(label));
     if (!usedRegs.isEmpty()) {
