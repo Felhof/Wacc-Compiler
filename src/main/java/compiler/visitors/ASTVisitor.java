@@ -95,7 +95,7 @@ public class ASTVisitor {
 
   public CodeGenData visitIntExpr(IntExpr expr) {
     REG rd = availableRegs.remove(0);
-    instructions.add(new LDR(rd, new Imm_LDR(Integer.parseInt(expr.value()))));
+    instructions.add(new LDR(rd, new Imm_LDR(expr.value())));
     return rd;
   }
 

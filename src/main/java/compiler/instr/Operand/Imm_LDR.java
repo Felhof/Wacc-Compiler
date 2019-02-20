@@ -1,10 +1,10 @@
 package compiler.instr.Operand;
 
 public class Imm_LDR implements Operand {
-  public String value;
+  public int value;
 
   public Imm_LDR(String value) { // WHY IMM_LDR ?
-    this.value = value;
+    this.value = Integer.parseInt(value);
   }
 
   @Override
