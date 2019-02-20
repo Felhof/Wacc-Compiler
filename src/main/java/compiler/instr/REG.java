@@ -20,6 +20,6 @@ public enum REG implements Operand, CodeGenData {
     return s;
   }
 
-  public static final List<REG> all =
+  public static final List<REG> allUsableRegs =
       new ArrayList<>(Arrays.asList(R4, R5, R6, R7, R8, R9, R10, R11, R12));
 }

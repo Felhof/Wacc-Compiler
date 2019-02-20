@@ -25,6 +25,7 @@ import compiler.instr.PUSH;
 import compiler.instr.REG;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -34,7 +35,6 @@ import static compiler.instr.REG.*;
 public class ASTVisitor {
   private List<Instr> instructions;
   private List<Instr> data;
-  private List<Instr> functions;
   private Set<String> specialLabels;
 
   private SymbolTable currentST;
@@ -43,9 +43,8 @@ public class ASTVisitor {
   public ASTVisitor() {
     this.instructions = new ArrayList<>();
     this.data = new ArrayList<>();
-    this.functions = new ArrayList<>();
     this.specialLabels = new HashSet<>();
-    availableRegs = REG.all;
+    availableRegs = new ArrayList<>(allUsableRegs);
   }
 
   public List<Instr> generate(AST root) {
@@ -72,7 +71,6 @@ public class ASTVisitor {
     }
 
     data.addAll(instructions);
-    data.addAll(functions);
     return data;
   }
 
@@ -112,7 +110,7 @@ public class ASTVisitor {
     REG rd = (REG) visit(printNode.expr());
     // mov result into arg register
     instructions.add(new MOV(R0, rd));
-    instructions.add(new BL("p_print_string"));
+    jumpToFunctionLabel("p_print_string");
     specialLabels.add("p_print_string");
     return null;
   }
@@ -144,17 +142,37 @@ public class ASTVisitor {
     data.add(new LABEL(labelName));
     data.add(new STRING_FIELD("\"%.*s\\0\""));
 
-    functions.addAll(Arrays.asList(
+    instructions.addAll(Arrays.asList(
         new LABEL("p_print_string"),
         new PUSH(LR),
         new LDR(R1, new Addr(R0)),
         new ADD(R2, R0, new Imm("4")),
         new LDR(R0, new Imm_STRING_LDR(labelName)),
-        new ADD(R0, R0, new Imm("4")),
-        new BL("printf"),
+        new ADD(R0, R0, new Imm("4"))));
+    jumpToFunctionLabel("printf");
+    instructions.addAll(Arrays.asList(
         new MOV(R0, new Imm("0")),
         new BL("fflush"),
         new POP(PC)));
+  }
+
+  private void jumpToFunctionLabel(String label) {
+    List<REG> usedRegs = getUsedRegs();
+    if (!usedRegs.isEmpty()) {
+      instructions.add(new PUSH(usedRegs)); // save onto stack all used regs
+      availableRegs = new ArrayList<>(allUsableRegs);
+    }
+      instructions.add(new BL(label));
+    if (!usedRegs.isEmpty()) {
+      Collections.reverse(usedRegs);
+      instructions.add(new POP(usedRegs));  // restore previous regs from stack
+    }
+  }
+
+  private List<REG> getUsedRegs() {
+    List<REG> regs = new ArrayList<>(allUsableRegs);
+    regs.removeAll(availableRegs);
+    return regs;
   }
 
 }
