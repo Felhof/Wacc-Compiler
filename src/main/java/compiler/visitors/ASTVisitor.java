@@ -1,5 +1,6 @@
 package compiler.visitors;
 
+import compiler.AST.NodeElements.RHS.CharExpr;
 import compiler.AST.NodeElements.RHS.IntExpr;
 import compiler.AST.NodeElements.RHS.StringExpr;
 import compiler.AST.NodeElements.RHS.UnaryExpr;
@@ -9,17 +10,15 @@ import compiler.AST.Nodes.ExitNode;
 import compiler.AST.Nodes.ParentNode;
 import compiler.AST.Nodes.PrintNode;
 import compiler.AST.SymbolTable.SymbolTable;
+import compiler.AST.Types.CharType;
 import compiler.AST.Types.IntType;
 import compiler.instr.*;
-import compiler.instr.Operand.Addr;
-import compiler.instr.Operand.Imm_INT;
-import compiler.instr.Operand.Imm_INT_LDR;
+import compiler.instr.Operand.*;
 import compiler.instr.BL;
 import compiler.instr.Instr;
 import compiler.instr.LABEL;
 import compiler.instr.LDR;
 import compiler.instr.MOV;
-import compiler.instr.Operand.Imm_STRING_LDR;
 import compiler.instr.POP;
 import compiler.instr.PUSH;
 import compiler.instr.REG;
@@ -114,8 +113,12 @@ public class ASTVisitor {
     instructions.add(new MOV(R0, rd));
 
 
-    instructions.add(new BL("p_print_string"));
-    specialLabels.add("p_print_string");
+    if(printNode.expr().type().equals(CharType.getInstance())) {
+      instructions.add(new BL("putchar"));
+    }else {
+      instructions.add(new BL("p_print_string"));
+      specialLabels.add("p_print_string");
+    }
 
     if(printNode.newLine()) {
       instructions.add(new BL("p_print_ln"));
@@ -131,11 +134,10 @@ public class ASTVisitor {
     return rd;
   }
 
-  public String addStringField(String string) {
-    String labelName = "msg_" + (data.size() - 1);
-    data.add(new LABEL(labelName));
-    data.add(new STRING_FIELD(string));
-    return labelName;
+  public CodeGenData visitCharExpr(CharExpr charExpr) {
+    REG rd = availableRegs.remove(0);
+    instructions.add(new MOV(rd, new Imm_STRING("'" + charExpr.getValue() + "'")));
+    return rd;
   }
 
   private void addSpecialFunction(String name){
@@ -151,7 +153,7 @@ public class ASTVisitor {
   }
 
   private void addPrint(){
-    String labelName = createUniqueDatafield("\"%.*s\\0\"");
+    String labelName = addStringField("\"%.*s\\0\"");
 
     functions.addAll(Arrays.asList(
         new LABEL("p_print_string"),
@@ -167,7 +169,7 @@ public class ASTVisitor {
   }
 
   private void addPrintln(){
-    String labelName = createUniqueDatafield("\"\\0\"");
+    String labelName = addStringField("\"\\0\"");
 
     functions.addAll(Arrays.asList(
             new LABEL("p_print_ln"),
@@ -180,12 +182,12 @@ public class ASTVisitor {
             new POP(PC)));
   }
 
-  private String createUniqueDatafield(String value){
+  private String addStringField(String string) {
     String labelName = "msg_" + (data.size() / 2);
     data.add(new LABEL(labelName));
-    data.add(new STRING_FIELD(value));
-
+    data.add(new STRING_FIELD(string));
     return labelName;
   }
+
 
 }

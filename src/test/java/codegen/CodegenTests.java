@@ -114,8 +114,9 @@ public class CodegenTests {
   @Test
   public void PrintTest() {
     String path = "src/test/examples/valid/IO/print/";
-    String[] filenames = {"print", "println"};
-    String[][] expectedOutput = {{"Hello World!"},{"Hello World!"}};
+    String[] filenames = {"print", "println", "printChar", "multipleLines"};
+    String[][] expectedOutput = {{"Hello World!"},{"Hello World!"},
+            {"A simple character example is f"},{"Line1","Line2"}};
 
     for (int i = 0; i < filenames.length; i++) {
       AST ast = Main.compileProg(path + filenames[i] + ".wacc");

@@ -1,0 +1,4 @@
+begin
+    println "Line1";
+    print "Line2"
+end
