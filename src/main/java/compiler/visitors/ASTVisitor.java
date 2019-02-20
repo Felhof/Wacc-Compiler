@@ -110,6 +110,7 @@ public class ASTVisitor {
     REG rd = (REG) visit(printNode.expr());
     // mov result into arg register
     instructions.add(new MOV(R0, rd));
+
     jumpToFunctionLabel("p_print_string");
     specialLabels.add("p_print_string");
     return null;
