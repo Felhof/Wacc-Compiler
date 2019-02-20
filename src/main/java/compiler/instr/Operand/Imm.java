@@ -1,14 +1,14 @@
 package compiler.instr.Operand;
 
-public class Imm_LDR implements Operand {
+public class Imm implements Operand {
   public int value;
 
-  public Imm_LDR(String value) { // WHY IMM_LDR ?
+  public Imm(String value) {
     this.value = Integer.parseInt(value);
   }
 
   @Override
   public String toString() {
-    return "=" + value;
+    return "#" + value;
   }
 }

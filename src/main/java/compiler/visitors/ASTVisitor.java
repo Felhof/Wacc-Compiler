@@ -1,22 +1,25 @@
 package compiler.visitors;
 
 import compiler.AST.NodeElements.RHS.IntExpr;
+import compiler.AST.NodeElements.RHS.StringExpr;
 import compiler.AST.NodeElements.RHS.UnaryExpr;
 import compiler.AST.NodeElements.RHS.UnaryExpr.UNOP;
 import compiler.AST.Nodes.AST;
 import compiler.AST.Nodes.ExitNode;
 import compiler.AST.Nodes.ParentNode;
+import compiler.AST.Nodes.PrintNode;
 import compiler.AST.SymbolTable.SymbolTable;
 import compiler.AST.Types.IntType;
 import compiler.instr.*;
 import compiler.instr.Operand.Addr;
-import compiler.instr.Operand.Imm_LDR;
-import compiler.instr.Operand.Imm_MOV;
+import compiler.instr.Operand.Imm;
+import compiler.instr.Operand.Imm_INT_LDR;
 import compiler.instr.BL;
 import compiler.instr.Instr;
 import compiler.instr.LABEL;
 import compiler.instr.LDR;
 import compiler.instr.MOV;
+import compiler.instr.Operand.Imm_STRING_LDR;
 import compiler.instr.POP;
 import compiler.instr.PUSH;
 import compiler.instr.REG;
@@ -39,24 +42,27 @@ public class ASTVisitor {
     this.data = new ArrayList<>();
     this.functions = new ArrayList<>();
     this.specialLabels = new ArrayList<>();
+    availableRegs = REG.all;
   }
 
   public List<Instr> generate(AST root) {
 
-    data.add(new FIELD("data"));
+    data.add(new SECTION("data"));
 
-    instructions.add(new FIELD("text"));
-    instructions.add(new FIELD("main", true));
+    instructions.add(new SECTION("text"));
+    instructions.add(new SECTION("main", true));
+
     instructions.add(new LABEL("main"));
     instructions.add(new PUSH(LR));
 
     currentST = root.symbolTable();
-    availableRegs = REG.all;
     visitParentNode(root.root());
 
-    instructions.add(new LDR(R0, new Imm_LDR("0")));  //Cleaning R0 like the reference compiler
+    instructions.add(new LDR(R0, new Imm_INT_LDR("0")));  //Cleaning R0 like the
+    // reference compiler
     instructions.add(new POP(PC));
-    instructions.add(new FIELD("ltorg"));
+
+    instructions.add(new SECTION("ltorg")); // Assemble directly
 
     for(String s : specialLabels){
       addSpecialFunction(s);
@@ -95,52 +101,56 @@ public class ASTVisitor {
 
   public CodeGenData visitIntExpr(IntExpr expr) {
     REG rd = availableRegs.remove(0);
-    instructions.add(new LDR(rd, new Imm_LDR(expr.value())));
+    instructions.add(new LDR(rd, new Imm_INT_LDR(expr.value())));
     return rd;
   }
 
-  public void visitPrintExpression(String field){
-    REG rd = availableRegs.remove(0);
-    instructions.add(new LDR(rd, new Imm_LDR(field)));
+  public CodeGenData visitPrintExpression(PrintNode printNode){
+    REG rd = (REG) visit(printNode.expr());
+    // mov result into arg register
     instructions.add(new MOV(R0, rd));
-    instructions.add(new BL("p_print_something"));
-    if(!specialLabels.contains("p_print_something")) {
-      specialLabels.add("p_print_something");
+    instructions.add(new BL("p_print_string"));
+    if(!specialLabels.contains("p_print_string")) {
+      specialLabels.add("p_print_string");
     }
+    return null;
   }
 
-  public String addString(String ident, boolean newline) {
-    String field = "msg_" + (data.size() - 1);
-    data.add(new LABEL(field));
-    data.add(new FIELD("word " + ident.length()));
-    data.add(new FIELD("ascii\t" + ident + (newline ? "\n" : "")));
+  public CodeGenData visitStringExpr(StringExpr stringExpr) {
+    String labelName = addStringField(stringExpr.getValue());
+    REG rd = availableRegs.remove(0);
+    instructions.add(new LDR(rd, new Imm_STRING_LDR(labelName)));
+    return rd;
+  }
 
-    return field;
+  public String addStringField(String string) {
+    String labelName = "msg_" + (data.size() - 1);
+    data.add(new LABEL(labelName));
+    data.add(new STRING_FIELD(string));
+    return labelName;
   }
 
   private void addSpecialFunction(String name){
     switch (name){
-      case "p_print_something":
+      case "p_print_string":
         addPrint();
         break;
     }
   }
 
   private void addPrint(){
+    String labelName = "msg_" + (data.size() - 2);
+    data.add(new LABEL(labelName));
+    data.add(new STRING_FIELD("\"%.*s\\0\""));
 
-    String field = "msg_" + (data.size() - 1);
-    data.add(new LABEL(field));
-    data.add(new FIELD("word  5" ));
-    data.add(new FIELD("ascii\t\"%.*s\\0\""));
-
-
-    functions.add(new FIELD("p_print_something"));
+    functions.add(new LABEL("p_print_string"));
+    functions.add(new PUSH(LR));
     functions.add(new LDR(R1, new Addr("r0")));
-    functions.add(new ADD(R2, R0, new Imm_MOV("4")));
-    functions.add(new LDR(R0, new Imm_LDR(field)));
-    functions.add(new ADD(R0, R0, new Imm_MOV("4")));
+    functions.add(new ADD(R2, R0, new Imm("4")));
+    functions.add(new LDR(R0, new Imm_STRING_LDR(labelName)));
+    functions.add(new ADD(R0, R0, new Imm("4")));
     functions.add(new BL("printf"));
-    functions.add(new MOV(R0, new Imm_MOV("0")));
+    functions.add(new MOV(R0, new Imm("0")));
     functions.add(new BL("fflush"));
     functions.add(new POP(PC));
   }

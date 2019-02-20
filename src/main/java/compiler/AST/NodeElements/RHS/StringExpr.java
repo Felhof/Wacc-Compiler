@@ -25,6 +25,6 @@ public class StringExpr extends Expr {
 
   @Override
   public CodeGenData accept(ASTVisitor visitor) {
-    return null;
+    return visitor.visitStringExpr(this);
   }
 }

@@ -81,10 +81,8 @@ public class Main {
       // write instructions to assembly file
       PrintWriter writer = new PrintWriter(assemblyFile, StandardCharsets.UTF_8);
 
-      writer.println(".text");
-      writer.println(".global main\n");
       instructions.forEach(i -> writer.println(i.toString()));
-      writer.println("\n\t.ltorg"); // assemble immediately
+
       writer.close();
 
     } catch (IOException e) {
