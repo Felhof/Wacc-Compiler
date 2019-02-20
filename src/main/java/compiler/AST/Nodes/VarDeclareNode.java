@@ -18,6 +18,9 @@ public class VarDeclareNode extends Node {
     this.rhs = rhs;
   }
 
+  public Type varType(){ return varType; }
+  public NodeElem rhs(){ return rhs; }
+
   @Override
   public String toString() {
     return "VarDeclaration: " + varType.toString() + " "
@@ -26,6 +29,6 @@ public class VarDeclareNode extends Node {
 
   @Override
   public CodeGenData accept(ASTVisitor visitor) {
-    return null;
+    return visitor.visitVarDeclareNode(this);
   }
 }

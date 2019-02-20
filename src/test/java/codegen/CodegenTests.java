@@ -32,8 +32,8 @@ public class CodegenTests {
           + "/arm-linux-gnueabi/", filename).start();
       emulator.waitFor();
 
-      new File(filename + ".s").delete();
-      new File(filename).delete();
+      //new File(filename + ".s").delete();
+      //new File(filename).delete();
       return emulator;
     } catch (IOException | InterruptedException e) {
       e.printStackTrace();
@@ -112,6 +112,22 @@ public class CodegenTests {
       Process emulator = assembleAndEmulate(outputFolder + filenames[i]);
       checkPrintsAreCorrect(emulator, expectedOutput[i]);
     }
+  }
+
+  @Test
+  public void basicVariableTest(){
+    String path = "src/test/examples/valid/variables/";
+    /*String[] filenames = {"boolDeclaration", "boolDeclaration2", "charDeclaration", "charDeclaration2",
+            "capCharDeclaration", "intDeclaration", "negIntDeclaration", "zeroIntDeclaration"};*/
+    String[] filenames = {"longVarNames"};
+
+    // Test that they exit correctly
+    Arrays.stream(filenames).forEach(filename -> {
+      AST ast = Main.compileProg(path + filename + ".wacc");
+      Main.generateCode(ast, outputFolder + filename);
+      Process emulator = assembleAndEmulate(outputFolder + filename);
+      assertThat(emulator.exitValue(), is(0));
+    });
   }
 
 

@@ -1,17 +1,13 @@
 package compiler.visitors;
 
-import compiler.AST.NodeElements.RHS.CharExpr;
-import compiler.AST.NodeElements.RHS.IntExpr;
-import compiler.AST.NodeElements.RHS.StringExpr;
-import compiler.AST.NodeElements.RHS.UnaryExpr;
+import compiler.AST.NodeElements.RHS.*;
 import compiler.AST.NodeElements.RHS.UnaryExpr.UNOP;
-import compiler.AST.Nodes.AST;
-import compiler.AST.Nodes.ExitNode;
-import compiler.AST.Nodes.ParentNode;
-import compiler.AST.Nodes.PrintNode;
+import compiler.AST.Nodes.*;
 import compiler.AST.SymbolTable.SymbolTable;
+import compiler.AST.Types.BoolType;
 import compiler.AST.Types.CharType;
 import compiler.AST.Types.IntType;
+import compiler.AST.Types.Type;
 import compiler.instr.*;
 import compiler.instr.Operand.*;
 import compiler.instr.BL;
@@ -35,6 +31,12 @@ public class ASTVisitor {
 
   private SymbolTable currentST;
   private List<REG> availableRegs;
+
+  private Map<Type, String> typeSizes =  Map.of(
+          BoolType.getInstance(), "1",
+          CharType.getInstance(), "1",
+          IntType.getInstance(), "4"
+  );
 
   public ASTVisitor() {
     this.instructions = new ArrayList<>();
@@ -139,6 +141,28 @@ public class ASTVisitor {
     REG rd = useFreeReg();
     instructions.add(new MOV(rd, new Imm_STRING("'" + charExpr.getValue() + "'")));
     return rd;
+  }
+
+  public CodeGenData visitBoolExpr(BoolExpr boolExpr){
+    REG rd = useFreeReg();
+    String value = String.valueOf(boolExpr.value() ? 1 : 0);
+    instructions.add(new MOV(rd, new Imm_INT(value)));
+    return rd;
+  }
+
+  public CodeGenData visitVarDeclareNode(VarDeclareNode varDeclareNode){
+
+    String size = typeSizes.get(varDeclareNode.varType());
+
+    instructions.add(new SUB(SP, SP, new Imm_INT(size)));
+
+    REG rd = (REG) visit(varDeclareNode.rhs());
+
+    instructions.add(new STR(rd, new Addr(SP)));
+
+    instructions.add(new ADD(SP, SP, new Imm_INT(size)));
+
+    return null;
   }
 
   private void addSpecialFunction(String name){
