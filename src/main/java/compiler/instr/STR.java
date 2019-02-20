@@ -3,8 +3,8 @@ package compiler.instr;
 import compiler.instr.Operand.Operand;
 
 public class STR extends Instr {
-  REG rd;
-  Operand op2;
+  private REG rd;
+  private Operand op2;
 
   public STR(REG rd, Operand op2) {
     this.rd = rd;

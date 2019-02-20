@@ -21,6 +21,10 @@ public class VarDeclareNode extends Node {
   public Type varType(){ return varType; }
   public NodeElem rhs(){ return rhs; }
 
+  public String varName() {
+    return varName;
+  }
+
   @Override
   public String toString() {
     return "VarDeclaration: " + varType.toString() + " "

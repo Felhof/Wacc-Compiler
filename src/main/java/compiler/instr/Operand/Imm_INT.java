@@ -3,8 +3,8 @@ package compiler.instr.Operand;
 public class Imm_INT implements Operand {
   public int value;
 
-  public Imm_INT(String value) {
-    this.value = Integer.parseInt(value);
+  public Imm_INT(int value) {
+    this.value = value;
   }
 
   @Override

@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 public class STRING_FIELD extends Instr {
 
-  String string;
+  private String string;
 
   public STRING_FIELD(String string) {
     this.string = string;
