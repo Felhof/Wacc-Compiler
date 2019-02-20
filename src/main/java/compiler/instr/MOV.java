@@ -1,5 +1,7 @@
 package compiler.instr;
 
+import compiler.instr.Operand.Operand;
+
 public class MOV extends Instr {
   REG rd;
   Operand op2;

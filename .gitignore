@@ -2,6 +2,7 @@
 bin
 src/main/java/antlr
 target
+output
 antlr_config/BasicLexer.tokens
 .idea/
 

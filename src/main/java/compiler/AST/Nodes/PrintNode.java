@@ -14,6 +14,10 @@ public class PrintNode extends Node {
     this.expr = expr;
   }
 
+  public Expr expr() {
+    return expr;
+  }
+
   @Override
   public String toString() {
     return "Print" + (newLine ? "ln " : " ") + expr.toString();
@@ -21,6 +25,6 @@ public class PrintNode extends Node {
 
   @Override
   public CodeGenData accept(ASTVisitor visitor) {
-    return null;
+    return visitor.visitPrintExpression(this);
   }
 }

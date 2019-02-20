@@ -1,5 +1,7 @@
 package compiler.instr;
 
+import compiler.instr.Operand.Operand;
+
 public class LDR extends Instr {
 
   private REG rd;
