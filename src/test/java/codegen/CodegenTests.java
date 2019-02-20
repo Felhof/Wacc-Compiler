@@ -27,8 +27,6 @@ public class CodegenTests {
           filename + ".s").start();
       assembler.waitFor();
 
-//      Process enterOutputFolder = new ProcessBuilder("ls").start();
-//      enterOutputFolder.waitFor();
       // Emulator
       Process emulator = new ProcessBuilder("qemu-arm", "-L", "/usr"
           + "/arm-linux-gnueabi/", filename).start();

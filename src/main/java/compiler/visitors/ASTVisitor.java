@@ -24,7 +24,10 @@ import compiler.instr.POP;
 import compiler.instr.PUSH;
 import compiler.instr.REG;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static compiler.instr.REG.*;
 
@@ -32,7 +35,7 @@ public class ASTVisitor {
   private List<Instr> instructions;
   private List<Instr> data;
   private List<Instr> functions;
-  private List<String> specialLabels;
+  private Set<String> specialLabels;
 
   private SymbolTable currentST;
   private List<REG> availableRegs;
@@ -41,7 +44,7 @@ public class ASTVisitor {
     this.instructions = new ArrayList<>();
     this.data = new ArrayList<>();
     this.functions = new ArrayList<>();
-    this.specialLabels = new ArrayList<>();
+    this.specialLabels = new HashSet<>();
     availableRegs = REG.all;
   }
 
@@ -110,9 +113,7 @@ public class ASTVisitor {
     // mov result into arg register
     instructions.add(new MOV(R0, rd));
     instructions.add(new BL("p_print_string"));
-    if(!specialLabels.contains("p_print_string")) {
-      specialLabels.add("p_print_string");
-    }
+    specialLabels.add("p_print_string");
     return null;
   }
 
@@ -139,20 +140,21 @@ public class ASTVisitor {
   }
 
   private void addPrint(){
-    String labelName = "msg_" + (data.size() - 2);
+    String labelName = "msg_" + (data.size() / 2);
     data.add(new LABEL(labelName));
     data.add(new STRING_FIELD("\"%.*s\\0\""));
 
-    functions.add(new LABEL("p_print_string"));
-    functions.add(new PUSH(LR));
-    functions.add(new LDR(R1, new Addr("r0")));
-    functions.add(new ADD(R2, R0, new Imm("4")));
-    functions.add(new LDR(R0, new Imm_STRING_LDR(labelName)));
-    functions.add(new ADD(R0, R0, new Imm("4")));
-    functions.add(new BL("printf"));
-    functions.add(new MOV(R0, new Imm("0")));
-    functions.add(new BL("fflush"));
-    functions.add(new POP(PC));
+    functions.addAll(Arrays.asList(
+        new LABEL("p_print_string"),
+        new PUSH(LR),
+        new LDR(R1, new Addr(R0)),
+        new ADD(R2, R0, new Imm("4")),
+        new LDR(R0, new Imm_STRING_LDR(labelName)),
+        new ADD(R0, R0, new Imm("4")),
+        new BL("printf"),
+        new MOV(R0, new Imm("0")),
+        new BL("fflush"),
+        new POP(PC)));
   }
 
 }

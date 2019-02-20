@@ -1,15 +1,17 @@
 package compiler.instr.Operand;
 
-public class Addr implements Operand {
-  public String value;
+import compiler.instr.REG;
 
-  public Addr(String value) {
-    this.value = value;
+public class Addr implements Operand {
+  public REG rd;
+
+  public Addr(REG rd) {
+    this.rd = rd;
   }
 
   @Override
   public String toString() {
-    return "[" + value + "]";
+    return "[" + rd.toString() + "]";
   }
 
 }
