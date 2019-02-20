@@ -16,7 +16,7 @@ import org.junit.Test;
 public class CodegenTests {
 
 
-  private final String outputFolder = "output/";
+  private final String outputFolder = "src/test/java/codegen/output/";
 
   private Process assembleAndEmulate(String filename) {
 
@@ -32,8 +32,8 @@ public class CodegenTests {
           + "/arm-linux-gnueabi/", filename).start();
       emulator.waitFor();
 
-      //new File(filename + ".s").delete();
-      //new File(filename).delete();
+      new File(filename + ".s").delete();
+      new File(filename).delete();
       return emulator;
     } catch (IOException | InterruptedException e) {
       e.printStackTrace();
