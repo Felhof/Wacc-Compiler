@@ -155,8 +155,7 @@ public class ASTVisitor {
 
   public CodeGenData visitBoolExpr(BoolExpr boolExpr) {
     REG rd = useFreeReg();
-    String value = String.valueOf(boolExpr.value() ? 1 : 0);
-    instructions.add(new MOV(rd, new Imm_INT(toInt(value))));
+    instructions.add(new MOV(rd, new Imm_INT(boolExpr.value() ? 1 : 0)));
     return rd;
   }
 
