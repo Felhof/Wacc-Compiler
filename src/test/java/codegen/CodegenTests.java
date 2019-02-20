@@ -16,7 +16,7 @@ import org.junit.Test;
 public class CodegenTests {
 
 
-  private final String outputFolder = "output/";
+  private final String outputFolder = "src/test/java/codegen/output";
 
   private Process assembleAndEmulate(String filename) {
 
