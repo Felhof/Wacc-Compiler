@@ -141,6 +141,9 @@ public class ASTVisitor {
 
     if (printNode.expr().type().equals(CharType.getInstance())) {
       jumpToFunctionLabel("putchar");
+    } else if (printNode.expr().type().equals(IntType.getInstance())){
+      jumpToFunctionLabel("p_print_int");
+      specialLabels.add("p_print_int");
     } else {
       jumpToFunctionLabel("p_print_string");
       specialLabels.add("p_print_string");
@@ -287,7 +290,11 @@ public class ASTVisitor {
   private void addSpecialFunction(String name) {
     switch (name) {
       case "p_print_string":
-        addPrint();
+        addPrintString();
+        break;
+
+      case "p_print_int":
+        addPrintInt();
         break;
 
       case "p_print_ln":
@@ -304,7 +311,7 @@ public class ASTVisitor {
     }
   }
 
-  private void addPrint() {
+  private void addPrintString() {
     String labelName = addStringField("\"%.*s\\0\"");
 
     instructions.addAll(Arrays.asList(
@@ -319,6 +326,24 @@ public class ASTVisitor {
       new MOV(R0, new Imm_INT(toInt("0"))),
       new BL("fflush"),
       new POP(PC)));
+
+  }
+
+  private void addPrintInt() {
+    String labelName = addStringField("\"%.*d\\0\"");
+
+    instructions.addAll(Arrays.asList(
+            new LABEL("p_print_int"),
+            new PUSH(LR),
+            new MOV(R1, R0),
+            new LDR(R0, new Imm_STRING_MEM(labelName)),
+            new ADD(R0, R0, new Imm_INT(4))));
+
+    jumpToFunctionLabel("printf");
+    instructions.addAll(Arrays.asList(
+            new MOV(R0, new Imm_INT(toInt("0"))),
+            new BL("fflush"),
+            new POP(PC)));
 
   }
 
