@@ -28,4 +28,10 @@ public class Ident extends Expr implements LHS {
   public CodeGenData accept(ASTVisitor visitor) {
     return visitor.visitIdent(this);
   }
+
+  @Override
+  public int sizeOf() {
+    //TODO: get type from symbol or augment the map in visitor
+    return 0;
+  }
 }

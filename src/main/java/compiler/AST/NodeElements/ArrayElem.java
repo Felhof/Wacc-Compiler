@@ -25,4 +25,10 @@ public class ArrayElem extends Expr implements LHS{
   public String varName() {
     return varName;
   }
+
+  @Override
+  public int sizeOf() {
+    // TODO: To think about
+    return 0;
+  }
 }

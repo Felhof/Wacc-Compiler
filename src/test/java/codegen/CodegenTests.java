@@ -9,7 +9,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Arrays;
 import java.util.stream.IntStream;
 import org.junit.Test;
 
@@ -17,6 +16,100 @@ public class CodegenTests {
 
 
   private final String outputFolder = "src/test/java/codegen/output/";
+
+  @Test
+  public void ExitCodeTest() {
+    String path = "src/test/examples/valid/basic/exit/";
+    String[] filenames = {"exit-1", "exitBasic", "exitBasic2", "exitWrap"};
+    int[] expectedExitCodes = {255, 7, 42, 0};
+
+    compileAndCheckExitAndOutput(path, filenames, expectedExitCodes, null);
+  }
+
+  @Test
+  public void SkipTest() {
+    String path = "src/test/examples/valid/basic/skip/";
+    String[] filenames = {"skip", "comment", "commentInLine"};
+
+    compileAndCheckExitAndOutput(path, filenames, null, null);
+  }
+
+  @Test
+  public void SequenceTest() {
+    String path = "src/test/examples/valid/sequence/";
+    String[] simpleFilenames = {"basicSeq", "basicSeq2"};
+
+    compileAndCheckExitAndOutput(path, simpleFilenames, null, null);
+  }
+
+  @Test
+  public void basicVariableTest(){
+    String path = "src/test/examples/valid/variables/";
+    String[] filenames = {"boolDeclaration", "boolDeclaration2", "charDeclaration", "charDeclaration2",
+        "capCharDeclaration", "intDeclaration", "negIntDeclaration", "zeroIntDeclaration", "manyVariables"};// "puncCharDeclaration"};
+
+    compileAndCheckExitAndOutput(path, filenames, null, null);
+  }
+
+  @Test
+  public void exitWithVar() {
+    String path = "src/test/examples/valid/variables/";
+    String[] filenames = {"longVarNames", "_VarNames"};
+    int[] expectedExitCodes = {5, 19};
+
+    compileAndCheckExitAndOutput(path, filenames, expectedExitCodes, null);
+  }
+
+  @Test
+  public void PrintTest() {
+    String path = "src/test/examples/valid/IO/print/";
+    String[] filenames = {"print", "println", "printChar", "multipleLines"};
+    String[][] expectedOutput = {{"Hello World!"},{"Hello World!"},
+            {"A simple character example is f"},{"Line1","Line2"}};
+
+    compileAndCheckExitAndOutput(path, filenames, null, expectedOutput);
+  }
+
+  @Test
+  public void PairTest() {
+    String path = "src/test/examples/valid/pairs/";
+    String[] filenames = {"createPair", "createPair02", "createPair03"};
+
+    compileAndCheckExitAndOutput(path, filenames, null, null);
+  }
+
+  private void compileAndCheckExitAndOutput(String path, String[] filenames,
+      int[] expectedExitCodes, String [][] expectedOutput) {
+    IntStream.range(0, filenames.length).forEach(i -> {
+      String filename = filenames[i];
+      AST ast = Main.compileProg(path + filename + ".wacc");
+      Main.generateCode(ast, outputFolder + filename);
+      Process emulator = assembleAndEmulate(outputFolder + filename);
+      if (expectedExitCodes == null) {
+        assertThat(emulator.exitValue(), is(0));
+      } else {
+        assertThat(emulator.exitValue(), is(expectedExitCodes[i]));
+      }
+      if (expectedOutput != null) {
+        checkPrintsAreCorrect(emulator, expectedOutput[i]);
+      }
+    });
+  }
+
+  private void checkPrintsAreCorrect(Process emulator, String[] expected) {
+    try {
+      //Read each line of the output into the sb
+      BufferedReader br = new BufferedReader(new InputStreamReader(emulator
+          .getInputStream()));
+
+      for (String expectedLine : expected) {
+        String actualLine = br.readLine();
+        assertThat(actualLine, is(expectedLine));
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
 
   private Process assembleAndEmulate(String filename) {
 
@@ -40,109 +133,4 @@ public class CodegenTests {
       return null;
     }
   }
-
-  private void checkPrintsAreCorrect(Process emulator, String[] expected) {
-    try {
-      //Read each line of the output into the sb
-      BufferedReader br = new BufferedReader(new InputStreamReader(emulator
-          .getInputStream()));
-
-      for (String expectedLine : expected) {
-        String actualLine = br.readLine();
-        assertThat(actualLine, is(expectedLine));
-      }
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-  }
-
-  @Test
-  public void ExitCodeTest() {
-
-    String path = "src/test/examples/valid/basic/exit/";
-    String[] filenames = {"exit-1", "exitBasic", "exitBasic2", "exitWrap"};
-    int[] expectedExitCodes = {255, 7, 42, 0};
-
-    IntStream.range(0, filenames.length).forEach(i -> {
-      String filename = filenames[i];
-      AST ast = Main.compileProg(path + filename + ".wacc");
-      Main.generateCode(ast, outputFolder + filename);
-      Process emulator = assembleAndEmulate(outputFolder + filename);
-      assertThat(emulator.exitValue(), is(expectedExitCodes[i]));
-    });
-  }
-
-  @Test
-  public void SkipTest() {
-    String path = "src/test/examples/valid/basic/skip/";
-    String[] filenames = {"skip", "comment", "commentInLine"};
-
-    Arrays.stream(filenames).forEach(filename -> {
-      AST ast = Main.compileProg(path + filename + ".wacc");
-      Main.generateCode(ast, outputFolder + filename);
-      Process emulator = assembleAndEmulate(outputFolder + filename);
-      assertThat(emulator.exitValue(), is(0));
-    });
-  }
-
-  @Test
-  public void SequenceTest() {
-    String path = "src/test/examples/valid/sequence/";
-    String[] simpleFilenames = {"basicSeq", "basicSeq2"};
-
-    // Test that they exit correctly
-    Arrays.stream(simpleFilenames).forEach(filename -> {
-      AST ast = Main.compileProg(path + filename + ".wacc");
-      Main.generateCode(ast, outputFolder + filename);
-      Process emulator = assembleAndEmulate(outputFolder + filename);
-      assertThat(emulator.exitValue(), is(0));
-    });
-  }
-
-  @Test
-  public void PrintTest() {
-    String path = "src/test/examples/valid/IO/print/";
-    String[] filenames = {"print", "println", "printChar", "multipleLines"};
-    String[][] expectedOutput = {{"Hello World!"},{"Hello World!"},
-            {"A simple character example is f"},{"Line1","Line2"}};
-
-    for (int i = 0; i < filenames.length; i++) {
-      AST ast = Main.compileProg(path + filenames[i] + ".wacc");
-      Main.generateCode(ast, outputFolder + filenames[i]);
-      Process emulator = assembleAndEmulate(outputFolder + filenames[i]);
-      checkPrintsAreCorrect(emulator, expectedOutput[i]);
-    }
-  }
-
-  @Test
-  public void basicVariableTest(){
-    String path = "src/test/examples/valid/variables/";
-    String[] filenames = {"boolDeclaration", "boolDeclaration2", "charDeclaration", "charDeclaration2",
-            "capCharDeclaration", "intDeclaration", "negIntDeclaration", "zeroIntDeclaration", "manyVariables"};// "puncCharDeclaration"};
-
-    // Test that they exit correctly
-    Arrays.stream(filenames).forEach(filename -> {
-      AST ast = Main.compileProg(path + filename + ".wacc");
-      Main.generateCode(ast, outputFolder + filename);
-      Process emulator = assembleAndEmulate(outputFolder + filename);
-      assertThat(emulator.exitValue(), is(0));
-    });
-  }
-
-  @Test
-  public void exitWithVar() {
-    String path = "src/test/examples/valid/variables/";
-    String[] filenames = {"longVarNames", "_VarNames"};
-    int[] expectedExitCodes = {5, 19};
-
-    IntStream.range(0, filenames.length).forEach(i -> {
-      String filename = filenames[i];
-      AST ast = Main.compileProg(path + filename + ".wacc");
-      Main.generateCode(ast, outputFolder + filename);
-      Process emulator = assembleAndEmulate(outputFolder + filename);
-      assertThat(emulator.exitValue(), is(expectedExitCodes[i]));
-    });
-  }
-
-
 }

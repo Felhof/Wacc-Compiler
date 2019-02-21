@@ -1,8 +1,10 @@
 package compiler.instr.Operand;
 
+import com.thoughtworks.qdox.model.expression.ShiftLeft;
 import compiler.instr.REG;
 
 public class Addr implements Operand {
+
   private REG rn;
   private boolean preIndex;
   private Operand shift;
@@ -19,13 +21,18 @@ public class Addr implements Operand {
 
   @Override
   public String toString() {
-    if (shift == null) {
+    if (shift == null || isOffsetZero()) {
       return "[" + rn.toString() + "]";
     } else if (preIndex) {
       return "[" + rn.toString() + ", " + shift.toString() + "]";
     } else {
       return "[" + rn.toString() + "]" + ", " + shift.toString();
     }
+  }
+
+  private boolean isOffsetZero() {
+    return (shift instanceof Imm_INT && ((Imm_INT) shift).value == 0)
+        || (shift instanceof Imm_INT_MEM && ((Imm_INT_MEM) shift).value == 0);
   }
 
 }
