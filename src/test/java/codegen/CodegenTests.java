@@ -43,7 +43,7 @@ public class CodegenTests {
   public void basicVariableTest(){
     String path = "src/test/examples/valid/variables/";
     String[] filenames = {"boolDeclaration", "boolDeclaration2", "charDeclaration", "charDeclaration2",
-        "capCharDeclaration", "intDeclaration", "negIntDeclaration", "zeroIntDeclaration", "manyVariables"};// "puncCharDeclaration"};
+        "capCharDeclaration", "intDeclaration", "negIntDeclaration", "zeroIntDeclaration", "manyVariables", "assignBool"};// "puncCharDeclaration"};
 
     compileAndCheckExitAndOutput(path, filenames, null, null, null);
   }

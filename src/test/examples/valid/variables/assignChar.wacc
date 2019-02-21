@@ -1,0 +1,4 @@
+begin
+  char a = 'a';
+  char b = a
+end
