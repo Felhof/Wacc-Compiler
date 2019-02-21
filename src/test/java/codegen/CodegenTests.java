@@ -117,9 +117,8 @@ public class CodegenTests {
   @Test
   public void basicVariableTest(){
     String path = "src/test/examples/valid/variables/";
-    /*String[] filenames = {"boolDeclaration", "boolDeclaration2", "charDeclaration", "charDeclaration2",
-            "capCharDeclaration", "intDeclaration", "negIntDeclaration", "zeroIntDeclaration"};*/
-    String[] filenames = {"longVarNames"};
+    String[] filenames = {"boolDeclaration", "boolDeclaration2", "charDeclaration", "charDeclaration2",
+            "capCharDeclaration", "intDeclaration", "negIntDeclaration", "zeroIntDeclaration"};
 
     // Test that they exit correctly
     Arrays.stream(filenames).forEach(filename -> {

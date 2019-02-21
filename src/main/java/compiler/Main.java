@@ -22,7 +22,7 @@ public class Main {
 
   public static void main(String[] args) {
     //String path = args[0]; // uncomment for labTS test
-    String path = "src/test/examples/valid/IO/print/print.wacc";
+    String path = "/homes/gtb17/variables.wacc";
     AST ast = compileProg(path);
     generateCode(ast, extractFileName(path));
     System.exit(0);
@@ -79,7 +79,7 @@ public class Main {
     String assemblyFile = filename + ".s";
     try {
       // write instructions to assembly file
-      PrintWriter writer = new PrintWriter(assemblyFile, StandardCharsets.UTF_8);
+      PrintWriter writer = new PrintWriter(assemblyFile, String.valueOf(StandardCharsets.UTF_8));
 
       instructions.forEach(i -> writer.println(i.toString()));
 

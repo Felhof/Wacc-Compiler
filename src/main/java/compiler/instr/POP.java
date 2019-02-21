@@ -6,7 +6,7 @@ import java.util.List;
 
 public class POP extends Instr {
 
-  List<REG> regsToPop;
+  private List<REG> regsToPop;
 
   public POP(List<REG> regsToPop) {
     this.regsToPop = regsToPop;

@@ -95,10 +95,12 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
   private BasicParser parser;
   private SymbolTable currentST;
   private ParentNode currentParentNode;
+  private int stackPointerOffset;
 
   public SemanticVisitor(BasicParser parser) {
     this.parser = parser;
     currentST = new SymbolTable(null);
+    stackPointerOffset = 0;
   }
 
   @Override
@@ -107,7 +109,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
     addFuncDefToST(ctx);
     ctx.func().forEach(f -> currentParentNode.add((Node) visit(f)));
     visit(ctx.stat());
-    return new AST(currentParentNode, currentST);
+    return new AST(currentParentNode, currentST, stackPointerOffset);
   }
 
   private void addFuncDefToST(ProgContext ctx) {
@@ -239,7 +241,16 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
       currentST.addVar(varName, varType);
       currentParentNode.add(new VarDeclareNode(varType, varName, rhs, ctx.start.getLine()));
     }
+    incrementStackOffset(varType);
     return null;
+  }
+
+  private void incrementStackOffset(Type varType) {
+    if (varType.equals(CharType.getInstance()) || varType.equals(BoolType.getInstance())) {
+      stackPointerOffset++;
+    } else {
+      stackPointerOffset += 4;
+    }
   }
 
   @Override

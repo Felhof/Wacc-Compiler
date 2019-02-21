@@ -8,10 +8,12 @@ import compiler.visitors.CodeGenData;
 public class AST implements ASTData {
   private ParentNode root;
   private SymbolTable symbolTable;
+  private int stackPointerOffset;
 
-  public AST(ParentNode root, SymbolTable symbolTable) {
+  public AST(ParentNode root, SymbolTable symbolTable, int stackPointerOffset) {
     this.root = root;
     this.symbolTable = symbolTable;
+    this.stackPointerOffset = stackPointerOffset;
   }
 
   public ParentNode root() {
@@ -25,5 +27,9 @@ public class AST implements ASTData {
   @Override
   public CodeGenData accept(ASTVisitor visitor) {
     return null;
+  }
+
+  public String stackOffset() {
+    return String.valueOf(stackPointerOffset);
   }
 }

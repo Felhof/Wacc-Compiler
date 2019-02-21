@@ -1,12 +1,15 @@
 package compiler.visitors;
 
+import compiler.AST.NodeElements.Ident;
 import compiler.AST.NodeElements.RHS.*;
 import compiler.AST.NodeElements.RHS.UnaryExpr.UNOP;
 import compiler.AST.Nodes.*;
 import compiler.AST.SymbolTable.SymbolTable;
+import compiler.AST.Types.ArrType;
 import compiler.AST.Types.BoolType;
 import compiler.AST.Types.CharType;
 import compiler.AST.Types.IntType;
+import compiler.AST.Types.PairType;
 import compiler.AST.Types.Type;
 import compiler.instr.*;
 import compiler.instr.Operand.*;
@@ -25,51 +28,57 @@ import java.util.Collections;
 import static compiler.instr.REG.*;
 
 public class ASTVisitor {
+
   private List<Instr> instructions;
   private List<Instr> data;
   private Set<String> specialLabels;
 
   private SymbolTable currentST;
   private List<REG> availableRegs;
-
-  private Map<Type, String> typeSizes =  Map.of(
-          BoolType.getInstance(), "1",
-          CharType.getInstance(), "1",
-          IntType.getInstance(), "4"
-  );
+  private int currentStackOffset;
+  private Map<String, Integer> varToOffsetFromStack;
 
   public ASTVisitor() {
     this.instructions = new ArrayList<>();
     this.data = new ArrayList<>();
     this.specialLabels = new HashSet<>();
     availableRegs = new ArrayList<>(allUsableRegs);
+    varToOffsetFromStack = new HashMap<>();
   }
 
   public List<Instr> generate(AST root) {
-
-    data.add(new SECTION("data"));
-
-    instructions.add(new SECTION("text"));
-    instructions.add(new SECTION("main", true));
-
-    instructions.add(new LABEL("main"));
-    instructions.add(new PUSH(LR));
-
+    int totalStackOffset = Integer.parseInt(root.stackOffset());
+    currentStackOffset = totalStackOffset;
+    constructStartProgram();
+    if (Integer.parseInt(root.stackOffset()) > 0) {
+      instructions.add(new SUB(SP, SP, new Imm_INT(totalStackOffset)));
+    }
     currentST = root.symbolTable();
     visitParentNode(root.root());
+    if (Integer.parseInt(root.stackOffset()) > 0) {
+      instructions.add(new ADD(SP, SP, new Imm_INT(totalStackOffset)));
+    }
+    constructEndProgram();
 
-    instructions.add(new LDR(R0, new Imm_INT_LDR("0")));  //Cleaning R0 like the
-    // reference compiler
-    instructions.add(new POP(PC));
-
-    instructions.add(new SECTION("ltorg")); // Assemble directly
-
-    for(String s : specialLabels){
+    for (String s : specialLabels) {
       addSpecialFunction(s);
     }
-
     data.addAll(instructions);
     return data;
+  }
+
+  private void constructEndProgram() {
+    instructions.add(new LDR(R0, new Imm_INT_LDR("0")));
+    instructions.add(new POP(PC));
+    instructions.add(new SECTION("ltorg"));
+  }
+
+  private void constructStartProgram() {
+    data.add(new SECTION("data"));
+    instructions.add(new SECTION("text"));
+    instructions.add(new SECTION("main", true));
+    instructions.add(new LABEL("main"));
+    instructions.add(new PUSH(LR));
   }
 
   public void visitParentNode(ParentNode node) {
@@ -88,9 +97,9 @@ public class ASTVisitor {
 
   public CodeGenData visitUnaryExpr(UnaryExpr expr) {
 
-    if(expr.type().equals(IntType.getInstance()) // Set int value to negative
-        && expr.operator() == UNOP.MINUS) {
-        ((IntExpr) expr.insideExpr()).setNegative();
+    if (expr.type().equals(IntType.getInstance()) // Set int value to negative
+      && expr.operator() == UNOP.MINUS) {
+      ((IntExpr) expr.insideExpr()).setNegative();
     }
 
     //TODO: handle other types
@@ -104,19 +113,19 @@ public class ASTVisitor {
     return rd;
   }
 
-  public CodeGenData visitPrintExpression(PrintNode printNode){
+  public CodeGenData visitPrintExpression(PrintNode printNode) {
     REG rd = (REG) visit(printNode.expr());
     // mov result into arg register
     instructions.add(new MOV(R0, rd));
 
-    if(printNode.expr().type().equals(CharType.getInstance())) {
+    if (printNode.expr().type().equals(CharType.getInstance())) {
       jumpToFunctionLabel("putchar");
-    }else {
+    } else {
       jumpToFunctionLabel("p_print_string");
       specialLabels.add("p_print_string");
     }
 
-    if(printNode.newLine()) {
+    if (printNode.newLine()) {
       jumpToFunctionLabel("p_print_ln");
       specialLabels.add("p_print_ln");
     }
@@ -139,34 +148,66 @@ public class ASTVisitor {
 
   public CodeGenData visitCharExpr(CharExpr charExpr) {
     REG rd = useFreeReg();
-    instructions.add(new MOV(rd, new Imm_STRING("'" + charExpr.getValue() + "'")));
+    instructions
+      .add(new MOV(rd, new Imm_STRING("'" + charExpr.getValue() + "'")));
     return rd;
   }
 
-  public CodeGenData visitBoolExpr(BoolExpr boolExpr){
+  public CodeGenData visitBoolExpr(BoolExpr boolExpr) {
     REG rd = useFreeReg();
-    String value = String.valueOf(boolExpr.value() ? 1 : 0);
-    instructions.add(new MOV(rd, new Imm_INT(value)));
+    instructions.add(new MOV(rd, new Imm_INT(boolExpr.value() ? 1 : 0)));
     return rd;
   }
 
-  public CodeGenData visitVarDeclareNode(VarDeclareNode varDeclareNode){
+  // Refactor possibly using overloading in accept of VarDeclareNode
+  // For now its ok.
+  public CodeGenData visitVarDeclareNode(VarDeclareNode varDeclareNode) {
+    Type type = varDeclareNode.varType();
 
-    String size = typeSizes.get(varDeclareNode.varType());
+    if (type.equals(IntType.getInstance())) {
+      visitBasicTypeDeclare(varDeclareNode, 4);
+    }
 
-    instructions.add(new SUB(SP, SP, new Imm_INT(size)));
+    if (type.equals(CharType.getInstance()) || type
+      .equals(BoolType.getInstance())) {
+      visitBasicTypeDeclare(varDeclareNode, 1);
+    }
 
-    REG rd = (REG) visit(varDeclareNode.rhs());
+    if (type instanceof ArrType) {
+      visitArrayDeclare(varDeclareNode);
+    }
 
-    instructions.add(new STR(rd, new Addr(SP)));
-
-    instructions.add(new ADD(SP, SP, new Imm_INT(size)));
+    if (type instanceof PairType) {
+      visitPairDeclare(varDeclareNode);
+    }
 
     return null;
   }
 
-  private void addSpecialFunction(String name){
-    switch (name){
+  private CodeGenData visitBasicTypeDeclare(VarDeclareNode varDeclareNode,
+    int offset) {
+    REG rd = (REG) visit(varDeclareNode.rhs());
+    currentStackOffset -= offset;
+    varToOffsetFromStack.put(varDeclareNode.varName(), currentStackOffset);
+    boolean isByteInstr =
+      varDeclareNode.varType().equals(BoolType.getInstance()) || varDeclareNode.varType()
+        .equals(CharType.getInstance());
+    instructions
+      .add(new STR(rd, new Addr(SP, true, new Imm_INT(currentStackOffset)), isByteInstr));
+    return null;
+  }
+
+  private CodeGenData visitArrayDeclare(VarDeclareNode varDeclareNode) {
+    return null;
+  }
+
+  private CodeGenData visitPairDeclare(VarDeclareNode varDeclareNode) {
+    return null;
+  }
+
+
+  private void addSpecialFunction(String name) {
+    switch (name) {
       case "p_print_string":
         addPrint();
         break;
@@ -177,36 +218,36 @@ public class ASTVisitor {
     }
   }
 
-  private void addPrint(){
+  private void addPrint() {
     String labelName = addStringField("\"%.*s\\0\"");
 
     instructions.addAll(Arrays.asList(
-        new LABEL("p_print_string"),
-        new PUSH(LR),
-        new LDR(R1, new Addr(R0)),
-        new ADD(R2, R0, new Imm_INT("4")),
-        new LDR(R0, new Imm_STRING_LDR(labelName)),
-        new ADD(R0, R0, new Imm_INT("4"))));
+      new LABEL("p_print_string"),
+      new PUSH(LR),
+      new LDR(R1, new Addr(R0)),
+      new ADD(R2, R0, new Imm_INT(toInt("4"))),
+      new LDR(R0, new Imm_STRING_LDR(labelName)),
+      new ADD(R0, R0, new Imm_INT(toInt("4")))));
     jumpToFunctionLabel("printf");
     instructions.addAll(Arrays.asList(
-            new MOV(R0, new Imm_INT("0")),
-            new BL("fflush"),
-            new POP(PC)));
+      new MOV(R0, new Imm_INT(toInt("0"))),
+      new BL("fflush"),
+      new POP(PC)));
 
   }
 
-  private void addPrintln(){
+  private void addPrintln() {
     String labelName = addStringField("\"\\0\"");
 
     instructions.addAll(Arrays.asList(
-            new LABEL("p_print_ln"),
-            new PUSH(LR),
-            new LDR(R0, new Imm_STRING_LDR(labelName)),
-            new ADD(R0, R0, new Imm_INT("4")),
-            new BL("puts"),
-            new MOV(R0, new Imm_INT("0")),
-            new BL("fflush"),
-            new POP(PC)));
+      new LABEL("p_print_ln"),
+      new PUSH(LR),
+      new LDR(R0, new Imm_STRING_LDR(labelName)),
+      new ADD(R0, R0, new Imm_INT(toInt("4"))),
+      new BL("puts"),
+      new MOV(R0, new Imm_INT(toInt("0"))),
+      new BL("fflush"),
+      new POP(PC)));
   }
 
   private void jumpToFunctionLabel(String label) {
@@ -228,7 +269,17 @@ public class ASTVisitor {
   }
 
   private REG useFreeReg() {
-    return availableRegs.remove(0);
+    return R4;
   }
 
+  private int toInt(String s) {
+    return Integer.parseInt(s);
+  }
+
+  public CodeGenData visitIdent(Ident ident) {
+    REG rd = useFreeReg();
+    instructions.add(new LDR(rd, new Addr(SP, true,
+      new Imm_INT(varToOffsetFromStack.get(ident.varName())))));
+    return rd;
+  }
 }
