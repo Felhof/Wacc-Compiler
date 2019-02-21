@@ -1,0 +1,13 @@
+# simple read statement
+
+# Output:
+# input an integer to continue...
+# #input#
+
+# Program:
+
+begin
+	int[] a = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0] ;
+  println "input a number to continue..." ;
+	read a[1]
+end

@@ -151,6 +151,22 @@ public class ASTVisitor {
     return null;
   }
 
+  public CodeGenData visitReadExpr(ReadNode readNode){
+    REG rd = useFreeReg();
+    instructions.add(new ADD(rd, SP, new Imm_INT(varToOffsetFromStack.get(readNode.lhs().toString()))));
+    instructions.add(new MOV(R0, rd));
+
+    if(readNode.lhs().type().equals(IntType.getInstance())){
+      instructions.add(new BL("p_read_int"));
+      specialLabels.add("p_read_int");
+    } else if(readNode.lhs().type().equals(CharType.getInstance())){
+      instructions.add(new BL("p_read_char"));
+      specialLabels.add("p_read_char");
+    }
+
+    return null;
+  }
+
   public CodeGenData visitStringExpr(StringExpr stringExpr) {
     String labelName = addStringField(stringExpr.getValue());
     REG rd = useFreeReg();
@@ -251,6 +267,10 @@ public class ASTVisitor {
       case "p_print_ln":
         addPrintln();
         break;
+
+      case "p_read_int":
+        addReadInt();
+        break;
     }
   }
 
@@ -284,6 +304,19 @@ public class ASTVisitor {
       new MOV(R0, new Imm_INT(toInt("0"))),
       new BL("fflush"),
       new POP(PC)));
+  }
+
+  private void addReadInt() {
+    String labelName = addStringField("\"%d\\0\"");
+
+    instructions.addAll(Arrays.asList(
+      new PUSH(LR),
+      new MOV(R1, R0),
+      new LDR(R0, new Imm_STRING_LDR(labelName)),
+      new ADD(R0, R0, new Imm_INT(4)),
+      new BL("scanf"),
+      new POP(PC)
+    ));
   }
 
   private void jumpToFunctionLabel(String label) {

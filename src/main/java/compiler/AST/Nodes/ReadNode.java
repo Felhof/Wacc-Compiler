@@ -13,6 +13,8 @@ public class ReadNode extends Node {
     this.lhs = lhs;
   }
 
+  public NodeElem lhs(){ return lhs; }
+
   @Override
   public String toString() {
     return "ReadNode( " + lhs.toString() + ')';
@@ -20,6 +22,6 @@ public class ReadNode extends Node {
 
   @Override
   public CodeGenData accept(ASTVisitor visitor) {
-    return null;
+    return visitor.visitReadExpr(this);
   }
 }

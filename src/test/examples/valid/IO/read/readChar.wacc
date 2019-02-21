@@ -1,0 +1,13 @@
+# simple read statement
+
+# Output:
+# input an integer to continue...
+# #input#
+
+# Program:
+
+begin
+	char c = 'a';
+  println "input a character to continue..." ;
+	read c
+end
