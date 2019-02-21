@@ -69,6 +69,7 @@ import compiler.AST.NodeElements.NodeElem;
 import compiler.AST.NodeElements.RHS.FuncCall;
 import compiler.AST.NodeElements.PairElem;
 import compiler.AST.NodeElements.RHS.PairExp;
+import compiler.AST.SymbolTable.VarInfo;
 import compiler.AST.Types.ArrType;
 import compiler.AST.NodeElements.RHS.Pair;
 import compiler.AST.Types.BoolType;
@@ -156,7 +157,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
     Type paramType = (Type) visit(ctx.type());
     if (currentST.getEncSymTable() != null) {
       // don't add parameters to main symbol table
-      currentST.addVar(ctx.IDENT().getText(), paramType);
+      currentST.addVar(ctx.IDENT().getText(), new VarInfo(paramType, null));
     }
     return paramType;
   }
@@ -225,7 +226,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
     String varName = ctx.IDENT().getText();
 
     Type varType = (Type) visit(ctx.type());
-    Type varTypeDef = currentST.lookUpVarScope(varName);
+    VarInfo varTypeDef = currentST.lookUpVarScope(varName);
     NodeElem rhs = (NodeElem) visit(ctx.assign_rhs()); // simple case
 
     if (!isAssignSameType(varType, rhs)) {
@@ -239,7 +240,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
           .notifyErrorListeners(ctx.IDENT().getSymbol(),
               identifierAlreadyDefinedMsg(annotateVar(varName)), null);
     } else {
-      currentST.addVar(varName, varType);
+      currentST.addVar(varName, new VarInfo(varType, null));
       currentParentNode.add(new VarDeclareNode(varType, varName, rhs, ctx.start.getLine()));
     }
     incrementStackOffset(varType);
@@ -312,13 +313,14 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
   @Override
   public ASTData visitIdentExp(IdentExpContext ctx) {
     String varName = ctx.IDENT().getText();
-    Type varTypeDef = currentST.lookUpAllVar(varName);
-    if (varTypeDef == null) {
+    VarInfo varInfo = currentST.lookUpAllVar(varName);
+    if (varInfo == null) {
       parser.notifyErrorListeners(ctx.start,
           identifierNotDefinedMsg(annotateVar(ctx.getText())), null);
-      varTypeDef = GenericType.getInstance();
+      return new Ident(varName, GenericType.getInstance());
+
     }
-    return new Ident(varName, varTypeDef);
+    return new Ident(varName, varInfo.getType());
   }
 
   @Override
@@ -336,7 +338,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
     String varName = ctx.IDENT().getText();
     int dimensionAccessed = ctx.expr().size();
 
-    Type varTypeDef = currentST.lookUpAllVar(varName);
+    Type varTypeDef = currentST.lookUpAllVar(varName).getType();
     if (varTypeDef == null) {
       parser
           .notifyErrorListeners(ctx.IDENT().getSymbol(),
@@ -457,7 +459,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
       return null;
     }
 
-    Type funcDefinitionReturn = currentST.lookUpAllVar("return");
+    Type funcDefinitionReturn = currentST.lookUpAllVar("return").getType();
 
     if (!funcDefinitionReturn.equals(exprType)) {
       parser.notifyErrorListeners(ctx.expr().start,
@@ -484,14 +486,15 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
   @Override
   public ASTData visitIdentLhs(IdentLhsContext ctx) {
     String varName = ctx.IDENT().getText();
-    Type varTypeDef = currentST.lookUpAllVar(varName);
-    if (varTypeDef == null) {
+    VarInfo varInfo = currentST.lookUpAllVar(varName);
+    if (varInfo == null) {
       parser.notifyErrorListeners(ctx.start,
           identifierNotDefinedMsg(annotateVar(varName)),
           null);
-      varTypeDef = GenericType.getInstance();
+      return new Ident(varName, GenericType.getInstance());
+
     }
-    return new Ident(varName, varTypeDef);
+    return new Ident(varName, varInfo.getType());
   }
 
   @Override
@@ -601,7 +604,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
 
     ParentNode ParentNode = enterScope(stat.start.getLine());
     currentST.setFunctionScope(true);
-    currentST.addVar("return", funcReturnType);
+    currentST.addVar("return", new VarInfo(funcReturnType, null));
 
     ListExpr paramList = new ListExpr();
     if (paramListContext != null) {

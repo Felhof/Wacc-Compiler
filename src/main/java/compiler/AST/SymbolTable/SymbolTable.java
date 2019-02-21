@@ -8,7 +8,7 @@ public class SymbolTable {
 
   private boolean functionScope;
   private SymbolTable encSymTable;
-  private HashMap<String, Type> varDict;
+  private HashMap<String, VarInfo> varDict;
   private HashMap<String, FuncTypes> funcDict;
 
   public SymbolTable(SymbolTable encSymTable) {
@@ -18,7 +18,7 @@ public class SymbolTable {
     functionScope = false;
   }
 
-  public void addVar(String name, Type ident) {
+  public void addVar(String name, VarInfo ident) {
     varDict.put(name, ident);
   }
 
@@ -26,8 +26,8 @@ public class SymbolTable {
     funcDict.put(name, func);
   }
 
-  public Type lookUpAllVar(String name) {
-    return (Type) genericLookUpAll(name, "var");
+  public VarInfo lookUpAllVar(String name) {
+    return (VarInfo) genericLookUpAll(name, "var");
   }
 
   public FuncTypes lookUpAllFunc(String name) {
@@ -51,7 +51,7 @@ public class SymbolTable {
     return null;
   }
 
-  public Type lookUpVarScope(String name) {
+  public VarInfo lookUpVarScope(String name) {
     return this.varDict.get(name);
   }
 

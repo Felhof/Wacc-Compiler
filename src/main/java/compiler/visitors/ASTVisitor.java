@@ -39,15 +39,12 @@ public class ASTVisitor {
   private List<REG> availableRegs;
   private int totalStackOffset;
   private int currentStackOffset;
-  private Map<String, Integer> varToOffsetFromStack;
 
   public ASTVisitor() {
     this.instructions = new ArrayList<>();
     this.data = new ArrayList<>();
     this.specialLabels = new HashSet<>();
     availableRegs = new ArrayList<>(allUsableRegs);
-    varToOffsetFromStack = new HashMap<>();
-
   }
 
   public List<Instr> generate(AST root) {
@@ -164,7 +161,7 @@ public class ASTVisitor {
 
     //In this case we don't visit the Node because we don't want to store the value but the address
     REG rd = useFreeReg();
-    instructions.add(new ADD(rd, SP, new Imm_INT(varToOffsetFromStack.get(readNode.lhs().varName()))));
+    instructions.add(new ADD(rd, SP, new Imm_INT(currentST.lookUpAllVar(readNode.lhs().varName()).getStackOffset())));
 
     instructions.add(new MOV(R0, rd));
 
@@ -235,7 +232,7 @@ public class ASTVisitor {
     int offset) {
     REG rd = (REG) visit(varDeclareNode.rhs());
     currentStackOffset -= offset;
-    varToOffsetFromStack.put(varDeclareNode.varName(), currentStackOffset);
+    currentST.lookUpAllVar(varDeclareNode.varName()).setStackOffset(currentStackOffset);
     return saveVarData(varDeclareNode.varType(), rd, SP, currentStackOffset);
   }
 
@@ -250,7 +247,7 @@ public class ASTVisitor {
   private void visitIdentAssign(VarAssignNode varAssignNode) {
     //TODO: CONSIDER other cases such as Arrays or Pairs
     REG rd = (REG) visit(varAssignNode.rhs());
-    saveVarData(varAssignNode.rhs().type(), rd, SP, varToOffsetFromStack.get(varAssignNode.lhs().varName()));
+    saveVarData(varAssignNode.rhs().type(), rd, SP, currentST.lookUpAllVar(varAssignNode.lhs().varName()).getStackOffset());
   }
 
   private CodeGenData saveVarData(Type varType, REG rd, REG rn, int offset) {
@@ -452,7 +449,7 @@ public class ASTVisitor {
   public CodeGenData visitIdent(Ident ident) {
     REG rd = regForDeclaration();
     instructions.add(new LDR(rd, new Addr(SP, true,
-      new Imm_INT(varToOffsetFromStack.get(ident.varName())))));
+      new Imm_INT(currentST.lookUpAllVar(ident.varName()).getStackOffset()))));
     return rd;
   }
 
