@@ -1,5 +1,6 @@
 package compiler.visitors;
 
+import compiler.AST.NodeElements.ArrayElem;
 import compiler.AST.NodeElements.Ident;
 import compiler.AST.NodeElements.NodeElem;
 import compiler.AST.NodeElements.RHS.*;
@@ -244,6 +245,9 @@ public class ASTVisitor {
     if (varAssignNode.rhs() instanceof Ident) {
       visitIdentAssign(varAssignNode);
     }
+    if (varAssignNode.lhs() instanceof ArrayElem) {
+      visitArrayAssign(varAssignNode);
+    }
     return null;
   }
 
@@ -254,15 +258,43 @@ public class ASTVisitor {
   }
 
   private CodeGenData saveVarData(Type varType, REG rd, REG rn, int offset) {
-    boolean isByteInstr =
-      varType.equals(BoolType.getInstance()) || varType.equals(CharType.getInstance());
-    instructions
-      .add(new STR(rd, new Addr(rn, true, new Imm_INT(offset)), isByteInstr));
+    boolean isByteInstr = varType.equals(BoolType.getInstance())
+        || varType.equals(CharType.getInstance());
+    instructions.
+        add(new STR(rd, new Addr(rn, true, new Imm_INT(offset)), isByteInstr));
     return null;
   }
 
   private CodeGenData visitArrayDeclare(VarDeclareNode varDeclareNode) {
+    Expr[] array = ((ArrayLiter) varDeclareNode.rhs()).elems();
+    int size = array.length;
+    // malloc the number of elems plus one
+    // to hold the size of the array for runtime errors
+    setArg(new Imm_INT_MEM((size + 1) * WORD_SIZE));
+    instructions.add(new BL("malloc"));
+    REG rd = useFreeReg();           // size
+    instructions.add(new MOV(rd, R0)); //
+    for (int i = 0; i < size; i++) { // store array elements
+      storeArrayElem(array[i], rd, (i + 1) * WORD_SIZE);
+    }
+    // store size of the array
+    REG rn = useFreeReg();
+    instructions.add(new LDR(rn, new Imm_INT_MEM(size)));
+    instructions.add(new STR(rn, new Addr(rd, true, null), false));
+
+    // ?
+    instructions.add(new STR(rd, new Addr(SP, true, null), false));
     return null;
+  }
+
+  private void storeArrayElem(Expr expr, REG objectAddr, int offset) {
+    REG rd = (REG) visit(expr);
+    saveVarData(expr.type(), rd, objectAddr, offset);
+    availableRegs.add(rd);
+  }
+
+  public void visitArrayAssign(VarAssignNode varAssignNode) {
+    REG rd = (REG) visit(varAssignNode.rhs());
   }
 
   private CodeGenData visitPairDeclare(VarDeclareNode varDeclareNode) {
