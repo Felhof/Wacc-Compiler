@@ -61,6 +61,12 @@ public class BinExpr extends Expr {
     return null;
   }
 
+  @Override
+  public int sizeOf() {
+    //TODO: need to think about this
+    return 0;
+  }
+
   public enum BINOP {
     MUL("*", typesInt, intType), DIV("/", typesInt, intType),
     MOD("%", typesInt, intType), PLUS("+", typesInt, intType),

@@ -12,14 +12,14 @@ public class STRING_FIELD extends Instr {
 
   @Override
   public String toString() {
-      return "\t\t.word " + (string.length() - 2 - nbSpecialChar())
+      return "\t\t.word " + (string.length() - 2 - nbSpecialChar(string))
           + "\n\t\t.ascii  " + string;
   }
 
-  private int nbSpecialChar () {
+  public static int nbSpecialChar (String s) {
     String[] escape = {"\0", "\b", "\t", "\n", "\f", "\r", "\"", "\\"};
-    String temp = string;
+    String temp = s;
     Arrays.stream(escape).forEach(c -> temp.replace(c, ""));
-    return (string.length() - temp.length()) / 2;
+    return (s.length() - temp.length()) / 2;
   }
 }
