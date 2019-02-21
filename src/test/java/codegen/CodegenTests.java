@@ -5,10 +5,8 @@ import static org.hamcrest.core.Is.is;
 
 import compiler.AST.Nodes.AST;
 import compiler.Main;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
+
+import java.io.*;
 import java.util.Arrays;
 import java.util.stream.IntStream;
 import org.junit.Test;
@@ -32,8 +30,8 @@ public class CodegenTests {
           + "/arm-linux-gnueabi/", filename).start();
       emulator.waitFor();
 
-      new File(filename + ".s").delete();
-      new File(filename).delete();
+      //new File(filename + ".s").delete();
+      //new File(filename).delete();
       return emulator;
     } catch (IOException | InterruptedException e) {
       e.printStackTrace();
@@ -141,6 +139,52 @@ public class CodegenTests {
       Main.generateCode(ast, outputFolder + filename);
       Process emulator = assembleAndEmulate(outputFolder + filename);
       assertThat(emulator.exitValue(), is(expectedExitCodes[i]));
+    });
+  }
+
+  @Test
+  public void readTest() {
+    String path = "src/test/examples/valid/IO/read/";
+    String[] filenames = {"readAndPrint"};
+
+    // Test that they exit correctly
+    Arrays.stream(filenames).forEach(filename -> {
+      AST ast = Main.compileProg(path + filename + ".wacc");
+      Main.generateCode(ast, outputFolder + filename);
+      //Process emulator = assembleAndEmulate(outputFolder + filename);
+
+      try {
+        // Assembler
+        Process assembler = new ProcessBuilder("arm-linux-gnueabi-gcc", "-o",
+                outputFolder + filename, "-mcpu=arm1176jzf-s", "-mtune=arm1176jzf-s",
+                outputFolder + filename + ".s").start();
+        assembler.waitFor();
+
+        // Emulator
+        Process emulator = new ProcessBuilder("qemu-arm", "-L", "/usr"
+                + "/arm-linux-gnueabi/", outputFolder + filename).start();
+
+
+        OutputStream stdin = emulator.getOutputStream();
+        //BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(stdin));
+
+        stdin.write(("c").getBytes());
+        stdin.flush();
+
+        emulator.waitFor();
+
+
+        BufferedReader br = new BufferedReader(new InputStreamReader(emulator
+                .getInputStream()));
+
+        System.out.println(br.readLine());
+
+        //new File(filename + ".s").delete();
+        //new File(filename).delete();
+        assertThat(emulator.exitValue(), is(0));
+      } catch (IOException | InterruptedException e) {
+        e.printStackTrace();
+      }
     });
   }
 

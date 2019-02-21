@@ -1,6 +1,7 @@
 package compiler.visitors;
 
 import compiler.AST.NodeElements.Ident;
+import compiler.AST.NodeElements.NodeElem;
 import compiler.AST.NodeElements.RHS.*;
 import compiler.AST.NodeElements.RHS.UnaryExpr.UNOP;
 import compiler.AST.Nodes.*;
@@ -152,14 +153,18 @@ public class ASTVisitor {
   }
 
   public CodeGenData visitReadExpr(ReadNode readNode){
+    //REG rd = (REG) visit((ASTData) readNode.lhs());
+
+    //In this case we don't visit the Node because we don't want to store the value but the address
     REG rd = useFreeReg();
-    instructions.add(new ADD(rd, SP, new Imm_INT(varToOffsetFromStack.get(readNode.lhs().toString()))));
+    instructions.add(new ADD(rd, SP, new Imm_INT(varToOffsetFromStack.get(readNode.lhs().varName()))));
+
     instructions.add(new MOV(R0, rd));
 
-    if(readNode.lhs().type().equals(IntType.getInstance())){
+    if(((NodeElem)readNode.lhs()).type().equals(IntType.getInstance())){
       instructions.add(new BL("p_read_int"));
       specialLabels.add("p_read_int");
-    } else if(readNode.lhs().type().equals(CharType.getInstance())){
+    } else if(((NodeElem)readNode.lhs()).type().equals(CharType.getInstance())){
       instructions.add(new BL("p_read_char"));
       specialLabels.add("p_read_char");
     }
@@ -271,6 +276,10 @@ public class ASTVisitor {
       case "p_read_int":
         addReadInt();
         break;
+
+      case "p_read_char":
+        addReadChar();
+        break;
     }
   }
 
@@ -310,6 +319,7 @@ public class ASTVisitor {
     String labelName = addStringField("\"%d\\0\"");
 
     instructions.addAll(Arrays.asList(
+      new LABEL("p_read_int"),
       new PUSH(LR),
       new MOV(R1, R0),
       new LDR(R0, new Imm_STRING_LDR(labelName)),
@@ -318,6 +328,21 @@ public class ASTVisitor {
       new POP(PC)
     ));
   }
+
+  private void addReadChar() {
+    String labelName = addStringField("\"%c\\0\"");
+
+    instructions.addAll(Arrays.asList(
+            new LABEL("p_read_char"),
+            new PUSH(LR),
+            new MOV(R1, R0),
+            new LDR(R0, new Imm_STRING_LDR(labelName)),
+            new ADD(R0, R0, new Imm_INT(4)),
+            new BL("scanf"),
+            new POP(PC)
+    ));
+  }
+
 
   private void jumpToFunctionLabel(String label) {
     List<REG> usedRegs = getUsedRegs();

@@ -189,7 +189,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
               Arrays.asList(IntType.getInstance(), CharType.getInstance()),
               lhs.type()), null);
     }
-    currentParentNode.add(new ReadNode(lhs, ctx.start.getLine()));
+    currentParentNode.add(new ReadNode((LHS) lhs, ctx.start.getLine()));
     return null;
   }
 

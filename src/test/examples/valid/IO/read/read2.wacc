@@ -1,0 +1,6 @@
+begin
+ int x = 10;
+ int y = 20;
+ println "input an integer to continue..." ;
+ read x
+end
