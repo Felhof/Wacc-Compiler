@@ -51,16 +51,29 @@ public class ASTVisitor {
     totalStackOffset = Integer.parseInt(root.stackOffset());
     currentStackOffset = totalStackOffset;
     constructStartProgram();
-    configureStack("sub");
-    currentST = root.symbolTable();
-    visitParentNode(root.root());
-    configureStack("add");
+    visitFuncsAndChildren(root);
     constructEndProgram();
     for (String s : specialLabels) {
       addSpecialFunction(s);
     }
     data.addAll(instructions);
     return data;
+  }
+
+  private void visitFuncsAndChildren(AST root) {
+    root.root().children().stream().filter(node -> node instanceof FuncNode).forEach(
+        this::visit);
+    currentST = root.symbolTable();
+    instructions.add(new LABEL("main"));
+    instructions.add(new PUSH(LR));
+    configureStack("sub");
+    root.root().children().stream().filter(node -> !(node instanceof FuncNode)).forEach(
+        this::visit);
+
+  }
+
+  public void visitParentNode(ParentNode node) {
+    node.children().forEach(this::visit);
   }
 
   private void configureStack(String type) {
@@ -86,6 +99,7 @@ public class ASTVisitor {
   }
 
   private void constructEndProgram() {
+    configureStack("add");
     setArg(new Imm_INT_MEM(toInt("0")));
     instructions.add(new POP(PC));
     instructions.add(new SECTION("ltorg"));
@@ -95,12 +109,6 @@ public class ASTVisitor {
     data.add(new SECTION("data"));
     instructions.add(new SECTION("text"));
     instructions.add(new SECTION("main", true));
-    instructions.add(new LABEL("main"));
-    instructions.add(new PUSH(LR));
-  }
-
-  public void visitParentNode(ParentNode node) {
-    node.children().forEach(this::visit);
   }
 
   private CodeGenData visit(ASTData data) {
