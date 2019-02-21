@@ -1,4 +1,5 @@
 begin
   char a = 'a';
-  char b = a
+  char b = a;
+  print b
 end

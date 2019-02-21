@@ -1,4 +1,5 @@
 begin
   bool a = true;
-  bool b = a
+  bool b = a;
+  print b
 end

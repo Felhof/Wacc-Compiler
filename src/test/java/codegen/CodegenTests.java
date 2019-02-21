@@ -51,9 +51,10 @@ public class CodegenTests {
   @Test
   public void varAssignmentTest(){
     String path = "src/test/examples/valid/variables/";
-    String[] filenames = { "assignBool", "assignChar", "assignInt" };
+    String[] filenames = { "assignBool", "assignChar", "assignInt"};
+    String[][] outputs = {{"true"},{"a"},{}};
 
-    compileAndCheckExitAndOutput(path, filenames, null, null, null);
+    compileAndCheckExitAndOutput(path, filenames, null, null, outputs);
   }
 
   @Test
