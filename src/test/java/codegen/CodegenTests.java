@@ -145,47 +145,51 @@ public class CodegenTests {
   @Test
   public void readTest() {
     String path = "src/test/examples/valid/IO/read/";
-    String[] filenames = {"readAndPrint"};
+    String[] filenames = { "readAndPrint"};
+    String[] inputs = { "c"};
+    String[][] outputs = { {"input a character to continue...", "c"}};
 
     // Test that they exit correctly
-    Arrays.stream(filenames).forEach(filename -> {
-      AST ast = Main.compileProg(path + filename + ".wacc");
-      Main.generateCode(ast, outputFolder + filename);
-      //Process emulator = assembleAndEmulate(outputFolder + filename);
+    for(int i = 0; i < filenames.length; i++) {
+      AST ast = Main.compileProg(path + filenames[i] + ".wacc");
+      Main.generateCode(ast, outputFolder + filenames[i]);
 
-      try {
-        // Assembler
-        Process assembler = new ProcessBuilder("arm-linux-gnueabi-gcc", "-o",
-                outputFolder + filename, "-mcpu=arm1176jzf-s", "-mtune=arm1176jzf-s",
-                outputFolder + filename + ".s").start();
-        assembler.waitFor();
+      Process emulator = assembleAndEmulateWithInput(outputFolder + filenames[i],inputs[i]);
 
-        // Emulator
-        Process emulator = new ProcessBuilder("qemu-arm", "-L", "/usr"
-                + "/arm-linux-gnueabi/", outputFolder + filename).start();
+      checkPrintsAreCorrect(emulator, outputs[i]);
+    }
+  }
 
+  private Process assembleAndEmulateWithInput(String filename, String input){
+    try {
+      // Assembler
+      Process assembler = new ProcessBuilder("arm-linux-gnueabi-gcc", "-o",
+              filename, "-mcpu=arm1176jzf-s", "-mtune=arm1176jzf-s",
+              filename + ".s").start();
+      assembler.waitFor();
 
-        OutputStream stdin = emulator.getOutputStream();
-        //BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(stdin));
-
-        stdin.write(("c").getBytes());
-        stdin.flush();
-
-        emulator.waitFor();
+      // Emulator
+      Process emulator = new ProcessBuilder("qemu-arm", "-L", "/usr"
+              + "/arm-linux-gnueabi/", filename).start();
 
 
-        BufferedReader br = new BufferedReader(new InputStreamReader(emulator
-                .getInputStream()));
+      BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(emulator.getOutputStream()));
 
-        System.out.println(br.readLine());
+      writer.write(input);
+      writer.flush();
 
-        //new File(filename + ".s").delete();
-        //new File(filename).delete();
-        assertThat(emulator.exitValue(), is(0));
-      } catch (IOException | InterruptedException e) {
-        e.printStackTrace();
-      }
-    });
+      emulator.waitFor();
+
+      new File(filename + ".s").delete();
+      new File(filename).delete();
+      assertThat(emulator.exitValue(), is(0));
+
+      return emulator;
+
+    } catch (IOException | InterruptedException e) {
+      e.printStackTrace();
+      return null;
+    }
   }
 
 
