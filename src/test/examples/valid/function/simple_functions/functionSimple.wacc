@@ -6,9 +6,12 @@
 # Program:
 
 begin
-  int f() is
-    return 0 
+  bool f(bool b, int y, int v) is
+    return b
   end
-  int x = call f() ;
-  println x 
+
+  int v = 16 ;
+  bool nb = true ; 
+  int h = 12 ;
+  bool x = call f(nb, v, h)
 end

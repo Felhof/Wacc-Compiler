@@ -22,7 +22,7 @@ public class Main {
 
   public static void main(String[] args) {
     //String path = args[0]; // uncomment for labTS test
-    String path = "src/test/examples/valid/function/simple_functions/functionDeclaration.wacc";
+    String path = "src/test/examples/valid/function/simple_functions/functionSimple.wacc";
     AST ast = compileProg(path);
     generateCode(ast, extractFileName(path));
     System.exit(0);
@@ -80,11 +80,8 @@ public class Main {
     try {
       // write instructions to assembly file
       PrintWriter writer = new PrintWriter(assemblyFile, String.valueOf(StandardCharsets.UTF_8));
-
       instructions.forEach(i -> writer.println(i.toString()));
-
       writer.close();
-
     } catch (IOException e) {
       e.printStackTrace();
     }

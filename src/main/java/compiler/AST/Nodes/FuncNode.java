@@ -49,4 +49,8 @@ public class FuncNode extends Node {
   public ParentNode getParentNode() {
     return parentNode;
   }
+
+  public ListExpr paramList() {
+    return paramList;
+  }
 }
