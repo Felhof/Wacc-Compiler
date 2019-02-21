@@ -46,6 +46,7 @@ import antlr.BasicParser.UnaryExpContext;
 import antlr.BasicParser.VarDeclarationStatContext;
 import antlr.BasicParser.WhileStatContext;
 import antlr.BasicParserBaseVisitor;
+import compiler.AST.NodeElements.LHS;
 import compiler.AST.Nodes.AST;
 import compiler.AST.Nodes.Node;
 import compiler.AST.Nodes.ParentNode;
@@ -469,11 +470,11 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
 
   @Override
   public ASTData visitAssignStat(AssignStatContext ctx) {
-    NodeElem lhs = (NodeElem) visit(ctx.assign_lhs());
+    LHS lhs = (LHS) visit(ctx.assign_lhs());
     NodeElem rhs = (NodeElem) visit(ctx.assign_rhs());
-    if (!lhs.type().equals(rhs.type())) {
+    if (!((NodeElem) lhs).type().equals(rhs.type())) {
       parser.notifyErrorListeners(ctx.assign_rhs().start,
-          incompatibleTypesMsg(ctx.assign_rhs().getText(), lhs.type(), rhs.type()),
+          incompatibleTypesMsg(ctx.assign_rhs().getText(),((NodeElem) lhs).type(), rhs.type()),
           null);
     }
     currentParentNode.add(new VarAssignNode(lhs, rhs, ctx.start.getLine()));

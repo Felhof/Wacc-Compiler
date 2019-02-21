@@ -1,15 +1,16 @@
 package compiler.AST.Nodes;
 
+import compiler.AST.NodeElements.LHS;
 import compiler.AST.NodeElements.NodeElem;
 import compiler.visitors.ASTVisitor;
 import compiler.visitors.CodeGenData;
 
 public class VarAssignNode extends Node {
 
-  private NodeElem lhs;
+  private LHS lhs;
   private NodeElem rhs;
 
-  public VarAssignNode(NodeElem lhs,
+  public VarAssignNode(LHS lhs,
       NodeElem rhs, int lineNumber) {
     super(lineNumber);
     this.lhs = lhs;
@@ -24,6 +25,14 @@ public class VarAssignNode extends Node {
 
   @Override
   public CodeGenData accept(ASTVisitor visitor) {
-    return null;
+    return visitor.visitAssignNode(this);
+  }
+
+  public NodeElem rhs() {
+    return rhs;
+  }
+
+  public LHS lhs() {
+    return lhs;
   }
 }
