@@ -14,7 +14,6 @@ import org.junit.Test;
 
 public class CodegenTests {
 
-
   private final String outputFolder = "src/test/java/codegen/output/";
 
   @Test
@@ -78,6 +77,7 @@ public class CodegenTests {
     compileAndCheckExitAndOutput(path, filenames, null, null);
   }
 
+  // provide path, filenames, exit codes, and expected output
   private void compileAndCheckExitAndOutput(String path, String[] filenames,
       int[] expectedExitCodes, String [][] expectedOutput) {
     IntStream.range(0, filenames.length).forEach(i -> {

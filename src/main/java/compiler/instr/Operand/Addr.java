@@ -1,6 +1,5 @@
 package compiler.instr.Operand;
 
-import com.thoughtworks.qdox.model.expression.ShiftLeft;
 import compiler.instr.REG;
 
 public class Addr implements Operand {
