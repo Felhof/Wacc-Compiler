@@ -60,9 +60,10 @@ public class CodegenTests {
   @Test
   public void PrintTest() {
     String path = "src/test/examples/valid/IO/print/";
-    String[] filenames = {"print", "println", "printChar", "multipleLines", "printInt"};
+    String[] filenames = {"print", "println", "printChar", "multipleLines", "printInt", "printBool"};
     String[][] expectedOutput = {{"Hello World!"},{"Hello World!"},
-            {"A simple character example is f"},{"Line1","Line2"}, {"An example integer is 189"}};
+            {"A simple character example is f"},{"Line1","Line2"}, {"An example integer is 189"},
+            {"True is true","False is false"}};
 
     compileAndCheckExitAndOutput(path, filenames, null, null, expectedOutput);
   }
