@@ -5,7 +5,7 @@ import compiler.AST.Types.Type;
 import compiler.visitors.ASTVisitor;
 import compiler.visitors.CodeGenData;
 
-public class Ident extends Expr implements LHS {
+public class Ident extends LHS {
 
   private String varName;
 

@@ -293,8 +293,17 @@ public class ASTVisitor {
     availableRegs.add(rd);
   }
 
-  public void visitArrayAssign(VarAssignNode varAssignNode) {
-    REG rd = (REG) visit(varAssignNode.rhs());
+  public CodeGenData visitArrayAssign(VarAssignNode varAssignNode) {
+    REG expr = (REG) visit(varAssignNode.rhs());  // get new value
+    // do something (?)
+    REG index = (REG) visit(varAssignNode.lhs()); // get index
+    // todo
+    return null;
+  }
+
+  public CodeGenData visitArrayElem(ArrayElem arrayElem) {
+    // simple array case
+    return visit(arrayElem.indexes()[0]);
   }
 
   private CodeGenData visitPairDeclare(VarDeclareNode varDeclareNode) {
@@ -469,7 +478,7 @@ public class ASTVisitor {
     return regs;
   }
 
-  private REG regForDeclaration() {
+  private REG regForDeclaration() { //todo useless
     return availableRegs.get(0);
   }
 
