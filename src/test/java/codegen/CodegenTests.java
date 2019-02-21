@@ -5,10 +5,8 @@ import static org.hamcrest.core.Is.is;
 
 import compiler.AST.Nodes.AST;
 import compiler.Main;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
+
+import java.io.*;
 import java.util.stream.IntStream;
 import org.junit.Test;
 
@@ -22,7 +20,7 @@ public class CodegenTests {
     String[] filenames = {"exit-1", "exitBasic", "exitBasic2", "exitWrap"};
     int[] expectedExitCodes = {255, 7, 42, 0};
 
-    compileAndCheckExitAndOutput(path, filenames, expectedExitCodes, null);
+    compileAndCheckExitAndOutput(path, filenames, null, expectedExitCodes, null);
   }
 
   @Test
@@ -30,7 +28,7 @@ public class CodegenTests {
     String path = "src/test/examples/valid/basic/skip/";
     String[] filenames = {"skip", "comment", "commentInLine"};
 
-    compileAndCheckExitAndOutput(path, filenames, null, null);
+    compileAndCheckExitAndOutput(path, filenames, null, null, null);
   }
 
   @Test
@@ -38,7 +36,7 @@ public class CodegenTests {
     String path = "src/test/examples/valid/sequence/";
     String[] simpleFilenames = {"basicSeq", "basicSeq2"};
 
-    compileAndCheckExitAndOutput(path, simpleFilenames, null, null);
+    compileAndCheckExitAndOutput(path, simpleFilenames, null, null, null);
   }
 
   @Test
@@ -47,7 +45,7 @@ public class CodegenTests {
     String[] filenames = {"boolDeclaration", "boolDeclaration2", "charDeclaration", "charDeclaration2",
         "capCharDeclaration", "intDeclaration", "negIntDeclaration", "zeroIntDeclaration", "manyVariables"};// "puncCharDeclaration"};
 
-    compileAndCheckExitAndOutput(path, filenames, null, null);
+    compileAndCheckExitAndOutput(path, filenames, null, null, null);
   }
 
   @Test
@@ -56,7 +54,7 @@ public class CodegenTests {
     String[] filenames = {"longVarNames", "_VarNames"};
     int[] expectedExitCodes = {5, 19};
 
-    compileAndCheckExitAndOutput(path, filenames, expectedExitCodes, null);
+    compileAndCheckExitAndOutput(path, filenames, null, expectedExitCodes, null);
   }
 
   @Test
@@ -66,7 +64,7 @@ public class CodegenTests {
     String[][] expectedOutput = {{"Hello World!"},{"Hello World!"},
             {"A simple character example is f"},{"Line1","Line2"}};
 
-    compileAndCheckExitAndOutput(path, filenames, null, expectedOutput);
+    compileAndCheckExitAndOutput(path, filenames, null, null, expectedOutput);
   }
 
   @Test
@@ -74,17 +72,36 @@ public class CodegenTests {
     String path = "src/test/examples/valid/pairs/";
     String[] filenames = {"createPair", "createPair02", "createPair03"};
 
-    compileAndCheckExitAndOutput(path, filenames, null, null);
+    compileAndCheckExitAndOutput(path, filenames, null,null, null);
   }
 
+  @Test
+  public void readTest() {
+    String path = "src/test/examples/valid/IO/read/";
+    String[] filenames = { "readAndPrint"};
+    String[] inputs = { "c"};
+    String[][] outputs = { {"input a character to continue...", "c"}};
+
+    compileAndCheckExitAndOutput(path, filenames, inputs, null, outputs);
+  }
+
+
   // provide path, filenames, exit codes, and expected output
-  private void compileAndCheckExitAndOutput(String path, String[] filenames,
+  private void compileAndCheckExitAndOutput(String path, String[] filenames, String[] inputs,
       int[] expectedExitCodes, String [][] expectedOutput) {
     IntStream.range(0, filenames.length).forEach(i -> {
       String filename = filenames[i];
       AST ast = Main.compileProg(path + filename + ".wacc");
       Main.generateCode(ast, outputFolder + filename);
-      Process emulator = assembleAndEmulate(outputFolder + filename);
+
+      Process emulator;
+      if(inputs != null) {
+        emulator = assembleAndEmulate(outputFolder + filename, inputs[i]);
+      }
+      else {
+        emulator = assembleAndEmulate(outputFolder + filename, null);
+      }
+
       if (expectedExitCodes == null) {
         assertThat(emulator.exitValue(), is(0));
       } else {
@@ -111,7 +128,7 @@ public class CodegenTests {
     }
   }
 
-  private Process assembleAndEmulate(String filename) {
+  private Process assembleAndEmulate(String filename, String input) {
 
     try {
       // Assembler
@@ -123,6 +140,14 @@ public class CodegenTests {
       // Emulator
       Process emulator = new ProcessBuilder("qemu-arm", "-L", "/usr"
           + "/arm-linux-gnueabi/", filename).start();
+
+      if(input != null){
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(emulator.getOutputStream()));
+
+        writer.write(input);
+        writer.flush();
+      }
+
       emulator.waitFor();
 
       new File(filename + ".s").delete();

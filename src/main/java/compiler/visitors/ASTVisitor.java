@@ -343,7 +343,7 @@ public class ASTVisitor {
       new LABEL("p_read_int"),
       new PUSH(LR),
       new MOV(R1, R0),
-      new LDR(R0, new Imm_STRING_LDR(labelName)),
+      new LDR(R0, new Imm_STRING_MEM(labelName)),
       new ADD(R0, R0, new Imm_INT(4)),
       new BL("scanf"),
       new POP(PC)
@@ -357,7 +357,7 @@ public class ASTVisitor {
             new LABEL("p_read_char"),
             new PUSH(LR),
             new MOV(R1, R0),
-            new LDR(R0, new Imm_STRING_LDR(labelName)),
+            new LDR(R0, new Imm_STRING_MEM(labelName)),
             new ADD(R0, R0, new Imm_INT(4)),
             new BL("scanf"),
             new POP(PC)
