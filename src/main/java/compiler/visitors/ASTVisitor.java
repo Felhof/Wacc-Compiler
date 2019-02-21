@@ -29,6 +29,7 @@ import static compiler.instr.REG.*;
 
 public class ASTVisitor {
 
+  private static final int WORD_SIZE = 4;
   private List<Instr> instructions;
   private List<Instr> data;
   private Set<String> specialLabels;
@@ -64,15 +65,15 @@ public class ASTVisitor {
     return data;
   }
 
-  private void configureStack(String str) {
+  private void configureStack(String type) {
     int maxIntImmShift = 1024;
     if (totalStackOffset > 0) {
       int temp = totalStackOffset;
       while(temp / 1024 != 0) {
-        instructions.add(buildInstr(str, SP, SP, new Imm_INT(maxIntImmShift)));
+        instructions.add(buildInstr(type, SP, SP, new Imm_INT(maxIntImmShift)));
         temp = temp - 1024;
       }
-      instructions.add(buildInstr(str, SP, SP, new Imm_INT(totalStackOffset % maxIntImmShift)));
+      instructions.add(buildInstr(type, SP, SP, new Imm_INT(totalStackOffset % maxIntImmShift)));
     }
   }
 
@@ -87,7 +88,7 @@ public class ASTVisitor {
   }
 
   private void constructEndProgram() {
-    setArg1(toInt("0"));
+    setArg(new Imm_INT_MEM(toInt("0")));
     instructions.add(new POP(PC));
     instructions.add(new SECTION("ltorg"));
   }
@@ -238,28 +239,29 @@ public class ASTVisitor {
   }
 
   private CodeGenData visitPairDeclare(VarDeclareNode varDeclareNode) {
-    setArg1(8);
+    setArg(new Imm_INT_MEM(2 * WORD_SIZE));
     instructions.add(new BL("malloc"));
     REG rd = useFreeReg();
     instructions.add(new MOV(rd, R0)); // fetch address of pair
     Pair pair = (Pair) varDeclareNode.rhs();
     storeExpInHeap(pair.fst(), rd, 0);
     storeExpInHeap(pair.snd(), rd, 4);
+    instructions.add(new STR(rd, new Addr(SP), false));
+    availableRegs.add(rd);
     return null;
   }
 
   private void storeExpInHeap(Expr expr, REG objectAddr, int offset) {
     REG rd = (REG) visit(expr);
-    setArg1(expr.sizeOf());
+    setArg(new Imm_INT_MEM(expr.sizeOf()));
     instructions.add(new BL("malloc"));
     saveVarData(expr.type(), rd, R0, 0);
     saveVarData(expr.type(), R0, objectAddr, offset);
   }
 
-  private void setArg1(int i) {
-    instructions.add(new LDR(R0, new Imm_INT_MEM(i)));
+  private void setArg(Operand op2) {
+    instructions.add(new LDR(R0, op2));
   }
-
 
   private void addSpecialFunction(String name) {
     switch (name) {
