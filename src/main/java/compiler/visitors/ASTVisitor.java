@@ -144,7 +144,10 @@ public class ASTVisitor {
     } else if (printNode.expr().type().equals(IntType.getInstance())){
       jumpToFunctionLabel("p_print_int");
       specialLabels.add("p_print_int");
-    } else {
+    } else if (printNode.expr().type().equals(BoolType.getInstance())){
+      jumpToFunctionLabel("p_print_bool");
+      specialLabels.add("p_print_bool");
+    }else {
       jumpToFunctionLabel("p_print_string");
       specialLabels.add("p_print_string");
     }
@@ -298,6 +301,10 @@ public class ASTVisitor {
         addPrintInt();
         break;
 
+      case "p_print_bool":
+        addPrintBool();
+        break;
+
       case "p_print_ln":
         addPrintln();
         break;
@@ -360,6 +367,28 @@ public class ASTVisitor {
       new MOV(R0, new Imm_INT(toInt("0"))),
       new BL("fflush"),
       new POP(PC)));
+  }
+
+  private void addPrintBool() {
+    String trueLabel = addStringField("\"true\\0\"");
+    String falseLabel = addStringField("\"false\\0\"");
+
+
+    instructions.addAll(Arrays.asList(
+            new LABEL("p_print_bool"),
+            new PUSH(LR),
+            new CMP(R0, new Imm_INT(0)),
+            new LDR_COND(R0, new Imm_STRING_MEM(trueLabel), LDR_COND.COND.NE),
+            new LDR_COND(R0, new Imm_STRING_MEM(falseLabel), LDR_COND.COND.EQ),
+            new ADD(R0, R0, new Imm_INT(4))));
+
+    jumpToFunctionLabel("printf");
+
+    instructions.addAll(Arrays.asList(
+       new MOV(R0, new Imm_INT(0)),
+       new BL("fflush"),
+       new POP(PC)
+    ));
   }
 
   private void addReadInt() {
