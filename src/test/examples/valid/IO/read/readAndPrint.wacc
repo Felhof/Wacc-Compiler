@@ -1,0 +1,6 @@
+begin
+ char c = 'c';
+ println "input a character to continue..." ;
+ read c;
+ print c
+end
