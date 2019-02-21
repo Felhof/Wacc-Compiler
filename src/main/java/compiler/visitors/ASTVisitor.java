@@ -145,6 +145,8 @@ public class ASTVisitor {
       instructions.add(new ORR(rd1, rd1, rd2));
     }
 
+    availableRegs.add(0 , rd1);
+
     return rd1;
   }
 
