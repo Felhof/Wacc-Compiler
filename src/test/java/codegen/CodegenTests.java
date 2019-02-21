@@ -49,6 +49,25 @@ public class CodegenTests {
   }
 
   @Test
+  public void boolExpresionTest(){
+    String path = "src/test/examples/valid/expressions/";
+    String[] filenames = {"boolCalc","andExpr", "boolOrExpr", "boolNestedExpr"};
+    String[][] outputs = {{"false"},{"false","true","false"}, {"true","true","true", "false"}, {"true"}};
+
+    compileAndCheckExitAndOutput(path, filenames, null, null,outputs);
+
+  }
+
+  @Test
+  public void varAssignmentTest(){
+    String path = "src/test/examples/valid/variables/";
+    String[] filenames = { "assignBool", "assignChar", "assignInt"};
+    String[][] outputs = {{"true"},{"a"},{}};
+
+    compileAndCheckExitAndOutput(path, filenames, null, null, outputs);
+  }
+
+  @Test
   public void exitWithVar() {
     String path = "src/test/examples/valid/variables/";
     String[] filenames = {"longVarNames", "_VarNames"};
@@ -60,10 +79,10 @@ public class CodegenTests {
   @Test
   public void PrintTest() {
     String path = "src/test/examples/valid/IO/print/";
-    String[] filenames = {"print", "println", "printChar", "multipleLines", "printInt", "printBool"};
+    String[] filenames = {"print", "println", "printChar", "multipleLines", "printInt", "printBool", "printEscChar"};
     String[][] expectedOutput = {{"Hello World!"},{"Hello World!"},
             {"A simple character example is f"},{"Line1","Line2"}, {"An example integer is 189"},
-            {"True is true","False is false"}};
+            {"True is true", "False is false"}, {"An escaped character example is \""}};
 
     compileAndCheckExitAndOutput(path, filenames, null, null, expectedOutput);
   }

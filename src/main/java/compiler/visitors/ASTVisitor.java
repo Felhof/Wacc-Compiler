@@ -134,6 +134,22 @@ public class ASTVisitor {
     return rd;
   }
 
+  public CodeGenData visitBinaryExp(BinExpr binExpr) {
+    REG rd1 = (REG) visit(binExpr.rhs());
+    availableRegs.remove(0);
+    REG rd2 = (REG) visit(binExpr.lhs());
+
+    if(binExpr.operator().equals(BinExpr.BINOP.AND)) {
+      instructions.add(new AND(rd1, rd1, rd2));
+    } else if (binExpr.operator().equals(BinExpr.BINOP.OR)) {
+      instructions.add(new ORR(rd1, rd1, rd2));
+    }
+
+    availableRegs.add(0 , rd1);
+
+    return rd1;
+  }
+
   public CodeGenData visitPrintExpression(PrintNode printNode) {
     REG rd = (REG) visit(printNode.expr());
     // mov result into arg register
@@ -256,6 +272,7 @@ public class ASTVisitor {
   private CodeGenData saveVarData(Type varType, REG rd, REG rn, int offset) {
     boolean isByteInstr =
       varType.equals(BoolType.getInstance()) || varType.equals(CharType.getInstance());
+
     instructions
       .add(new STR(rd, new Addr(rn, true, new Imm_INT(offset)), isByteInstr));
     return null;
@@ -451,8 +468,12 @@ public class ASTVisitor {
 
   public CodeGenData visitIdent(Ident ident) {
     REG rd = regForDeclaration();
+
+    boolean isByteInstr = ((NodeElem)ident).type().equals(CharType.getInstance())
+            || ((NodeElem)ident).type().equals(BoolType.getInstance());
+
     instructions.add(new LDR(rd, new Addr(SP, true,
-      new Imm_INT(varToOffsetFromStack.get(ident.varName())))));
+      new Imm_INT(varToOffsetFromStack.get(ident.varName()))), isByteInstr));
     return rd;
   }
 
