@@ -330,7 +330,7 @@ public class ASTVisitor {
   }
 
   private void addPrintInt() {
-    String labelName = addStringField("\"%.*d\\0\"");
+    String labelName = addStringField("\"%d\\0\"");
 
     instructions.addAll(Arrays.asList(
             new LABEL("p_print_int"),
