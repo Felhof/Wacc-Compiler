@@ -16,6 +16,14 @@ public class Pair extends Expr implements ASTData {
     this.sndExpr = sndExpr;
   }
 
+  public Expr fst() {
+    return fstExpr;
+  }
+
+  public Expr snd() {
+    return sndExpr;
+  }
+
   @Override
   public String toString() {
     return "Pair" +
@@ -27,5 +35,10 @@ public class Pair extends Expr implements ASTData {
   @Override
   public CodeGenData accept(ASTVisitor visitor) {
     return null;
+  }
+
+  @Override
+  public int sizeOf() {
+    return 4;
   }
 }

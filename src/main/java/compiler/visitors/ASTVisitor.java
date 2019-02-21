@@ -30,6 +30,7 @@ import static compiler.instr.REG.*;
 
 public class ASTVisitor {
 
+  private static final int WORD_SIZE = 4;
   private List<Instr> instructions;
   private List<Instr> data;
   private Set<String> specialLabels;
@@ -65,15 +66,15 @@ public class ASTVisitor {
     return data;
   }
 
-  private void configureStack(String str) {
+  private void configureStack(String type) {
     int maxIntImmShift = 1024;
     if (totalStackOffset > 0) {
       int temp = totalStackOffset;
       while(temp / 1024 != 0) {
-        instructions.add(buildInstr(str, SP, SP, new Imm_INT(maxIntImmShift)));
+        instructions.add(buildInstr(type, SP, SP, new Imm_INT(maxIntImmShift)));
         temp = temp - 1024;
       }
-      instructions.add(buildInstr(str, SP, SP, new Imm_INT(totalStackOffset % maxIntImmShift)));
+      instructions.add(buildInstr(type, SP, SP, new Imm_INT(totalStackOffset % maxIntImmShift)));
     }
   }
 
@@ -88,7 +89,7 @@ public class ASTVisitor {
   }
 
   private void constructEndProgram() {
-    instructions.add(new LDR(R0, new Imm_INT_LDR("0")));
+    setArg(new Imm_INT_MEM(toInt("0")));
     instructions.add(new POP(PC));
     instructions.add(new SECTION("ltorg"));
   }
@@ -128,8 +129,8 @@ public class ASTVisitor {
   }
 
   public CodeGenData visitIntExpr(IntExpr expr) {
-    REG rd = useFreeReg();
-    instructions.add(new LDR(rd, new Imm_INT_LDR(expr.value())));
+    REG rd = regForDeclaration();
+    instructions.add(new LDR(rd, new Imm_INT_MEM(toInt(expr.value()))));
     return rd;
   }
 
@@ -174,8 +175,8 @@ public class ASTVisitor {
 
   public CodeGenData visitStringExpr(StringExpr stringExpr) {
     String labelName = addStringField(stringExpr.getValue());
-    REG rd = useFreeReg();
-    instructions.add(new LDR(rd, new Imm_STRING_LDR(labelName)));
+    REG rd = regForDeclaration();
+    instructions.add(new LDR(rd, new Imm_STRING_MEM(labelName)));
     return rd;
   }
 
@@ -187,14 +188,14 @@ public class ASTVisitor {
   }
 
   public CodeGenData visitCharExpr(CharExpr charExpr) {
-    REG rd = useFreeReg();
+    REG rd = regForDeclaration();
     instructions
       .add(new MOV(rd, new Imm_STRING("'" + charExpr.getValue() + "'")));
     return rd;
   }
 
   public CodeGenData visitBoolExpr(BoolExpr boolExpr) {
-    REG rd = useFreeReg();
+    REG rd = regForDeclaration();
     instructions.add(new MOV(rd, new Imm_INT(boolExpr.value() ? 1 : 0)));
     return rd;
   }
@@ -229,7 +230,7 @@ public class ASTVisitor {
     REG rd = (REG) visit(varDeclareNode.rhs());
     currentStackOffset -= offset;
     varToOffsetFromStack.put(varDeclareNode.varName(), currentStackOffset);
-    return saveVarData(varDeclareNode.varType(), rd, currentStackOffset);
+    return saveVarData(varDeclareNode.varType(), rd, SP, currentStackOffset);
   }
 
   public CodeGenData visitAssignNode(VarAssignNode varAssignNode) {
@@ -243,14 +244,14 @@ public class ASTVisitor {
   private void visitIdentAssign(VarAssignNode varAssignNode) {
     //TODO: CONSIDER other cases such as Arrays or Pairs
     REG rd = (REG) visit(varAssignNode.rhs());
-    saveVarData(varAssignNode.rhs().type(), rd, varToOffsetFromStack.get(varAssignNode.lhs().varName()));
+    saveVarData(varAssignNode.rhs().type(), rd, SP, varToOffsetFromStack.get(varAssignNode.lhs().varName()));
   }
 
-  private CodeGenData saveVarData(Type varType, REG rd, int offset) {
+  private CodeGenData saveVarData(Type varType, REG rd, REG rn, int offset) {
     boolean isByteInstr =
       varType.equals(BoolType.getInstance()) || varType.equals(CharType.getInstance());
     instructions
-      .add(new STR(rd, new Addr(SP, true, new Imm_INT(offset)), isByteInstr));
+      .add(new STR(rd, new Addr(rn, true, new Imm_INT(offset)), isByteInstr));
     return null;
   }
 
@@ -259,9 +260,29 @@ public class ASTVisitor {
   }
 
   private CodeGenData visitPairDeclare(VarDeclareNode varDeclareNode) {
+    setArg(new Imm_INT_MEM(2 * WORD_SIZE));
+    instructions.add(new BL("malloc"));
+    REG rd = useFreeReg();
+    instructions.add(new MOV(rd, R0)); // fetch address of pair
+    Pair pair = (Pair) varDeclareNode.rhs();
+    storeExpInHeap(pair.fst(), rd, 0);
+    storeExpInHeap(pair.snd(), rd, 4);
+    instructions.add(new STR(rd, new Addr(SP), false));
+    availableRegs.add(rd);
     return null;
   }
 
+  private void storeExpInHeap(Expr expr, REG objectAddr, int offset) {
+    REG rd = (REG) visit(expr);
+    setArg(new Imm_INT_MEM(expr.sizeOf()));
+    instructions.add(new BL("malloc"));
+    saveVarData(expr.type(), rd, R0, 0);
+    saveVarData(expr.type(), R0, objectAddr, offset);
+  }
+
+  private void setArg(Operand op2) {
+    instructions.add(new LDR(R0, op2));
+  }
 
   private void addSpecialFunction(String name) {
     switch (name) {
@@ -291,7 +312,7 @@ public class ASTVisitor {
       new PUSH(LR),
       new LDR(R1, new Addr(R0)),
       new ADD(R2, R0, new Imm_INT(toInt("4"))),
-      new LDR(R0, new Imm_STRING_LDR(labelName)),
+      new LDR(R0, new Imm_STRING_MEM(labelName)),
       new ADD(R0, R0, new Imm_INT(toInt("4")))));
     jumpToFunctionLabel("printf");
     instructions.addAll(Arrays.asList(
@@ -307,7 +328,7 @@ public class ASTVisitor {
     instructions.addAll(Arrays.asList(
       new LABEL("p_print_ln"),
       new PUSH(LR),
-      new LDR(R0, new Imm_STRING_LDR(labelName)),
+      new LDR(R0, new Imm_STRING_MEM(labelName)),
       new ADD(R0, R0, new Imm_INT(toInt("4"))),
       new BL("puts"),
       new MOV(R0, new Imm_INT(toInt("0"))),
@@ -362,8 +383,12 @@ public class ASTVisitor {
     return regs;
   }
 
+  private REG regForDeclaration() {
+    return availableRegs.get(0);
+  }
+
   private REG useFreeReg() {
-    return R4;
+    return availableRegs.remove(0);
   }
 
   private int toInt(String s) {
@@ -371,7 +396,7 @@ public class ASTVisitor {
   }
 
   public CodeGenData visitIdent(Ident ident) {
-    REG rd = useFreeReg();
+    REG rd = regForDeclaration();
     instructions.add(new LDR(rd, new Addr(SP, true,
       new Imm_INT(varToOffsetFromStack.get(ident.varName())))));
     return rd;
