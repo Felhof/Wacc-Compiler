@@ -134,6 +134,16 @@ public class ASTVisitor {
     return rd;
   }
 
+  public CodeGenData visitBinaryExp(BinExpr binExpr) {
+    REG rd1 = (REG) visit(binExpr.rhs());
+    availableRegs.remove(0);
+    REG rd2 = (REG) visit(binExpr.lhs());
+
+    instructions.add(new AND(rd1, rd1, rd2));
+
+    return rd1;
+  }
+
   public CodeGenData visitPrintExpression(PrintNode printNode) {
     REG rd = (REG) visit(printNode.expr());
     // mov result into arg register

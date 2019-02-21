@@ -33,6 +33,9 @@ public class BinExpr extends Expr {
     this.rhs = rhs;
   }
 
+  public Expr lhs(){ return lhs; }
+  public Expr rhs() { return rhs; }
+
   public String isTypeCompatible() {
     if (!operator.op.equals("==") && !operator.op().equals("!="))  {
       String tempReturn = "Binary Operator " + operator.op
@@ -58,7 +61,7 @@ public class BinExpr extends Expr {
 
   @Override
   public CodeGenData accept(ASTVisitor visitor) {
-    return null;
+    return visitor.visitBinaryExp(this);
   }
 
   @Override

@@ -49,6 +49,16 @@ public class CodegenTests {
   }
 
   @Test
+  public void boolExpresionTest(){
+    String path = "src/test/examples/valid/expressions/";
+    String[] filenames = {"boolCalc","andExpr", "boolNestedExpr"};
+    String[][] outputs = {{"false"},{"false","true","false"}, {"false"}};
+
+    compileAndCheckExitAndOutput(path, filenames, null, null,outputs);
+
+  }
+
+  @Test
   public void varAssignmentTest(){
     String path = "src/test/examples/valid/variables/";
     String[] filenames = { "assignBool", "assignChar", "assignInt"};
