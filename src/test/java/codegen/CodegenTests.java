@@ -118,7 +118,7 @@ public class CodegenTests {
   public void basicVariableTest(){
     String path = "src/test/examples/valid/variables/";
     String[] filenames = {"boolDeclaration", "boolDeclaration2", "charDeclaration", "charDeclaration2",
-            "capCharDeclaration", "intDeclaration", "negIntDeclaration", "zeroIntDeclaration"};
+            "capCharDeclaration", "intDeclaration", "negIntDeclaration", "zeroIntDeclaration", "manyVariables"};// "puncCharDeclaration"};
 
     // Test that they exit correctly
     Arrays.stream(filenames).forEach(filename -> {
@@ -126,6 +126,21 @@ public class CodegenTests {
       Main.generateCode(ast, outputFolder + filename);
       Process emulator = assembleAndEmulate(outputFolder + filename);
       assertThat(emulator.exitValue(), is(0));
+    });
+  }
+
+  @Test
+  public void exitWithVar() {
+    String path = "src/test/examples/valid/variables/";
+    String[] filenames = {"longVarNames", "_VarNames"};
+    int[] expectedExitCodes = {5, 19};
+
+    IntStream.range(0, filenames.length).forEach(i -> {
+      String filename = filenames[i];
+      AST ast = Main.compileProg(path + filename + ".wacc");
+      Main.generateCode(ast, outputFolder + filename);
+      Process emulator = assembleAndEmulate(outputFolder + filename);
+      assertThat(emulator.exitValue(), is(expectedExitCodes[i]));
     });
   }
 

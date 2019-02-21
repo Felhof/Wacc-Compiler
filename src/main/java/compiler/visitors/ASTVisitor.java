@@ -35,6 +35,7 @@ public class ASTVisitor {
 
   private SymbolTable currentST;
   private List<REG> availableRegs;
+  private int totalStackOffset;
   private int currentStackOffset;
   private Map<String, Integer> varToOffsetFromStack;
 
@@ -44,27 +45,45 @@ public class ASTVisitor {
     this.specialLabels = new HashSet<>();
     availableRegs = new ArrayList<>(allUsableRegs);
     varToOffsetFromStack = new HashMap<>();
+
   }
 
   public List<Instr> generate(AST root) {
-    int totalStackOffset = Integer.parseInt(root.stackOffset());
+    totalStackOffset = Integer.parseInt(root.stackOffset());
     currentStackOffset = totalStackOffset;
     constructStartProgram();
-    if (Integer.parseInt(root.stackOffset()) > 0) {
-      instructions.add(new SUB(SP, SP, new Imm_INT(totalStackOffset)));
-    }
+    configureStack("sub");
     currentST = root.symbolTable();
     visitParentNode(root.root());
-    if (Integer.parseInt(root.stackOffset()) > 0) {
-      instructions.add(new ADD(SP, SP, new Imm_INT(totalStackOffset)));
-    }
+    configureStack("add");
     constructEndProgram();
-
     for (String s : specialLabels) {
       addSpecialFunction(s);
     }
     data.addAll(instructions);
     return data;
+  }
+
+  private void configureStack(String str) {
+    int maxIntImmShift = 1024;
+    if (totalStackOffset > 0) {
+      int temp = totalStackOffset;
+      while(temp / 1024 != 0) {
+        instructions.add(buildInstr(str, SP, SP, new Imm_INT(maxIntImmShift)));
+        temp = temp - 1024;
+      }
+      instructions.add(buildInstr(str, SP, SP, new Imm_INT(totalStackOffset % maxIntImmShift)));
+    }
+  }
+
+  private Instr buildInstr(String type, REG rd, REG rn, Operand op2) {
+    switch (type) {
+      case "add":
+        return new ADD(rd, rn, op2);
+      case "sub":
+        return new SUB(rd, rn, op2);
+      default: return null;
+    }
   }
 
   private void constructEndProgram() {
