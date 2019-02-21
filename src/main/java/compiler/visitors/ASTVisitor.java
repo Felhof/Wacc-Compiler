@@ -212,9 +212,17 @@ public class ASTVisitor {
   }
 
   public CodeGenData visitAssignNode(VarAssignNode varAssignNode) {
+    //TODO: IMPLEMENT OTHER TYPES OF RHS
+    if (varAssignNode.rhs() instanceof Ident) {
+      visitIdentAssign(varAssignNode);
+    }
+    return null;
+  }
+
+  private void visitIdentAssign(VarAssignNode varAssignNode) {
+    //TODO: CONSIDER other cases such as Arrays or Pairs
     REG rd = (REG) visit(varAssignNode.rhs());
     saveVarData(varAssignNode.rhs().type(), rd, varToOffsetFromStack.get(varAssignNode.lhs().varName()));
-    return null;
   }
 
   private CodeGenData saveVarData(Type varType, REG rd, int offset) {
