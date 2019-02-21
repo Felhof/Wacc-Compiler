@@ -1,4 +1,4 @@
 begin
-  bool b = (true && true) && false;
+  bool b = (true && true) || false;
   println b
 end

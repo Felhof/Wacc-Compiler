@@ -33,7 +33,8 @@ public class BinExpr extends Expr {
     this.rhs = rhs;
   }
 
-  public Expr lhs(){ return lhs; }
+  public BINOP operator() { return operator; }
+  public Expr lhs() { return lhs; }
   public Expr rhs() { return rhs; }
 
   public String isTypeCompatible() {

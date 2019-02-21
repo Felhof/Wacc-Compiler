@@ -139,7 +139,11 @@ public class ASTVisitor {
     availableRegs.remove(0);
     REG rd2 = (REG) visit(binExpr.lhs());
 
-    instructions.add(new AND(rd1, rd1, rd2));
+    if(binExpr.operator().equals(BinExpr.BINOP.AND)) {
+      instructions.add(new AND(rd1, rd1, rd2));
+    } else if (binExpr.operator().equals(BinExpr.BINOP.OR)) {
+      instructions.add(new ORR(rd1, rd1, rd2));
+    }
 
     return rd1;
   }

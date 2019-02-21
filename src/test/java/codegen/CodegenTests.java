@@ -51,8 +51,8 @@ public class CodegenTests {
   @Test
   public void boolExpresionTest(){
     String path = "src/test/examples/valid/expressions/";
-    String[] filenames = {"boolCalc","andExpr", "boolNestedExpr"};
-    String[][] outputs = {{"false"},{"false","true","false"}, {"false"}};
+    String[] filenames = {"boolCalc","andExpr", "boolOrExpr", "boolNestedExpr"};
+    String[][] outputs = {{"false"},{"false","true","false"}, {"true","true","true", "false"}, {"true"}};
 
     compileAndCheckExitAndOutput(path, filenames, null, null,outputs);
 
