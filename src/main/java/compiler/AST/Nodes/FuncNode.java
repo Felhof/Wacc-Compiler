@@ -35,6 +35,18 @@ public class FuncNode extends Node {
 
   @Override
   public CodeGenData accept(ASTVisitor visitor) {
-    return null;
+    return visitor.visitFuncNode(this);
+  }
+
+  public SymbolTable symbolTable() {
+    return symbolTable;
+  }
+
+  public String name() {
+    return name;
+  }
+
+  public ParentNode getParentNode() {
+    return parentNode;
   }
 }

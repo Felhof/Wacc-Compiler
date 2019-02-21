@@ -461,4 +461,20 @@ public class ASTVisitor {
     return rd;
   }
 
+  public CodeGenData visitFuncNode(FuncNode funcNode) {
+    currentST = funcNode.symbolTable();
+    instructions.add(new LABEL("f_" + funcNode.name()));
+    instructions.add(new PUSH(LR));
+    funcNode.getParentNode().children().forEach(this::visit);
+    instructions.addAll(Arrays.asList(new POP(PC), new POP(PC)));
+    currentST = currentST.getEncSymTable();
+    instructions.add(new SECTION("ltorg"));
+    return null;
+  }
+
+  public CodeGenData visitReturn(ReturnNode returnNode) {
+    REG rd = (REG) visit(returnNode.expr());
+    instructions.add(new MOV(R0, rd));
+    return null;
+  }
 }

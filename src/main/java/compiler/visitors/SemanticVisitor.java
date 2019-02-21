@@ -135,10 +135,8 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
   @Override
   public ASTData visitFunc(FuncContext ctx) {
     Type funcReturnType = (Type) visit(ctx.type());
-
     ScopeData funcStat = visitFuncStatInNewScope(ctx.IDENT().getText(),
         ctx.stat(), ctx.param_list(), funcReturnType);
-
     return new FuncNode(funcReturnType,
         ctx.IDENT().getText(),
         funcStat.paramList(), funcStat.astNode(),
