@@ -189,11 +189,20 @@ public class ASTVisitor {
     REG rd = (REG) visit(varDeclareNode.rhs());
     currentStackOffset -= offset;
     varToOffsetFromStack.put(varDeclareNode.varName(), currentStackOffset);
+    return saveVarData(varDeclareNode.varType(), rd, currentStackOffset);
+  }
+
+  public CodeGenData visitAssignNode(VarAssignNode varAssignNode) {
+    REG rd = (REG) visit(varAssignNode.rhs());
+    saveVarData(varAssignNode.rhs().type(), rd, varToOffsetFromStack.get(varAssignNode.lhs().varName()));
+    return null;
+  }
+
+  private CodeGenData saveVarData(Type varType, REG rd, int offset) {
     boolean isByteInstr =
-      varDeclareNode.varType().equals(BoolType.getInstance()) || varDeclareNode.varType()
-        .equals(CharType.getInstance());
+      varType.equals(BoolType.getInstance()) || varType.equals(CharType.getInstance());
     instructions
-      .add(new STR(rd, new Addr(SP, true, new Imm_INT(currentStackOffset)), isByteInstr));
+      .add(new STR(rd, new Addr(SP, true, new Imm_INT(offset)), isByteInstr));
     return null;
   }
 
@@ -282,4 +291,5 @@ public class ASTVisitor {
       new Imm_INT(varToOffsetFromStack.get(ident.varName())))));
     return rd;
   }
+
 }

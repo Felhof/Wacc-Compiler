@@ -5,7 +5,7 @@ import compiler.AST.Types.Type;
 import compiler.visitors.ASTVisitor;
 import compiler.visitors.CodeGenData;
 
-public class ArrayElem extends Expr {
+public class ArrayElem extends Expr implements LHS{
 
   private String varName;
   private Expr[] indexes;
@@ -19,5 +19,10 @@ public class ArrayElem extends Expr {
   @Override
   public CodeGenData accept(ASTVisitor visitor) {
     return null;
+  }
+
+  @Override
+  public String varName() {
+    return varName;
   }
 }
