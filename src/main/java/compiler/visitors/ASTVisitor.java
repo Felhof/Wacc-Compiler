@@ -98,7 +98,7 @@ public class ASTVisitor {
   public CodeGenData visitUnaryExpr(UnaryExpr expr) {
 
     if (expr.type().equals(IntType.getInstance()) // Set int value to negative
-        && expr.operator() == UNOP.MINUS) {
+      && expr.operator() == UNOP.MINUS) {
       ((IntExpr) expr.insideExpr()).setNegative();
     }
 
@@ -149,7 +149,7 @@ public class ASTVisitor {
   public CodeGenData visitCharExpr(CharExpr charExpr) {
     REG rd = useFreeReg();
     instructions
-        .add(new MOV(rd, new Imm_STRING("'" + charExpr.getValue() + "'")));
+      .add(new MOV(rd, new Imm_STRING("'" + charExpr.getValue() + "'")));
     return rd;
   }
 
@@ -169,7 +169,7 @@ public class ASTVisitor {
     }
 
     if (type.equals(CharType.getInstance()) || type
-        .equals(BoolType.getInstance())) {
+      .equals(BoolType.getInstance())) {
       visitBasicTypeDeclare(varDeclareNode, 1);
     }
 
@@ -185,12 +185,15 @@ public class ASTVisitor {
   }
 
   private CodeGenData visitBasicTypeDeclare(VarDeclareNode varDeclareNode,
-      int offset) {
+    int offset) {
     REG rd = (REG) visit(varDeclareNode.rhs());
     currentStackOffset -= offset;
     varToOffsetFromStack.put(varDeclareNode.varName(), currentStackOffset);
+    boolean isByteInstr =
+      varDeclareNode.varType().equals(BoolType.getInstance()) || varDeclareNode.varType()
+        .equals(CharType.getInstance());
     instructions
-        .add(new STR(rd, new Addr(SP, true, new Imm_INT(currentStackOffset))));
+      .add(new STR(rd, new Addr(SP, true, new Imm_INT(currentStackOffset)), isByteInstr));
     return null;
   }
 
@@ -219,17 +222,17 @@ public class ASTVisitor {
     String labelName = addStringField("\"%.*s\\0\"");
 
     instructions.addAll(Arrays.asList(
-        new LABEL("p_print_string"),
-        new PUSH(LR),
-        new LDR(R1, new Addr(R0)),
-        new ADD(R2, R0, new Imm_INT(toInt("4"))),
-        new LDR(R0, new Imm_STRING_LDR(labelName)),
-        new ADD(R0, R0, new Imm_INT(toInt("4")))));
+      new LABEL("p_print_string"),
+      new PUSH(LR),
+      new LDR(R1, new Addr(R0)),
+      new ADD(R2, R0, new Imm_INT(toInt("4"))),
+      new LDR(R0, new Imm_STRING_LDR(labelName)),
+      new ADD(R0, R0, new Imm_INT(toInt("4")))));
     jumpToFunctionLabel("printf");
     instructions.addAll(Arrays.asList(
-        new MOV(R0, new Imm_INT(toInt("0"))),
-        new BL("fflush"),
-        new POP(PC)));
+      new MOV(R0, new Imm_INT(toInt("0"))),
+      new BL("fflush"),
+      new POP(PC)));
 
   }
 
@@ -237,14 +240,14 @@ public class ASTVisitor {
     String labelName = addStringField("\"\\0\"");
 
     instructions.addAll(Arrays.asList(
-        new LABEL("p_print_ln"),
-        new PUSH(LR),
-        new LDR(R0, new Imm_STRING_LDR(labelName)),
-        new ADD(R0, R0, new Imm_INT(toInt("4"))),
-        new BL("puts"),
-        new MOV(R0, new Imm_INT(toInt("0"))),
-        new BL("fflush"),
-        new POP(PC)));
+      new LABEL("p_print_ln"),
+      new PUSH(LR),
+      new LDR(R0, new Imm_STRING_LDR(labelName)),
+      new ADD(R0, R0, new Imm_INT(toInt("4"))),
+      new BL("puts"),
+      new MOV(R0, new Imm_INT(toInt("0"))),
+      new BL("fflush"),
+      new POP(PC)));
   }
 
   private void jumpToFunctionLabel(String label) {
@@ -276,7 +279,7 @@ public class ASTVisitor {
   public CodeGenData visitIdent(Ident ident) {
     REG rd = useFreeReg();
     instructions.add(new LDR(rd, new Addr(SP, true,
-        new Imm_INT(varToOffsetFromStack.get(ident.varName())))));
+      new Imm_INT(varToOffsetFromStack.get(ident.varName())))));
     return rd;
   }
 }

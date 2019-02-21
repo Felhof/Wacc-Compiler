@@ -79,7 +79,7 @@ public class Main {
     String assemblyFile = filename + ".s";
     try {
       // write instructions to assembly file
-      PrintWriter writer = new PrintWriter(assemblyFile, StandardCharsets.UTF_8);
+      PrintWriter writer = new PrintWriter(assemblyFile, String.valueOf(StandardCharsets.UTF_8));
 
       instructions.forEach(i -> writer.println(i.toString()));
 

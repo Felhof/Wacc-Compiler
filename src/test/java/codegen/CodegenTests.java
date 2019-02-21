@@ -32,7 +32,7 @@ public class CodegenTests {
           + "/arm-linux-gnueabi/", filename).start();
       emulator.waitFor();
 
-      //new File(filename + ".s").delete();
+      new File(filename + ".s").delete();
       new File(filename).delete();
       return emulator;
     } catch (IOException | InterruptedException e) {
@@ -117,16 +117,15 @@ public class CodegenTests {
   @Test
   public void basicVariableTest(){
     String path = "src/test/examples/valid/variables/";
-    //String[] filenames = {"boolDeclaration", "boolDeclaration2", "charDeclaration", "charDeclaration2",
-     //       "capCharDeclaration", "intDeclaration", "negIntDeclaration", "zeroIntDeclaration"};
-    String[] filenames = {"boolDeclaration"};
+    String[] filenames = {"boolDeclaration", "boolDeclaration2", "charDeclaration", "charDeclaration2",
+            "capCharDeclaration", "intDeclaration", "negIntDeclaration", "zeroIntDeclaration"};
 
     // Test that they exit correctly
     Arrays.stream(filenames).forEach(filename -> {
       AST ast = Main.compileProg(path + filename + ".wacc");
       Main.generateCode(ast, outputFolder + filename);
       Process emulator = assembleAndEmulate(outputFolder + filename);
-      assertThat(emulator.exitValue(), is(5));
+      assertThat(emulator.exitValue(), is(0));
     });
   }
 
