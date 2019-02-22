@@ -4,13 +4,14 @@ import compiler.instr.Operand.Operand;
 
 public class CMP extends Instr {
 
+  private REG rd;
+  private Operand op;
+  private Shift s;
 
-  REG rd;
-  Operand op;
-
-  public CMP(REG rd, Operand op) {
+  public CMP(REG rd, Operand op, Shift s) {
     this.rd = rd;
     this.op = op;
+    this.s = s;
   }
 
 
@@ -18,8 +19,7 @@ public class CMP extends Instr {
   public String toString() {
     return "\tCMP "
             + rd.toString()
-            +", "+ op.toString();
+            +", "+ op.toString() + ((s != null) ? (", " + s.toString()) : "");
   }
-
 
 }
