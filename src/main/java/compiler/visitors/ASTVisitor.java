@@ -28,14 +28,7 @@ import compiler.instr.REG;
 import java.util.*;
 import java.util.Collections;
 
-import static compiler.SubRoutines.addOverflowErr;
-import static compiler.SubRoutines.addPrintBool;
-import static compiler.SubRoutines.addPrintInt;
-import static compiler.SubRoutines.addPrintString;
-import static compiler.SubRoutines.addPrintln;
-import static compiler.SubRoutines.addReadChar;
-import static compiler.SubRoutines.addReadInt;
-import static compiler.SubRoutines.addRuntimeErr;
+import static compiler.SubRoutines.*;
 import static compiler.instr.REG.*;
 import static compiler.instr.ShiftType.ASR;
 
@@ -169,49 +162,111 @@ public class ASTVisitor {
   public CodeGenData visitBinaryExp(BinExpr binExpr) {
     REG rd = (REG) visit(binExpr.lhs());
 
+    REG rn;
+    REG reg;
     boolean pushedReg = false;
     if(rd == R10){
       instructions.add(new PUSH(R10));
       pushedReg = true;
+      rn = (REG) visit(binExpr.rhs());
+      reg = R11;
+      instructions.add(new POP(R11));
     } else {
       availableRegs.remove(0);
+      rn = (REG) visit(binExpr.rhs());
+      reg = rd;
     }
 
-    REG rn = (REG) visit(binExpr.rhs());
     switch (binExpr.operator()) {
       case OR:
-        instructions.add(new ORR(rd, rd, rn));
+        instructions.add(new ORR(rd, reg, rn));
         break;
       case AND:
-        instructions.add(new AND(rd, rd, rn));
+        instructions.add(new AND(rd, reg, rn));
         break;
       case PLUS:
         specialLabels.addAll(
             Arrays.asList("p_throw_overflow_error", "p_throw_runtime_error",
                 "p_print_string"));
-        instructions.add(new ADD(rd, rd, rn, true));
+        instructions.add(new ADD(rd, reg, rn, true));
         instructions.add(new BL("p_throw_overflow_error", "VS"));
         break;
       case MINUS:
         specialLabels.addAll(Arrays
             .asList("p_throw_overflow_error", "p_throw_runtime_error",
                 "p_print_string"));
-        instructions.add(new SUB(rd, rd, rn, true));
+        instructions.add(new SUB(rd, reg, rn, true));
         instructions.add(new BL("p_throw_overflow_error", "VS"));
         break;
       case MUL:
         specialLabels.addAll(Arrays
             .asList("p_throw_overflow_error", "p_throw_runtime_error",
                 "p_print_string"));
-        instructions.add(new MUL(rd, rn, rd, rn));
-        instructions.add(new CMP(rn, rd, new Shift(ASR, 31)));
+        if(pushedReg) {
+          instructions.add(new MUL(rd, reg, reg, rd));
+          instructions.add(new CMP(reg, rd, new Shift(ASR, 31)));
+        }else{
+          instructions.add(new MUL(rd, rn, rd, rn));
+          instructions.add(new CMP(rn, rd, new Shift(ASR, 31)));
+        }
         instructions.add(new BL("p_throw_overflow_error", "NE"));
+        break;
+      case DIV:
+        specialLabels.addAll(Arrays
+          .asList("p_check_divide_by_zero","p_throw_runtime_error","p_print_string"));
+
+        instructions.addAll(Arrays
+          .asList(new MOV(R0, reg), new MOV(R1, rn), new BL("p_check_divide_by_zero",""),
+                  new BL("__aeabi_idiv", ""),new MOV(rd, R0)));
+        break;
+      case MOD:
+        specialLabels.addAll(Arrays
+          .asList("p_check_divide_by_zero","p_throw_runtime_error","p_print_string"));
+
+        instructions.addAll(Arrays
+          .asList(new MOV(R0, reg), new MOV(R1, rn), new BL("p_check_divide_by_zero",""),
+                  new BL("__aeabi_idivmod", ""),new MOV(rd, R1)));
+        break;
+
+      case EQUAL:
+        instructions.addAll(Arrays
+          .asList(new CMP(rd, rn, null), new MOV(rd, new Imm_INT(1), "EQ"),
+                  new MOV(rd, new Imm_INT(0), "NE")));
+        break;
+
+      case GE:
+        instructions.addAll(Arrays
+                .asList(new CMP(rd, rn, null), new MOV(rd, new Imm_INT(1), "GE"),
+                        new MOV(rd, new Imm_INT(0), "LT")));
+        break;
+
+      case GT:
+        instructions.addAll(Arrays
+                .asList(new CMP(rd, rn, null), new MOV(rd, new Imm_INT(1), "GT"),
+                        new MOV(rd, new Imm_INT(0), "LE")));
+        break;
+
+      case LE:
+        instructions.addAll(Arrays
+                .asList(new CMP(rd, rn, null), new MOV(rd, new Imm_INT(1), "LE"),
+                        new MOV(rd, new Imm_INT(0), "GT")));
+        break;
+
+      case LT:
+        instructions.addAll(Arrays
+                .asList(new CMP(rd, rn, null), new MOV(rd, new Imm_INT(1), "LT"),
+                        new MOV(rd, new Imm_INT(0), "GE")));
+        break;
+
+      case NOTEQUAL:
+        instructions.addAll(Arrays
+                .asList(new CMP(rd, rn, null), new MOV(rd, new Imm_INT(1), "NE"),
+                        new MOV(rd, new Imm_INT(0), "EQ")));
+        break;
+
     }
 
-    if(pushedReg){
-      instructions.add(new POP(R11));
-    }
-    else {
+    if(!pushedReg){
       availableRegs.add(0, rd);
     }
     return rd;
@@ -399,6 +454,8 @@ public class ASTVisitor {
       case "p_throw_runtime_error":
         addRuntimeErr();
         break;
+      case "p_check_divide_by_zero":
+        addCheckDivideByZero();
     }
   }
 
@@ -499,6 +556,4 @@ public class ASTVisitor {
     }
     return null;
   }
-
-
 }

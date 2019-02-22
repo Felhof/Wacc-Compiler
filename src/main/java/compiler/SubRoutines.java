@@ -147,4 +147,16 @@ public class SubRoutines {
       Arrays.asList(new LABEL("p_throw_runtime_error"), new BL("p_print_string",
           ""), new MOV(R0, new Imm_INT(-1)), new BL("exit", "")));
   }
+
+  public static void addCheckDivideByZero() {
+
+    String labelName = addStringField("\"DivideByZeroError: divide or modulo by zero\\n\\0\"");
+
+    instructions.addAll(
+      Arrays.asList( new LABEL("p_check_divide_by_zero"), new PUSH(LR), new CMP(R1, new Imm_INT(0), null),
+              new LDR_COND(R0, new Imm_STRING_MEM(labelName), LDR_COND.COND.EQ),
+              new BL("p_throw_runtime_error", "EQ"),
+              new POP(PC)));
+
+  }
 }

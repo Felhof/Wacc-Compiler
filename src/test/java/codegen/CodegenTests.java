@@ -8,6 +8,8 @@ import compiler.Main;
 
 import java.io.*;
 import java.util.stream.IntStream;
+
+import compiler.instr.STR;
 import org.junit.Test;
 
 public class CodegenTests {
@@ -60,7 +62,35 @@ public class CodegenTests {
         {"true", "true", "true", "false"}, {"true"}, {"true"}};
 
     compileAndCheckExitAndOutput(path, filenames, null, null, outputs);
+  }
 
+  @Test
+  public void integerExpressionTest() {
+    String path = "src/test/examples/valid/expressions/";
+    String[] filenames = {"intCalc","divExpr","multExpr","modExpr", "equalsExpr", "greaterEqExpr", "greaterExpr",
+            "lessEqExpr","lessExpr","notequalsExpr"};
+    String[][] outputs = {{"72"},{"1"},{"15"},{"2"}, {"false","false","true"}, {"false","true", "true"},
+            {"false","true"},{"true","false","true"},{"true","false"},{"true","true","false"}};
+
+    compileAndCheckExitAndOutput(path, filenames, null, null, outputs);
+  }
+
+  @Test
+  public void charExpressionTest() {
+    String path = "src/test/examples/valid/expressions/";
+    String[] filenames = {"charComparisonExpr"};
+    String[][] outputs = {{"false","true","true","true","false","false"}};
+
+    compileAndCheckExitAndOutput(path, filenames, null, null, outputs);
+  }
+
+  @Test
+  public void longExpressionTest() {
+    String path = "src/test/examples/valid/expressions/";
+    String[] filenames = { "longExpr","longExpr2","longExpr3","longMultExpr"};
+    int[] expectedExitCodes = { 153, 10, 9, 16};
+
+    compileAndCheckExitAndOutput(path, filenames, null, expectedExitCodes, null);
   }
 
   @Test
