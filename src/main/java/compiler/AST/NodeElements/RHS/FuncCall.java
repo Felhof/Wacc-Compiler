@@ -26,6 +26,14 @@ public class FuncCall extends NodeElem {
 
   @Override
   public CodeGenData accept(ASTVisitor visitor) {
-    return null;
+    return visitor.visitFuncCall(this);
+  }
+
+  public String funcName() {
+    return funcName;
+  }
+
+  public ListExpr argsList() {
+    return argsList;
   }
 }

@@ -69,6 +69,7 @@ import compiler.AST.NodeElements.NodeElem;
 import compiler.AST.NodeElements.RHS.FuncCall;
 import compiler.AST.NodeElements.PairElem;
 import compiler.AST.NodeElements.RHS.PairExp;
+import compiler.AST.SymbolTable.VarInfo;
 import compiler.AST.Types.ArrType;
 import compiler.AST.NodeElements.RHS.Pair;
 import compiler.AST.Types.BoolType;
@@ -123,7 +124,8 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
       }
       Type type = (Type) visit(ctx.func(i).type());
       Param_listContext param_listContext = ctx.func(i).param_list();
-      ListExpr params = new ListExpr();
+      boolean isParams = true;
+      ListExpr params = new ListExpr(isParams);
       if (param_listContext != null) {
         params = (ListExpr) visit(ctx.func(i).param_list());
       }
@@ -134,10 +136,8 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
   @Override
   public ASTData visitFunc(FuncContext ctx) {
     Type funcReturnType = (Type) visit(ctx.type());
-
     ScopeData funcStat = visitFuncStatInNewScope(ctx.IDENT().getText(),
         ctx.stat(), ctx.param_list(), funcReturnType);
-
     return new FuncNode(funcReturnType,
         ctx.IDENT().getText(),
         funcStat.paramList(), funcStat.astNode(),
@@ -146,8 +146,12 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
 
   @Override
   public ASTData visitParam_list(Param_listContext ctx) {
-    ListExpr paramList = new ListExpr();
-    ctx.param().forEach(p -> paramList.add(new Ident(p.IDENT().getText(), (Type) visit(p))));
+    boolean isParams = true;
+    ListExpr paramList = new ListExpr(isParams);
+    ctx.param().forEach(p -> {
+      paramList.addExpr(new Ident(p.IDENT().getText(), (Type) visit(p)));
+      paramList.addParamName(p.IDENT().getText());
+    });
     return paramList;
   }
 
@@ -155,8 +159,8 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
   public ASTData visitParam(ParamContext ctx) {
     Type paramType = (Type) visit(ctx.type());
     if (currentST.getEncSymTable() != null) {
-      // don't add parameters to main symbol table
-      currentST.addVar(ctx.IDENT().getText(), paramType);
+      // don't addExpr parameters to main symbol table
+      currentST.addVar(ctx.IDENT().getText(), new VarInfo(paramType, null));
     }
     return paramType;
   }
@@ -170,13 +174,15 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
 
   @Override
   public ASTData visitPrintStat(PrintStatContext ctx) {
-    currentParentNode.add(new PrintNode(false, (Expr) visit(ctx.expr()), ctx.start.getLine()));
+    currentParentNode.add(
+        new PrintNode(false, (Expr) visit(ctx.expr()), ctx.start.getLine()));
     return null;
   }
 
   @Override
   public ASTData visitPrintlnStat(PrintlnStatContext ctx) {
-    currentParentNode.add(new PrintNode(true, (Expr) visit(ctx.expr()), ctx.start.getLine()));
+    currentParentNode.add(
+        new PrintNode(true, (Expr) visit(ctx.expr()), ctx.start.getLine()));
     return null;
   }
 
@@ -203,7 +209,8 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
     ScopeData elseStat = visitStatInNewScope(ctx.stat(1));
 
     currentParentNode.add(new IfElseNode(condition, thenStat.astNode(),
-        thenStat.symbolTable(), elseStat.astNode(), elseStat.symbolTable(), ctx.start.getLine()));
+        thenStat.symbolTable(), elseStat.astNode(), elseStat.symbolTable(),
+        ctx.start.getLine()));
     return null;
   }
 
@@ -216,7 +223,8 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
     ScopeData stat = visitStatInNewScope(ctx.stat());
 
     currentParentNode
-        .add(new WhileNode(condition, stat.astNode(), stat.symbolTable(), ctx.start.getLine()));
+        .add(new WhileNode(condition, stat.astNode(), stat.symbolTable(),
+            ctx.start.getLine()));
     return null;
   }
 
@@ -225,7 +233,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
     String varName = ctx.IDENT().getText();
 
     Type varType = (Type) visit(ctx.type());
-    Type varTypeDef = currentST.lookUpVarScope(varName);
+    VarInfo varTypeDef = currentST.lookUpVarScope(varName);
     NodeElem rhs = (NodeElem) visit(ctx.assign_rhs()); // simple case
 
     if (!isAssignSameType(varType, rhs)) {
@@ -239,15 +247,17 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
           .notifyErrorListeners(ctx.IDENT().getSymbol(),
               identifierAlreadyDefinedMsg(annotateVar(varName)), null);
     } else {
-      currentST.addVar(varName, varType);
-      currentParentNode.add(new VarDeclareNode(varType, varName, rhs, ctx.start.getLine()));
+      currentST.addVar(varName, new VarInfo(varType, null));
+      currentParentNode
+          .add(new VarDeclareNode(varType, varName, rhs, ctx.start.getLine()));
     }
     incrementStackOffset(varType);
     return null;
   }
 
   private void incrementStackOffset(Type varType) {
-    if (varType.equals(CharType.getInstance()) || varType.equals(BoolType.getInstance())) {
+    if (varType.equals(CharType.getInstance()) || varType
+        .equals(BoolType.getInstance())) {
       stackPointerOffset++;
     } else {
       stackPointerOffset += 4;
@@ -286,8 +296,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
     String errorMessage = binExpr.isTypeCompatible();
     if (errorMessage != null) {
       parser.notifyErrorListeners(ctx.start, errorMessage, null);
-    }
-    else if (!lhs.type().equals(rhs.type())) {
+    } else if (!lhs.type().equals(rhs.type())) {
       parser.notifyErrorListeners(ctx.expr(1).start,
           incompatibleTypesMsg(ctx.expr(1).getText(), lhs.type(), rhs.type())
           , null);
@@ -312,13 +321,14 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
   @Override
   public ASTData visitIdentExp(IdentExpContext ctx) {
     String varName = ctx.IDENT().getText();
-    Type varTypeDef = currentST.lookUpAllVar(varName);
-    if (varTypeDef == null) {
+    VarInfo varInfo = currentST.lookUpAllVar(varName);
+    if (varInfo == null) {
       parser.notifyErrorListeners(ctx.start,
           identifierNotDefinedMsg(annotateVar(ctx.getText())), null);
-      varTypeDef = GenericType.getInstance();
+      return new Ident(varName, GenericType.getInstance());
+
     }
-    return new Ident(varName, varTypeDef);
+    return new Ident(varName, varInfo.getType());
   }
 
   @Override
@@ -336,24 +346,22 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
     String varName = ctx.IDENT().getText();
     int dimensionAccessed = ctx.expr().size();
 
-    Type varTypeDef = currentST.lookUpAllVar(varName);
+    Type varTypeDef = currentST.lookUpAllVar(varName).getType();
     if (varTypeDef == null) {
       parser
           .notifyErrorListeners(ctx.IDENT().getSymbol(),
               identifierNotDefinedMsg(annotateVar(varName)), null);
-    }
-    else if (!(varTypeDef instanceof ArrType)) {
+    } else if (!(varTypeDef instanceof ArrType)) {
       parser.notifyErrorListeners(ctx.IDENT().getSymbol(),
           incompatibleTypesMsg(varName, new ArrType(GenericType.getInstance()),
               varTypeDef), null);
-    }
-    else if (((ArrType) varTypeDef).dimension() < dimensionAccessed) {
+    } else if (((ArrType) varTypeDef).dimension() < dimensionAccessed) {
       String msg = incompatibleTypesMsg(varName,
           new ArrType(GenericType.getInstance()), varTypeDef);
       parser.notifyErrorListeners(ctx.IDENT().getSymbol(), msg.substring(0,
-          msg.length() - 1) + ArrType.bracketsString(dimensionAccessed) + ')', null);
-    }
-    else {
+          msg.length() - 1) + ArrType.bracketsString(dimensionAccessed) + ')',
+          null);
+    } else {
       Expr[] indexes = new Expr[dimensionAccessed];
       for (int i = 0; i < dimensionAccessed; i++) {
         indexes[i] = (Expr) visit(ctx.expr(i));
@@ -385,8 +393,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
 
       if (elemType == null) {
         elemType = expr.type();
-      }
-      else if (!expr.type().equals(elemType)) {
+      } else if (!expr.type().equals(elemType)) {
         parser.notifyErrorListeners(e.start, incompatibleTypesMsg(e.getText()
             , elemType, expr.type()), null);
       }
@@ -441,7 +448,8 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
     Type intType = IntType.getInstance();
     if (!expr.type().equals(IntType.getInstance())) {
       parser.notifyErrorListeners(ctx.expr().start,
-          incompatibleTypesMsg(ctx.expr().getText(), intType, expr.type()), null);
+          incompatibleTypesMsg(ctx.expr().getText(), intType, expr.type()),
+          null);
     }
     currentParentNode.add(new ExitNode(expr, ctx.start.getLine()));
     return null;
@@ -457,7 +465,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
       return null;
     }
 
-    Type funcDefinitionReturn = currentST.lookUpAllVar("return");
+    Type funcDefinitionReturn = currentST.lookUpAllVar("return").getType();
 
     if (!funcDefinitionReturn.equals(exprType)) {
       parser.notifyErrorListeners(ctx.expr().start,
@@ -474,7 +482,8 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
     NodeElem rhs = (NodeElem) visit(ctx.assign_rhs());
     if (!((NodeElem) lhs).type().equals(rhs.type())) {
       parser.notifyErrorListeners(ctx.assign_rhs().start,
-          incompatibleTypesMsg(ctx.assign_rhs().getText(),((NodeElem) lhs).type(), rhs.type()),
+          incompatibleTypesMsg(ctx.assign_rhs().getText(),
+              ((NodeElem) lhs).type(), rhs.type()),
           null);
     }
     currentParentNode.add(new VarAssignNode(lhs, rhs, ctx.start.getLine()));
@@ -484,21 +493,23 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
   @Override
   public ASTData visitIdentLhs(IdentLhsContext ctx) {
     String varName = ctx.IDENT().getText();
-    Type varTypeDef = currentST.lookUpAllVar(varName);
-    if (varTypeDef == null) {
+    VarInfo varInfo = currentST.lookUpAllVar(varName);
+    if (varInfo == null) {
       parser.notifyErrorListeners(ctx.start,
           identifierNotDefinedMsg(annotateVar(varName)),
           null);
-      varTypeDef = GenericType.getInstance();
+      return new Ident(varName, GenericType.getInstance());
+
     }
-    return new Ident(varName, varTypeDef);
+    return new Ident(varName, varInfo.getType());
   }
 
   @Override
   public ASTData visitFuncCall(FuncCallContext ctx) {
     String funcName = ctx.IDENT().getText();
     FuncTypes funcTypes = currentST.lookUpAllFunc(funcName);
-    ListExpr args = new ListExpr();
+    boolean isParams = false;
+    ListExpr args = new ListExpr(isParams);
 
     if (funcTypes == null) {
       parser.notifyErrorListeners(ctx.IDENT().getSymbol(),
@@ -509,7 +520,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
         args = (ListExpr) visit(ctx.arg_list());
       }
       List<Type> paramsTypes = funcTypes.getParamTypes();
-      if (!ListExpr.hasSameTypes(args.getExprTypes(),paramsTypes)) {
+      if (!ListExpr.hasSameTypes(args.getExprTypes(), paramsTypes)) {
         parser.notifyErrorListeners(ctx.arg_list().start,
             incompatibleTypeListMsg(ctx.arg_list().getText(), paramsTypes,
                 args.getExprTypes()),
@@ -521,8 +532,9 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
 
   @Override
   public ASTData visitArg_list(Arg_listContext ctx) {
-    ListExpr argsList = new ListExpr();
-    ctx.expr().forEach(e -> argsList.add(((Expr) visit(e))));
+    boolean isParams = false;
+    ListExpr argsList = new ListExpr(isParams);
+    ctx.expr().forEach(e -> argsList.addExpr(((Expr) visit(e))));
     return argsList;
   }
 
@@ -534,7 +546,8 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
       parser.notifyErrorListeners(ctx.expr().start,
           incompatibleTypeMultiChoiceMsg(ctx.expr().getText(),
               Arrays.asList(new PairType(GenericType.getInstance(),
-                  GenericType.getInstance()), new ArrType(GenericType.getInstance())) ,
+                      GenericType.getInstance()),
+                  new ArrType(GenericType.getInstance())),
               expr.type()),
           null);
     }
@@ -545,7 +558,8 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
   @Override
   public ASTData visitNewScopeStat(NewScopeStatContext ctx) {
     ScopeData stat = visitStatInNewScope(ctx.stat());
-    currentParentNode.add(new ScopeNode(stat.astNode(), stat.symbolTable(), ctx.start.getLine()));
+    currentParentNode.add(
+        new ScopeNode(stat.astNode(), stat.symbolTable(), ctx.start.getLine()));
     return null;
   }
 
@@ -562,7 +576,8 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
     if (!(expr.type() instanceof PairType)) {
       parser.notifyErrorListeners(ctx.expr().start,
           incompatibleTypesMsg(ctx.expr().getText(),
-              new PairType(GenericType.getInstance(), GenericType.getInstance()),
+              new PairType(GenericType.getInstance(),
+                  GenericType.getInstance()),
               expr.type()),
           null);
       return null;
@@ -572,7 +587,8 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
 
   @Override
   public ASTData visitPairExp(PairExpContext ctx) {
-    return new PairExp(new PairType(GenericType.getInstance(), GenericType.getInstance()));
+    return new PairExp(
+        new PairType(GenericType.getInstance(), GenericType.getInstance()));
   }
 
   private ASTData getPairElem(Expr expr, Pair_elemContext ctx) {
@@ -601,9 +617,9 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
 
     ParentNode ParentNode = enterScope(stat.start.getLine());
     currentST.setFunctionScope(true);
-    currentST.addVar("return", funcReturnType);
-
-    ListExpr paramList = new ListExpr();
+    currentST.addVar("return", new VarInfo(funcReturnType, null));
+    boolean isParams = true;
+    ListExpr paramList = new ListExpr(isParams);
     if (paramListContext != null) {
       paramList = (ListExpr) visit(paramListContext);
     }
@@ -676,7 +692,8 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
   }
 
   private boolean isReadableType(NodeElem lhs) {
-    return lhs.type().equals(IntType.getInstance()) || lhs.type().equals(CharType.getInstance());
+    return lhs.type().equals(IntType.getInstance()) || lhs.type()
+        .equals(CharType.getInstance());
   }
 
   private String identifierAlreadyDefinedMsg(String offendingSymbol) {
@@ -697,7 +714,8 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
     StringBuilder sb = new StringBuilder();
     sb.append(incompatibleMsg(offendingSymbol)).append(" (expected: ");
     for (int i = 0; i < expected.size(); i++) {
-      sb.append((expected.get(i) instanceof ArrType) ? "Any[]" : expected.get(i).toString());
+      sb.append((expected.get(i) instanceof ArrType) ? "Any[]"
+          : expected.get(i).toString());
       if (i < expected.size() - 1) {
         sb.append(" or ");
       }
@@ -721,7 +739,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
     StringBuilder sb = new StringBuilder();
     sb.append(incompatibleMsg(offendingSymbol))
         .append(" (expected: ");
-    for(Type t : expected) {
+    for (Type t : expected) {
       sb.append((t instanceof ArrType) ? "Any[]" : t.toString()).append(" ");
     }
     sb.append(", actual: ");

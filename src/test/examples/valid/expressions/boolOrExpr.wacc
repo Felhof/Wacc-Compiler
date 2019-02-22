@@ -1,0 +1,10 @@
+begin
+  bool a = true || false;
+  bool b = false || true;
+  bool c = true || true;
+  bool d = false || false;
+  println a;
+  println b;
+  println c;
+  println d
+end

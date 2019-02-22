@@ -4,20 +4,22 @@ import compiler.instr.Operand.Operand;
 
 public class ADD extends Instr {
 
-  REG rd;
-  REG rn;
-  Operand op;
+  private REG rd;
+  private REG rn;
+  private Operand op;
+  private boolean setCPSR;
 
-  public ADD(REG rd1, REG rd2, Operand op) {
+  public ADD(REG rd1, REG rd2, Operand op, boolean setCPSR) {
     this.rd = rd1;
     this.rn = rd2;
     this.op = op;
+    this.setCPSR = setCPSR;
   }
 
 
   @Override
   public String toString() {
-    return "\tADD "
+    return "\tADD" + ((setCPSR) ? "S " : " ")
             + rd.toString()
             +", "+ rn.toString()
             +", " + op.toString();

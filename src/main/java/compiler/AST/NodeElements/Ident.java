@@ -1,6 +1,8 @@
 package compiler.AST.NodeElements;
 
 import compiler.AST.NodeElements.RHS.Expr;
+import compiler.AST.Types.BoolType;
+import compiler.AST.Types.CharType;
 import compiler.AST.Types.Type;
 import compiler.visitors.ASTVisitor;
 import compiler.visitors.CodeGenData;
@@ -32,6 +34,6 @@ public class Ident extends LHS {
   @Override
   public int sizeOf() {
     //TODO: get type from symbol or augment the map in visitor
-    return 0;
+    return (type instanceof CharType || type instanceof BoolType ? 1 : 4);
   }
 }

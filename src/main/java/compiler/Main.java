@@ -80,11 +80,8 @@ public class Main {
     try {
       // write instructions to assembly file
       PrintWriter writer = new PrintWriter(assemblyFile, String.valueOf(StandardCharsets.UTF_8));
-
       instructions.forEach(i -> writer.println(i.toString()));
-
       writer.close();
-
     } catch (IOException e) {
       e.printStackTrace();
     }
