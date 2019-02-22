@@ -6,7 +6,6 @@ import static org.hamcrest.core.Is.is;
 import compiler.AST.Nodes.AST;
 import compiler.Main;
 
-import compiler.instr.STR;
 import java.io.*;
 import java.util.stream.IntStream;
 import org.junit.Test;
@@ -130,9 +129,10 @@ public class CodegenTests {
     String path = "src/test/examples/valid/runtimeErr/integerOverflow/";
     String[] filenames = {"intWayOverflow", "intnegateOverflow4",
         "intUnderflow", "intJustOverflow", "intmultOverflow",
-        "intnegateOverflow2", "intnegateOverflow3"};
-    int[] expectedExitCodes = {255, 255, 255, 255, 255, 255, 255};
-    String[][] outputs = {{"2000000000",
+        "intnegateOverflow2", "intnegateOverflow3", "intnegateOverflow"};
+    int[] expectedExitCodes = {255, 255, 255, 255, 255, 255, 255, 255};
+    String[][] outputs = {
+        {"2000000000",
         "OverflowError: the result is too small/large to store in a 4-byte signed-integer."},
         {"-2000000000",
             "OverflowError: the result is too small/large to store in a 4-byte signed-integer."},
@@ -149,13 +149,12 @@ public class CodegenTests {
             "OverflowError: the result is too small/large to store in a 4-byte signed-integer."},
         {"-20000",
             "OverflowError: the result is too small/large to store in a 4-byte signed-integer."},
-        {"-2000000000",
-            "OverflowError: the result is too small/large to store in a 4-byte signed-integer."}};
+        { "-2147483648",
+        "OverflowError: the result is too small/large to store in a 4-byte signed-integer."}};
     compileAndCheckExitAndOutput(path, filenames, null, expectedExitCodes,
         outputs);
   }
-
-
+  
   // provide path, filenames, exit codes, and expected output
   private void compileAndCheckExitAndOutput(String path, String[] filenames,
       String[] inputs,

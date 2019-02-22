@@ -1,8 +1,6 @@
 package compiler.AST.NodeElements;
 
 import compiler.AST.NodeElements.RHS.Expr;
-import compiler.AST.Types.BoolType;
-import compiler.AST.Types.CharType;
 import compiler.AST.Types.Type;
 import compiler.visitors.ASTData;
 import compiler.visitors.ASTVisitor;

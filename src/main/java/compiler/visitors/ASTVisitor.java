@@ -141,7 +141,6 @@ public class ASTVisitor {
   }
 
   public CodeGenData visitUnaryExpr(UnaryExpr expr) {
-
     if ((expr.insideExpr() instanceof IntExpr) // Set int value to negative
         && expr.operator() == UNOP.MINUS) {
       ((IntExpr) expr.insideExpr()).setNegative();
@@ -149,11 +148,16 @@ public class ASTVisitor {
     } else if (expr.insideExpr() instanceof Ident
         && expr.operator() == UNOP.MINUS) {
       REG rd = (REG) visit(expr.insideExpr());
-      instructions.add(new RS(rd, rd, new Imm_INT(0), ""));
+      specialLabels.addAll(
+          Arrays.asList("p_throw_overflow_error", "p_throw_runtime_error",
+              "p_print_string"));
+      instructions.add(new RS(rd, rd, new Imm_INT(0), "BS"));
+      instructions.add(new BL("p_throw_overflow_error", "VS"));
+      return rd;
     }
 
-    //TODO: handle other types
-    return null;
+    //TODO: other types
+    return  null;
   }
 
   public CodeGenData visitIntExpr(IntExpr expr) {
