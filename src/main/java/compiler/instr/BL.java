@@ -3,15 +3,15 @@ package compiler.instr;
 public class BL extends Instr {
 
   private String label;
-  private boolean checkRuntimeErr;
+  private String cond;
 
-  public BL(String label, boolean checkRuntimeErr) {
+  public BL(String label, String cond) {
     this.label = label;
-    this.checkRuntimeErr = checkRuntimeErr;
+    this.cond = cond;
   }
 
   @Override
   public String toString() {
-    return "\tBL"+(checkRuntimeErr ? "VS " : " ") + label;
+    return "\tBL"+ cond + " " + label;
   }
 }

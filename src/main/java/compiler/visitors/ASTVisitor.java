@@ -37,6 +37,7 @@ import static compiler.SubRoutines.addReadChar;
 import static compiler.SubRoutines.addReadInt;
 import static compiler.SubRoutines.addRuntimeErr;
 import static compiler.instr.REG.*;
+import static compiler.instr.ShiftType.ASR;
 
 public class ASTVisitor {
 
@@ -135,7 +136,7 @@ public class ASTVisitor {
   public void visitExit(ExitNode exitNode) {
     REG rd = (REG) visit(exitNode.exitStatus());
     instructions.add(new MOV(R0, rd));
-    instructions.add(new BL("exit", false));
+    instructions.add(new BL("exit",  ""));
   }
 
   public CodeGenData visitUnaryExpr(UnaryExpr expr) {
@@ -171,13 +172,18 @@ public class ASTVisitor {
         specialLabels.addAll(
           Arrays.asList("p_throw_overflow_error", "p_throw_runtime_error", "p_print_string"));
         instructions.add(new ADD(rd, rd, rn, true));
-        instructions.add(new BL("p_throw_overflow_error", true));
+        instructions.add(new BL("p_throw_overflow_error",  "VS"));
         break;
       case MINUS:
         specialLabels.addAll(Arrays.asList("p_throw_overflow_error", "p_throw_runtime_error", "p_print_string"));
         instructions.add(new SUB(rd, rd, rn, true));
-        instructions.add(new BL("p_throw_overflow_error", true));
-
+        instructions.add(new BL("p_throw_overflow_error","VS"));
+        break;
+      case MUL:
+        specialLabels.addAll(Arrays.asList("p_throw_overflow_error", "p_throw_runtime_error", "p_print_string"));
+        instructions.add(new MUL(rd, rn, rd, rn));
+        instructions.add(new CMP(rn, rd, new Shift(ASR, 31)));
+        instructions.add(new BL("p_throw_overflow_error",  "NE"));
     }
     availableRegs.add(0, rd);
     return rd;
@@ -220,11 +226,11 @@ public class ASTVisitor {
     instructions.add(new MOV(R0, rd));
 
     if (((NodeElem) readNode.lhs()).type().equals(IntType.getInstance())) {
-      instructions.add(new BL("p_read_int", false));
+      instructions.add(new BL("p_read_int",  ""));
       specialLabels.add("p_read_int");
     } else if (((NodeElem) readNode.lhs()).type()
       .equals(CharType.getInstance())) {
-      instructions.add(new BL("p_read_char", false));
+      instructions.add(new BL("p_read_char",  ""));
       specialLabels.add("p_read_char");
     }
 
@@ -315,7 +321,7 @@ public class ASTVisitor {
 
   private CodeGenData visitPairDeclare(VarDeclareNode varDeclareNode) {
     setArg(new Imm_INT_MEM(2 * WORD_SIZE));
-    instructions.add(new BL("malloc", false));
+    instructions.add(new BL("malloc",  ""));
     REG rd = useFreeReg();
     instructions.add(new MOV(rd, R0)); // fetch address of pair
     Pair pair = (Pair) varDeclareNode.rhs();
@@ -329,7 +335,7 @@ public class ASTVisitor {
   private void storeExpInHeap(Expr expr, REG objectAddr, int offset) {
     REG rd = (REG) visit(expr);
     setArg(new Imm_INT_MEM(expr.sizeOf()));
-    instructions.add(new BL("malloc", false));
+    instructions.add(new BL("malloc",  ""));
     saveVarData(expr.type(), rd, R0, 0, false);
     saveVarData(expr.type(), R0, objectAddr, offset, false);
   }
@@ -372,7 +378,7 @@ public class ASTVisitor {
     if (!usedRegs.isEmpty()) {
       instructions.add(new PUSH(usedRegs)); // save onto stack all used regs
     }
-    instructions.add(new BL(label, false));
+    instructions.add(new BL(label,  ""));
     if (!usedRegs.isEmpty()) {
       Collections.reverse(usedRegs);
       instructions.add(new POP(usedRegs));  // restore previous regs from stack

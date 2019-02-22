@@ -129,14 +129,27 @@ public class CodegenTests {
   public void simpleRuntimeErr() {
     String path = "src/test/examples/valid/runtimeErr/integerOverflow/";
     String[] filenames = {"intWayOverflow", "intnegateOverflow4",
-        "intUnderflow"};
-    int[] expectedExitCodes = {255, 255, 255};
+        "intUnderflow", "intJustOverflow", "intmultOverflow",
+        "intnegateOverflow2", "intnegateOverflow3", "intnegateOverflow4"};
+    int[] expectedExitCodes = {255, 255, 255, 255, 255, 255, 255, 255};
     String[][] outputs = {{"2000000000",
         "OverflowError: the result is too small/large to store in a 4-byte signed-integer."},
         {"-2000000000",
             "OverflowError: the result is too small/large to store in a 4-byte signed-integer."},
         {"-2147483647"
             , "-2147483648",
+            "OverflowError: the result is too small/large to store in a 4-byte signed-integer."},
+        {"2147483646",
+            "2147483647",
+            "OverflowError: the result is too small/large to store in a 4-byte signed-integer."},
+        {"2147483",
+            "2147483000",
+            "OverflowError: the result is too small/large to store in a 4-byte signed-integer."},
+        {"-2147483648",
+            "OverflowError: the result is too small/large to store in a 4-byte signed-integer."},
+        {"-20000",
+            "OverflowError: the result is too small/large to store in a 4-byte signed-integer."},
+        {"-2000000000",
             "OverflowError: the result is too small/large to store in a 4-byte signed-integer."}};
     compileAndCheckExitAndOutput(path, filenames, null, expectedExitCodes,
         outputs);

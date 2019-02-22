@@ -46,7 +46,7 @@ public class SubRoutines {
     jumpToFunctionLabel("printf");
     instructions.addAll(Arrays.asList(
       new MOV(R0, new Imm_INT(toInt("0"))),
-      new BL("fflush", false),
+      new BL("fflush",  ""),
       new POP(PC)));
   }
 
@@ -63,7 +63,7 @@ public class SubRoutines {
     jumpToFunctionLabel("printf");
     instructions.addAll(Arrays.asList(
       new MOV(R0, new Imm_INT(toInt("0"))),
-      new BL("fflush", false),
+      new BL("fflush",  ""),
       new POP(PC)));
 
   }
@@ -76,9 +76,9 @@ public class SubRoutines {
       new PUSH(LR),
       new LDR(R0, new Imm_STRING_MEM(labelName), false),
       new ADD(R0, R0, new Imm_INT(toInt("4")), false),
-      new BL("puts", false),
+      new BL("puts",  ""),
       new MOV(R0, new Imm_INT(toInt("0"))),
-      new BL("fflush", false),
+      new BL("fflush",  ""),
       new POP(PC)));
   }
 
@@ -89,7 +89,7 @@ public class SubRoutines {
     instructions.addAll(Arrays.asList(
       new LABEL("p_print_bool"),
       new PUSH(LR),
-      new CMP(R0, new Imm_INT(0)),
+      new CMP(R0, new Imm_INT(0), null),
       new LDR_COND(R0, new Imm_STRING_MEM(trueLabel), LDR_COND.COND.NE),
       new LDR_COND(R0, new Imm_STRING_MEM(falseLabel), LDR_COND.COND.EQ),
       new ADD(R0, R0, new Imm_INT(4), false)));
@@ -98,7 +98,7 @@ public class SubRoutines {
 
     instructions.addAll(Arrays.asList(
       new MOV(R0, new Imm_INT(0)),
-      new BL("fflush", false),
+      new BL("fflush",  ""),
       new POP(PC)
     ));
   }
@@ -112,7 +112,7 @@ public class SubRoutines {
       new MOV(R1, R0),
       new LDR(R0, new Imm_STRING_MEM(labelName), false),
       new ADD(R0, R0, new Imm_INT(4), false),
-      new BL("scanf", false),
+      new BL("scanf",  ""),
       new POP(PC)
     ));
   }
@@ -126,7 +126,7 @@ public class SubRoutines {
       new MOV(R1, R0),
       new LDR(R0, new Imm_STRING_MEM(labelName), false),
       new ADD(R0, R0, new Imm_INT(4), false),
-      new BL("scanf", false),
+      new BL("scanf",  ""),
       new POP(PC)
     ));
   }
@@ -137,15 +137,14 @@ public class SubRoutines {
 
     instructions.addAll(Arrays
       .asList(new LABEL("p_throw_overflow_error"), new LDR(R0, new Imm_STRING_MEM(labelName), false), new BL("p_throw_runtime_error",
-        false)));
+         "")));
 
   }
 
   public static void addRuntimeErr() {
 
     instructions.addAll(
-      Arrays.asList(new LABEL("p_throw_runtime_error"), new BL("p_print_string", false), new MOV(R0, new Imm_INT(-1)), new BL("exit",
-        false)));
+      Arrays.asList(new LABEL("p_throw_runtime_error"), new BL("p_print_string",
+          ""), new MOV(R0, new Imm_INT(-1)), new BL("exit", "")));
   }
-
 }
