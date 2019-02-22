@@ -1,6 +1,8 @@
 package compiler.AST.NodeElements;
 
 import compiler.AST.NodeElements.RHS.Expr;
+import compiler.AST.Types.BoolType;
+import compiler.AST.Types.CharType;
 import compiler.AST.Types.Type;
 import compiler.visitors.ASTData;
 import compiler.visitors.ASTVisitor;
@@ -11,10 +13,17 @@ import java.util.stream.Collectors;
 
 public class ListExpr implements ASTData {
 
+  private List<String> paramNames;
   private List<Expr> exprList;
+  private boolean isParams;
+  private int bytesPushed;
 
-  public ListExpr() {
+
+  public ListExpr(boolean isParams) {
+    this.isParams = isParams;
     this.exprList = new ArrayList<>();
+    this.paramNames = new ArrayList<>();
+    bytesPushed = 0;
   }
 
   public static boolean hasSameTypes(List<Type> typeList1,
@@ -31,8 +40,17 @@ public class ListExpr implements ASTData {
     }
   }
 
-  public void add(Expr expr) {
+  public int bytesPushed() {
+    return bytesPushed;
+  }
+
+  public List<Expr> exprList() {
+    return exprList;
+  }
+
+  public void addExpr(Expr expr) {
     exprList.add(expr);
+    bytesPushed += expr.sizeOf();
   }
 
   public List<Type> getExprTypes() {
@@ -49,6 +67,19 @@ public class ListExpr implements ASTData {
 
   @Override
   public CodeGenData accept(ASTVisitor visitor) {
+    if (isParams) {
+      visitor.visitParams(this);
+    } else {
+      visitor.visitArgs(this);
+    }
     return null;
+  }
+
+  public void addParamName(String text) {
+    paramNames.add(text);
+  }
+
+  public List<String> paramNames() {
+    return paramNames;
   }
 }

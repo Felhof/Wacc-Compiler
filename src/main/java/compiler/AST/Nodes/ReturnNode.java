@@ -19,6 +19,10 @@ public class ReturnNode extends Node {
 
   @Override
   public CodeGenData accept(ASTVisitor visitor) {
-    return null;
+    return visitor.visitReturn(this);
+  }
+
+  public Expr expr() {
+    return expr;
   }
 }

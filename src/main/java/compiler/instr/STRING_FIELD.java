@@ -18,7 +18,7 @@ public class STRING_FIELD extends Instr {
 
   public static int nbSpecialChar (String s) {
     String[] escape = {"\0", "\b", "\t", "\n", "\f", "\r", "\"", "\\"};
-    String temp = s;
+    String temp = s.substring(1, s.length());
     Arrays.stream(escape).forEach(c -> temp.replace(c, ""));
     return (s.length() - temp.length()) / 2;
   }

@@ -100,9 +100,19 @@ public class CodegenTests {
     String path = "src/test/examples/valid/IO/read/";
     String[] filenames = { "readAndPrint"};
     String[] inputs = { "c"};
-    String[][] outputs = { {"input a character to continue...", "c"}};
+    String[][] outputs = {{"input a character to continue...", "c"}};
 
     compileAndCheckExitAndOutput(path, filenames, inputs, null, outputs);
+  }
+
+  @Test
+  public void simpleFunctions() {
+    String path = "src/test/examples/valid/function/simple_functions/";
+    String[] filenames = { "functionDeclaration", "functionSimple", "sameArgName2"};
+    String[][] outputs = {{}, {}, {"99"}};
+
+    compileAndCheckExitAndOutput(path, filenames, null,null, outputs);
+
   }
 
 
