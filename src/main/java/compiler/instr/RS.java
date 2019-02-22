@@ -1,6 +1,7 @@
-package compiler.instr.Operand;
+package compiler.instr;
 
 import compiler.instr.Instr;
+import compiler.instr.Operand.Operand;
 import compiler.instr.REG;
 
 public class RS extends Instr {
@@ -19,7 +20,7 @@ public class RS extends Instr {
 
   @Override
   public String toString() {
-    return "\tRS" + cond + ", " + rd.toString() + ", " + rn.toString() + ", "
+    return "\tRS" + cond + " " + rd.toString() + ", " + rn.toString() + ", "
         + op2.toString();
   }
 }
