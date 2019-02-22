@@ -40,13 +40,13 @@ public class SubRoutines {
       new LABEL("p_print_string"),
       new PUSH(LR),
       new LDR(R1, new Addr(R0), false),
-      new ADD(R2, R0, new Imm_INT(toInt("4"))),
+      new ADD(R2, R0, new Imm_INT(toInt("4")), false),
       new LDR(R0, new Imm_STRING_MEM(labelName), false),
-      new ADD(R0, R0, new Imm_INT(toInt("4")))));
+      new ADD(R0, R0, new Imm_INT(toInt("4")), false)));
     jumpToFunctionLabel("printf");
     instructions.addAll(Arrays.asList(
       new MOV(R0, new Imm_INT(toInt("0"))),
-      new BL("fflush"),
+      new BL("fflush", false),
       new POP(PC)));
   }
 
@@ -58,12 +58,12 @@ public class SubRoutines {
       new PUSH(LR),
       new MOV(R1, R0),
       new LDR(R0, new Imm_STRING_MEM(labelName), false),
-      new ADD(R0, R0, new Imm_INT(4))));
+      new ADD(R0, R0, new Imm_INT(4), false)));
 
     jumpToFunctionLabel("printf");
     instructions.addAll(Arrays.asList(
       new MOV(R0, new Imm_INT(toInt("0"))),
-      new BL("fflush"),
+      new BL("fflush", false),
       new POP(PC)));
 
   }
@@ -75,10 +75,10 @@ public class SubRoutines {
       new LABEL("p_print_ln"),
       new PUSH(LR),
       new LDR(R0, new Imm_STRING_MEM(labelName), false),
-      new ADD(R0, R0, new Imm_INT(toInt("4"))),
-      new BL("puts"),
+      new ADD(R0, R0, new Imm_INT(toInt("4")), false),
+      new BL("puts", false),
       new MOV(R0, new Imm_INT(toInt("0"))),
-      new BL("fflush"),
+      new BL("fflush", false),
       new POP(PC)));
   }
 
@@ -92,13 +92,13 @@ public class SubRoutines {
       new CMP(R0, new Imm_INT(0)),
       new LDR_COND(R0, new Imm_STRING_MEM(trueLabel), LDR_COND.COND.NE),
       new LDR_COND(R0, new Imm_STRING_MEM(falseLabel), LDR_COND.COND.EQ),
-      new ADD(R0, R0, new Imm_INT(4))));
+      new ADD(R0, R0, new Imm_INT(4), false)));
 
     jumpToFunctionLabel("printf");
 
     instructions.addAll(Arrays.asList(
       new MOV(R0, new Imm_INT(0)),
-      new BL("fflush"),
+      new BL("fflush", false),
       new POP(PC)
     ));
   }
@@ -111,28 +111,41 @@ public class SubRoutines {
       new PUSH(LR),
       new MOV(R1, R0),
       new LDR(R0, new Imm_STRING_MEM(labelName), false),
-      new ADD(R0, R0, new Imm_INT(4)),
-      new BL("scanf"),
+      new ADD(R0, R0, new Imm_INT(4), false),
+      new BL("scanf", false),
       new POP(PC)
     ));
   }
 
   public static void addReadChar() {
-    String labelName = addStringField("\"%c\\0\"");
+    String labelName = addStringField("\" %c\\0\"");
 
     instructions.addAll(Arrays.asList(
       new LABEL("p_read_char"),
       new PUSH(LR),
       new MOV(R1, R0),
       new LDR(R0, new Imm_STRING_MEM(labelName), false),
-      new ADD(R0, R0, new Imm_INT(4)),
-      new BL("scanf"),
+      new ADD(R0, R0, new Imm_INT(4), false),
+      new BL("scanf", false),
       new POP(PC)
     ));
   }
 
-  public static void addOverflowErr() {}
+  public static void addOverflowErr() {
+    String labelName = addStringField(
+      "\"OverflowError: the result is too small/large to store in a 4-byte signed-integer." +"\\n\"");
 
-  public static void addRuntimeErr() {}
+    instructions.addAll(Arrays
+      .asList(new LABEL("p_throw_overflow_error"), new LDR(R0, new Imm_STRING_MEM(labelName), false), new BL("p_throw_runtime_error",
+        false)));
+
+  }
+
+  public static void addRuntimeErr() {
+
+    instructions.addAll(
+      Arrays.asList(new LABEL("p_throw_runtime_error"), new BL("p_print_string", false), new MOV(R0, new Imm_INT(-1)), new BL("exit",
+        false)));
+  }
 
 }
