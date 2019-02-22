@@ -6,6 +6,7 @@ import static org.hamcrest.core.Is.is;
 import compiler.AST.Nodes.AST;
 import compiler.Main;
 
+import compiler.instr.STR;
 import java.io.*;
 import java.util.stream.IntStream;
 import org.junit.Test;
@@ -61,7 +62,7 @@ public class CodegenTests {
   @Test
   public void varAssignmentTest(){
     String path = "src/test/examples/valid/variables/";
-    String[] filenames = { "assignBool", "assignChar", "assignInt"};
+    String[] filenames = {"assignBool", "assignChar", "assignInt"};
     String[][] outputs = {{"true"},{"a"},{}};
 
     compileAndCheckExitAndOutput(path, filenames, null, null, outputs);
@@ -99,7 +100,7 @@ public class CodegenTests {
   public void readTest() {
     String path = "src/test/examples/valid/IO/read/";
     String[] filenames = { "readAndPrint"};
-    String[] inputs = { "c"};
+    String[] inputs = {"c"};
     String[][] outputs = {{"input a character to continue...", "c"}};
 
     compileAndCheckExitAndOutput(path, filenames, inputs, null, outputs);
@@ -108,11 +109,20 @@ public class CodegenTests {
   @Test
   public void simpleFunctions() {
     String path = "src/test/examples/valid/function/simple_functions/";
-    String[] filenames = { "functionDeclaration", "functionSimple", "sameArgName2"};
+    String[] filenames = {"functionDeclaration", "functionSimple", "sameArgName2"};
     String[][] outputs = {{}, {}, {"99"}};
 
     compileAndCheckExitAndOutput(path, filenames, null,null, outputs);
+  }
 
+  @Test
+  public void simpleRuntimeErr() {
+    String path = "src/test/examples/valid/runtimeErr/integerOverflow/";
+    String[] filenames = {"intWayOverflow"};
+    int[] expectedExitCodes = {255};
+    String [][] outputs =  {{"2000000000",
+      "OverflowError: the result is too small/large to store in a 4-byte signed-integer."}};
+    compileAndCheckExitAndOutput(path,filenames,null, expectedExitCodes, outputs);
   }
 
 

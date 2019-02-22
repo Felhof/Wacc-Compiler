@@ -19,7 +19,7 @@ public class BinExpr extends Expr {
 
   private final static List<Type> typesInt = Arrays.asList(intType);
   private final static List<Type> typesIntChar =
-      Arrays.asList(intType, charType);
+    Arrays.asList(intType, charType);
   private final static List<Type> typesBool = Arrays.asList(boolType);
 
   private BINOP operator;
@@ -33,14 +33,22 @@ public class BinExpr extends Expr {
     this.rhs = rhs;
   }
 
-  public BINOP operator() { return operator; }
-  public Expr lhs() { return lhs; }
-  public Expr rhs() { return rhs; }
+  public BINOP operator() {
+    return operator;
+  }
+
+  public Expr lhs() {
+    return lhs;
+  }
+
+  public Expr rhs() {
+    return rhs;
+  }
 
   public String isTypeCompatible() {
-    if (!operator.op.equals("==") && !operator.op().equals("!="))  {
+    if (!operator.op.equals("==") && !operator.op().equals("!=")) {
       String tempReturn = "Binary Operator " + operator.op
-          + " cannot take as its ";
+        + " cannot take as its ";
       if (!contains(operator.argTypes(), lhs.type())) {
         return tempReturn + "LHS the type " + lhs.type().toString();
       }
@@ -57,7 +65,8 @@ public class BinExpr extends Expr {
 
   @Override
   public String toString() {
-    return "BinExpr(" + lhs.toString() + " " + operator.op().toString() + " " + rhs.toString() +")";
+    return "BinExpr(" + lhs.toString() + " " + operator.op().toString() + " " + rhs.toString()
+      + ")";
   }
 
   @Override
@@ -68,7 +77,8 @@ public class BinExpr extends Expr {
   @Override
   public int sizeOf() {
     //TODO: need to think about this
-    return 0;
+    return (operator.returnType() instanceof CharType || operator.returnType instanceof BoolType)
+      ? 1 : 4;
   }
 
   public enum BINOP {
@@ -86,8 +96,8 @@ public class BinExpr extends Expr {
     private static Map<String, BINOP> map;
 
     BINOP(String op,
-        List<Type> argTypes,
-        Type returnType) {
+      List<Type> argTypes,
+      Type returnType) {
       this.op = op;
       this.argTypes = argTypes;
       this.returnType = returnType;
@@ -102,11 +112,13 @@ public class BinExpr extends Expr {
       return argTypes;
     }
 
-    public Type returnType() { return returnType; }
+    public Type returnType() {
+      return returnType;
+    }
 
     static {
       map = new HashMap<>();
-      for(BINOP t : BINOP.values()) {
+      for (BINOP t : BINOP.values()) {
         map.put(t.op(), t);
       }
     }
