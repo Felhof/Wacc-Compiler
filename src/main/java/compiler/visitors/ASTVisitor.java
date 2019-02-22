@@ -45,7 +45,7 @@ public class ASTVisitor {
   public ASTVisitor() {
     this.instructions = new ArrayList<>();
     this.data = new ArrayList<>();
-    this.specialLabels = new HashSet<>();
+    this.specialLabels = new LinkedHashSet<>();
     availableRegs = new ArrayList<>(allUsableRegs);
     offsetFromInitialSP = 0;
   }
@@ -142,7 +142,7 @@ public class ASTVisitor {
 
   public CodeGenData visitIntExpr(IntExpr expr) {
     REG rd = topRegAvailable();
-    instructions.add(new LDR(rd, new Imm_INT_MEM(toInt(expr.value()))));
+    instructions.add(new LDR(rd, new Imm_INT_MEM(toInt(expr.value())), false));
     return rd;
   }
 
@@ -196,12 +196,12 @@ public class ASTVisitor {
   public CodeGenData visitStringExpr(StringExpr stringExpr) {
     String labelName = addStringField(stringExpr.getValue());
     REG rd = topRegAvailable();
-    instructions.add(new LDR(rd, new Imm_STRING_MEM(labelName)));
+    instructions.add(new LDR(rd, new Imm_STRING_MEM(labelName), false));
     return rd;
   }
 
   public String addStringField(String string) {
-    String labelName = "msg_" + (data.size() - 1);
+    String labelName = "msg_" + (data.size() / 2);
     data.add(new LABEL(labelName));
     data.add(new STRING_FIELD(string));
     return labelName;
@@ -297,7 +297,7 @@ public class ASTVisitor {
   }
 
   private void setArg(Operand op2) {
-    instructions.add(new LDR(R0, op2));
+    instructions.add(new LDR(R0, op2, false));
   }
 
   private void addSpecialFunction(String name) {
@@ -329,9 +329,9 @@ public class ASTVisitor {
     instructions.addAll(Arrays.asList(
         new LABEL("p_print_string"),
         new PUSH(LR),
-        new LDR(R1, new Addr(R0)),
+        new LDR(R1, new Addr(R0), false),
         new ADD(R2, R0, new Imm_INT(toInt("4"))),
-        new LDR(R0, new Imm_STRING_MEM(labelName)),
+        new LDR(R0, new Imm_STRING_MEM(labelName), false),
         new ADD(R0, R0, new Imm_INT(toInt("4")))));
     jumpToFunctionLabel("printf");
     instructions.addAll(Arrays.asList(
@@ -348,7 +348,7 @@ public class ASTVisitor {
         new LABEL("p_print_int"),
         new PUSH(LR),
         new MOV(R1, R0),
-        new LDR(R0, new Imm_STRING_MEM(labelName)),
+        new LDR(R0, new Imm_STRING_MEM(labelName), false),
         new ADD(R0, R0, new Imm_INT(4))));
 
     jumpToFunctionLabel("printf");
@@ -365,7 +365,7 @@ public class ASTVisitor {
     instructions.addAll(Arrays.asList(
         new LABEL("p_print_ln"),
         new PUSH(LR),
-        new LDR(R0, new Imm_STRING_MEM(labelName)),
+        new LDR(R0, new Imm_STRING_MEM(labelName), false),
         new ADD(R0, R0, new Imm_INT(toInt("4"))),
         new BL("puts"),
         new MOV(R0, new Imm_INT(toInt("0"))),
@@ -401,7 +401,7 @@ public class ASTVisitor {
         new LABEL("p_read_int"),
         new PUSH(LR),
         new MOV(R1, R0),
-        new LDR(R0, new Imm_STRING_MEM(labelName)),
+        new LDR(R0, new Imm_STRING_MEM(labelName), false),
         new ADD(R0, R0, new Imm_INT(4)),
         new BL("scanf"),
         new POP(PC)
@@ -415,7 +415,7 @@ public class ASTVisitor {
         new LABEL("p_read_char"),
         new PUSH(LR),
         new MOV(R1, R0),
-        new LDR(R0, new Imm_STRING_MEM(labelName)),
+        new LDR(R0, new Imm_STRING_MEM(labelName), false),
         new ADD(R0, R0, new Imm_INT(4)),
         new BL("scanf"),
         new POP(PC)
@@ -454,9 +454,10 @@ public class ASTVisitor {
 
   public CodeGenData visitIdent(Ident ident) {
     REG rd = topRegAvailable();
+    int offset = currentST.lookUpAllVar(ident.varName()).getStackOffset() - offsetFromInitialSP;
     instructions.add(new LDR(rd, new Addr(SP, true,
         new Imm_INT(
-            currentST.lookUpAllVar(ident.varName()).getStackOffset() - offsetFromInitialSP))));
+          offset)), ident.sizeOf() == 1));
     return rd;
   }
 
@@ -482,6 +483,7 @@ public class ASTVisitor {
   public CodeGenData visitFuncCall(FuncCall funcCall) {
     visit(funcCall.argsList());
     jumpToFunctionLabel("f_" + funcCall.funcName());
+    offsetFromInitialSP = 0;
     instructions.add(new ADD(SP, SP, new Imm_INT(funcCall.argsList().bytesPushed())));
     REG rd = topRegAvailable();
     instructions.add(new MOV(rd, R0));
