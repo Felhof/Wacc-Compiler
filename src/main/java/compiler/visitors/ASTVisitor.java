@@ -227,6 +227,12 @@ public class ASTVisitor {
           .asList(new MOV(R0, reg), new MOV(R1, rn), new BL("p_check_divide_by_zero",""),
                   new BL("__aeabi_idivmod", ""),new MOV(rd, R1)));
         break;
+
+      case EQUAL:
+        instructions.addAll(Arrays
+          .asList(new CMP(rd, rn, null), new MOV(rd, new Imm_INT(1), "EQ"),
+                  new MOV(rd, new Imm_INT(0), "NE")));
+        break;
     }
 
     if(!pushedReg){

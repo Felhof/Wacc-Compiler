@@ -67,8 +67,8 @@ public class CodegenTests {
   @Test
   public void integerExpressionTest() {
     String path = "src/test/examples/valid/expressions/";
-    String[] filenames = {"intCalc","divExpr","multExpr","modExpr"};
-    String[][] outputs = {{"72"},{"1"},{"15"},{"2"}};
+    String[] filenames = {"intCalc","divExpr","multExpr","modExpr", "equalsExpr"};
+    String[][] outputs = {{"72"},{"1"},{"15"},{"2"}, {"false","false","true"}};
 
     compileAndCheckExitAndOutput(path, filenames, null, null, outputs);
   }
