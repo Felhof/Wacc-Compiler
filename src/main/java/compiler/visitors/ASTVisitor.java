@@ -42,6 +42,7 @@ import static compiler.instr.ShiftType.ASR;
 public class ASTVisitor {
 
   private static final int WORD_SIZE = 4;
+  private static final int BYTE = 1;
   private static List<Instr> instructions;
   private static List<Instr> data;
   private Set<String> specialLabels;
@@ -76,15 +77,15 @@ public class ASTVisitor {
 
   private void visitFuncsAndChildren(AST root) {
     root.root().children().stream().filter(node -> node instanceof FuncNode)
-      .forEach(
-        this::visit);
+        .forEach(
+            this::visit);
     currentST = root.symbolTable();
     instructions.add(new LABEL("main"));
     instructions.add(new PUSH(LR));
     configureStack("sub");
     root.root().children().stream().filter(node -> !(node instanceof FuncNode))
-      .forEach(
-        this::visit);
+        .forEach(
+            this::visit);
 
   }
 
@@ -101,7 +102,7 @@ public class ASTVisitor {
         temp = temp - 1024;
       }
       instructions.add(buildInstr(type, SP, SP,
-        new Imm_INT(totalStackOffset % maxIntImmShift)));
+          new Imm_INT(totalStackOffset % maxIntImmShift)));
     }
   }
 
@@ -136,19 +137,23 @@ public class ASTVisitor {
   public void visitExit(ExitNode exitNode) {
     REG rd = (REG) visit(exitNode.exitStatus());
     instructions.add(new MOV(R0, rd));
-    instructions.add(new BL("exit",  ""));
+    instructions.add(new BL("exit", ""));
   }
 
   public CodeGenData visitUnaryExpr(UnaryExpr expr) {
 
-    if (expr.type().equals(IntType.getInstance()) // Set int value to negative
-      && expr.operator() == UNOP.MINUS) {
+    if ((expr.insideExpr() instanceof IntExpr) // Set int value to negative
+        && expr.operator() == UNOP.MINUS) {
       ((IntExpr) expr.insideExpr()).setNegative();
+      return visit(expr.insideExpr());
+    } else if (expr.insideExpr() instanceof Ident
+        && expr.operator() == UNOP.MINUS) {
+      REG rd = (REG) visit(expr.insideExpr());
+      instructions.add(new RS(rd, rd, new Imm_INT(0), ""));
     }
 
     //TODO: handle other types
-
-    return visit(expr.insideExpr());
+    return null;
   }
 
   public CodeGenData visitIntExpr(IntExpr expr) {
@@ -170,20 +175,25 @@ public class ASTVisitor {
         break;
       case PLUS:
         specialLabels.addAll(
-          Arrays.asList("p_throw_overflow_error", "p_throw_runtime_error", "p_print_string"));
+            Arrays.asList("p_throw_overflow_error", "p_throw_runtime_error",
+                "p_print_string"));
         instructions.add(new ADD(rd, rd, rn, true));
-        instructions.add(new BL("p_throw_overflow_error",  "VS"));
+        instructions.add(new BL("p_throw_overflow_error", "VS"));
         break;
       case MINUS:
-        specialLabels.addAll(Arrays.asList("p_throw_overflow_error", "p_throw_runtime_error", "p_print_string"));
+        specialLabels.addAll(Arrays
+            .asList("p_throw_overflow_error", "p_throw_runtime_error",
+                "p_print_string"));
         instructions.add(new SUB(rd, rd, rn, true));
-        instructions.add(new BL("p_throw_overflow_error","VS"));
+        instructions.add(new BL("p_throw_overflow_error", "VS"));
         break;
       case MUL:
-        specialLabels.addAll(Arrays.asList("p_throw_overflow_error", "p_throw_runtime_error", "p_print_string"));
+        specialLabels.addAll(Arrays
+            .asList("p_throw_overflow_error", "p_throw_runtime_error",
+                "p_print_string"));
         instructions.add(new MUL(rd, rn, rd, rn));
         instructions.add(new CMP(rn, rd, new Shift(ASR, 31)));
-        instructions.add(new BL("p_throw_overflow_error",  "NE"));
+        instructions.add(new BL("p_throw_overflow_error", "NE"));
     }
     availableRegs.add(0, rd);
     return rd;
@@ -220,17 +230,18 @@ public class ASTVisitor {
     //In this case we don't visit the Node because we don't want to store the value but the address
     REG rd = useFreeReg();
     instructions.add(new ADD(rd, SP, new Imm_INT(
-      currentST.lookUpAllVar(readNode.lhs().varName()).getStackOffset() - offsetFromInitialSP),
-      false));
+        currentST.lookUpAllVar(readNode.lhs().varName()).getStackOffset()
+            - offsetFromInitialSP),
+        false));
 
     instructions.add(new MOV(R0, rd));
 
     if (((NodeElem) readNode.lhs()).type().equals(IntType.getInstance())) {
-      instructions.add(new BL("p_read_int",  ""));
+      instructions.add(new BL("p_read_int", ""));
       specialLabels.add("p_read_int");
     } else if (((NodeElem) readNode.lhs()).type()
-      .equals(CharType.getInstance())) {
-      instructions.add(new BL("p_read_char",  ""));
+        .equals(CharType.getInstance())) {
+      instructions.add(new BL("p_read_char", ""));
       specialLabels.add("p_read_char");
     }
 
@@ -254,7 +265,7 @@ public class ASTVisitor {
   public CodeGenData visitCharExpr(CharExpr charExpr) {
     REG rd = topRegAvailable();
     instructions
-      .add(new MOV(rd, new Imm_STRING("'" + charExpr.getValue() + "'")));
+        .add(new MOV(rd, new Imm_STRING("'" + charExpr.getValue() + "'")));
     return rd;
   }
 
@@ -279,13 +290,13 @@ public class ASTVisitor {
   }
 
   private CodeGenData visitBasicTypeDeclare(VarDeclareNode varDeclareNode,
-    int offset) {
+      int offset) {
     REG rd = (REG) visit(varDeclareNode.rhs());
     nextPosInStack -= offset;
     currentST.lookUpAllVar(varDeclareNode.varName())
-      .setStackOffset(nextPosInStack);
+        .setStackOffset(nextPosInStack);
     return saveVarData(varDeclareNode.varType(), rd, SP, nextPosInStack,
-      false);
+        false);
   }
 
   public CodeGenData visitAssignNode(VarAssignNode varAssignNode) {
@@ -300,18 +311,18 @@ public class ASTVisitor {
     //TODO: CONSIDER other cases such as Arrays or Pairs
     REG rd = (REG) visit(varAssignNode.rhs());
     int offset = currentST.lookUpAllVar(varAssignNode.lhs().varName())
-      .getStackOffset() - offsetFromInitialSP;
+        .getStackOffset() - offsetFromInitialSP;
     saveVarData(varAssignNode.rhs().type(), rd, SP, offset, false);
   }
 
   private CodeGenData saveVarData(Type varType, REG rd, REG rn, int offset,
-    boolean update) {
+      boolean update) {
     boolean isByteInstr =
-      varType.equals(BoolType.getInstance()) || varType
-        .equals(CharType.getInstance());
+        varType.equals(BoolType.getInstance()) || varType
+            .equals(CharType.getInstance());
     instructions
-      .add(new STR(rd, new Addr(rn, true, new Imm_INT(offset)), isByteInstr,
-        update));
+        .add(new STR(rd, new Addr(rn, true, new Imm_INT(offset)), isByteInstr,
+            update));
     return null;
   }
 
@@ -321,7 +332,7 @@ public class ASTVisitor {
 
   private CodeGenData visitPairDeclare(VarDeclareNode varDeclareNode) {
     setArg(new Imm_INT_MEM(2 * WORD_SIZE));
-    instructions.add(new BL("malloc",  ""));
+    instructions.add(new BL("malloc", ""));
     REG rd = useFreeReg();
     instructions.add(new MOV(rd, R0)); // fetch address of pair
     Pair pair = (Pair) varDeclareNode.rhs();
@@ -335,7 +346,7 @@ public class ASTVisitor {
   private void storeExpInHeap(Expr expr, REG objectAddr, int offset) {
     REG rd = (REG) visit(expr);
     setArg(new Imm_INT_MEM(expr.sizeOf()));
-    instructions.add(new BL("malloc",  ""));
+    instructions.add(new BL("malloc", ""));
     saveVarData(expr.type(), rd, R0, 0, false);
     saveVarData(expr.type(), R0, objectAddr, offset, false);
   }
@@ -378,7 +389,7 @@ public class ASTVisitor {
     if (!usedRegs.isEmpty()) {
       instructions.add(new PUSH(usedRegs)); // save onto stack all used regs
     }
-    instructions.add(new BL(label,  ""));
+    instructions.add(new BL(label, ""));
     if (!usedRegs.isEmpty()) {
       Collections.reverse(usedRegs);
       instructions.add(new POP(usedRegs));  // restore previous regs from stack
@@ -405,10 +416,11 @@ public class ASTVisitor {
 
   public CodeGenData visitIdent(Ident ident) {
     REG rd = topRegAvailable();
-    int offset = currentST.lookUpAllVar(ident.varName()).getStackOffset() - offsetFromInitialSP;
+    int offset = currentST.lookUpAllVar(ident.varName()).getStackOffset()
+        - offsetFromInitialSP;
     instructions.add(new LDR(rd, new Addr(SP, true,
-      new Imm_INT(
-        offset)), ident.sizeOf() == 1));
+        new Imm_INT(
+            offset)), ident.sizeOf() == 1));
     return rd;
   }
 
@@ -421,8 +433,8 @@ public class ASTVisitor {
     }
     funcNode.getParentNode().children().forEach(this::visit);
     instructions.addAll(Arrays.asList(new POP(PC), new POP(PC)));
-    currentST = currentST.getEncSymTable();
     instructions.add(new SECTION("ltorg"));
+    currentST = currentST.getEncSymTable();
     return null;
   }
 
@@ -436,7 +448,8 @@ public class ASTVisitor {
     visit(funcCall.argsList());
     jumpToFunctionLabel("f_" + funcCall.funcName());
     offsetFromInitialSP = 0;
-    instructions.add(new ADD(SP, SP, new Imm_INT(funcCall.argsList().bytesPushed()), false));
+    instructions.add(
+        new ADD(SP, SP, new Imm_INT(funcCall.argsList().bytesPushed()), false));
     REG rd = topRegAvailable();
     instructions.add(new MOV(rd, R0));
     return rd;
@@ -446,7 +459,7 @@ public class ASTVisitor {
     List<String> paramNames = listExpr.paramNames();
     List<Expr> exprList = listExpr.exprList();
     int offset =
-      listExpr.bytesPushed() + exprList.get(exprList.size() - 1).sizeOf();
+        listExpr.bytesPushed() + exprList.get(exprList.size() - 1).sizeOf();
     for (int i = exprList.size() - 1; i >= 0; i--) {
       offset -= exprList.get(i).sizeOf();
       currentST.lookUpAllVar(paramNames.get(i)).setStackOffset(offset);
@@ -459,10 +472,12 @@ public class ASTVisitor {
     Collections.reverse(reverseArgs);
     for (Expr e : reverseArgs) {
       REG rd = (REG) visit(e);
-      int offsetFromBase = (e.type() instanceof IntType) ? -4 : -1;
+      int offsetFromBase =
+          (!(e.type() instanceof CharType) && !(e.type() instanceof BoolType))
+              ? -WORD_SIZE : -BYTE;
       offsetFromInitialSP += offsetFromBase;
       saveVarData(e.type(), rd, SP, offsetFromBase,
-        true);
+          true);
     }
     return null;
   }

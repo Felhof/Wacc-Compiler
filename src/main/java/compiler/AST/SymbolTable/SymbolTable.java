@@ -1,6 +1,5 @@
 package compiler.AST.SymbolTable;
 
-import compiler.AST.Types.Type;
 import compiler.visitors.ASTData;
 import java.util.HashMap;
 
