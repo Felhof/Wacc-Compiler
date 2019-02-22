@@ -28,14 +28,7 @@ import compiler.instr.REG;
 import java.util.*;
 import java.util.Collections;
 
-import static compiler.SubRoutines.addOverflowErr;
-import static compiler.SubRoutines.addPrintBool;
-import static compiler.SubRoutines.addPrintInt;
-import static compiler.SubRoutines.addPrintString;
-import static compiler.SubRoutines.addPrintln;
-import static compiler.SubRoutines.addReadChar;
-import static compiler.SubRoutines.addReadInt;
-import static compiler.SubRoutines.addRuntimeErr;
+import static compiler.SubRoutines.*;
 import static compiler.instr.REG.*;
 import static compiler.instr.ShiftType.ASR;
 
@@ -206,6 +199,16 @@ public class ASTVisitor {
         instructions.add(new MUL(rd, rn, rd, rn));
         instructions.add(new CMP(rn, rd, new Shift(ASR, 31)));
         instructions.add(new BL("p_throw_overflow_error", "NE"));
+        break;
+      case DIV:
+        specialLabels.addAll(Arrays
+                .asList("p_check_divide_by_zero","p_throw_runtime_error","p_print_string"));
+        instructions.add(new MOV(R0, rd));
+        instructions.add(new MOV(R1, rn));
+        instructions.add(new BL("p_check_divide_by_zero",""));
+        instructions.add(new BL("__aeabi_idiv", ""));
+        instructions.add(new MOV(rd, R0));
+        break;
     }
 
     if(pushedReg){
@@ -399,6 +402,8 @@ public class ASTVisitor {
       case "p_throw_runtime_error":
         addRuntimeErr();
         break;
+      case "p_check_divide_by_zero":
+        addCheckDivideByZero();
     }
   }
 

@@ -8,6 +8,8 @@ import compiler.Main;
 
 import java.io.*;
 import java.util.stream.IntStream;
+
+import compiler.instr.STR;
 import org.junit.Test;
 
 public class CodegenTests {
@@ -60,7 +62,15 @@ public class CodegenTests {
         {"true", "true", "true", "false"}, {"true"}, {"true"}};
 
     compileAndCheckExitAndOutput(path, filenames, null, null, outputs);
+  }
 
+  @Test
+  public void integerExpressionTest() {
+    String path = "src/test/examples/valid/expressions/";
+    String[] filenames = {"intCalc","divExpr"};
+    String[][] outputs = {{"72"},{"1"}};
+
+    compileAndCheckExitAndOutput(path, filenames, null, null, outputs);
   }
 
   @Test
@@ -220,7 +230,7 @@ public class CodegenTests {
 
       emulator.waitFor();
 
-      new File(filename + ".s").delete();
+      //new File(filename + ".s").delete();
       new File(filename).delete();
       return emulator;
     } catch (IOException | InterruptedException e) {
