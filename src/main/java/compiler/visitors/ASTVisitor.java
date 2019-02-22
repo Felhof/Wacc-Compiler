@@ -233,6 +233,37 @@ public class ASTVisitor {
           .asList(new CMP(rd, rn, null), new MOV(rd, new Imm_INT(1), "EQ"),
                   new MOV(rd, new Imm_INT(0), "NE")));
         break;
+
+      case GE:
+        instructions.addAll(Arrays
+                .asList(new CMP(rd, rn, null), new MOV(rd, new Imm_INT(1), "GE"),
+                        new MOV(rd, new Imm_INT(0), "LT")));
+        break;
+
+      case GT:
+        instructions.addAll(Arrays
+                .asList(new CMP(rd, rn, null), new MOV(rd, new Imm_INT(1), "GT"),
+                        new MOV(rd, new Imm_INT(0), "LE")));
+        break;
+
+      case LE:
+        instructions.addAll(Arrays
+                .asList(new CMP(rd, rn, null), new MOV(rd, new Imm_INT(1), "LE"),
+                        new MOV(rd, new Imm_INT(0), "GT")));
+        break;
+
+      case LT:
+        instructions.addAll(Arrays
+                .asList(new CMP(rd, rn, null), new MOV(rd, new Imm_INT(1), "LT"),
+                        new MOV(rd, new Imm_INT(0), "GE")));
+        break;
+
+      case NOTEQUAL:
+        instructions.addAll(Arrays
+                .asList(new CMP(rd, rn, null), new MOV(rd, new Imm_INT(1), "NE"),
+                        new MOV(rd, new Imm_INT(0), "EQ")));
+        break;
+
     }
 
     if(!pushedReg){
