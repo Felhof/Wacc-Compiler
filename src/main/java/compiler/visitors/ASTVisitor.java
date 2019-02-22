@@ -13,6 +13,7 @@ import compiler.AST.Types.CharType;
 import compiler.AST.Types.IntType;
 import compiler.AST.Types.PairType;
 import compiler.AST.Types.Type;
+import compiler.SubRoutines;
 import compiler.instr.*;
 import compiler.instr.Operand.*;
 import compiler.instr.BL;
@@ -27,17 +28,25 @@ import compiler.instr.REG;
 import java.util.*;
 import java.util.Collections;
 
+import static compiler.SubRoutines.addOverflowErr;
+import static compiler.SubRoutines.addPrintBool;
+import static compiler.SubRoutines.addPrintInt;
+import static compiler.SubRoutines.addPrintString;
+import static compiler.SubRoutines.addPrintln;
+import static compiler.SubRoutines.addReadChar;
+import static compiler.SubRoutines.addReadInt;
+import static compiler.SubRoutines.addRuntimeErr;
 import static compiler.instr.REG.*;
 
 public class ASTVisitor {
 
   private static final int WORD_SIZE = 4;
-  private List<Instr> instructions;
-  private List<Instr> data;
+  private static List<Instr> instructions;
+  private static List<Instr> data;
   private Set<String> specialLabels;
 
   private SymbolTable currentST;
-  private List<REG> availableRegs;
+  private static List<REG> availableRegs;
   private int totalStackOffset;
   private int nextPosInStack;
   private int offsetFromInitialSP;
@@ -48,6 +57,7 @@ public class ASTVisitor {
     this.specialLabels = new LinkedHashSet<>();
     availableRegs = new ArrayList<>(allUsableRegs);
     offsetFromInitialSP = 0;
+    new SubRoutines(instructions);
   }
 
   public List<Instr> generate(AST root) {
@@ -147,16 +157,21 @@ public class ASTVisitor {
   }
 
   public CodeGenData visitBinaryExp(BinExpr binExpr) {
-    REG rd1 = (REG) visit(binExpr.rhs());
+    REG rd = (REG) visit(binExpr.rhs());
     availableRegs.remove(0);
-    REG rd2 = (REG) visit(binExpr.lhs());
-    if(binExpr.operator().equals(BinExpr.BINOP.AND)) {
-      instructions.add(new AND(rd1, rd1, rd2));
-    } else if (binExpr.operator().equals(BinExpr.BINOP.OR)) {
-      instructions.add(new ORR(rd1, rd1, rd2));
+    REG rn = (REG) visit(binExpr.lhs());
+    switch(binExpr.operator()) {
+      case OR:
+        instructions.add(new ORR(rd, rd, rn));
+        break;
+      case AND:
+        instructions.add(new AND(rd, rd, rn));
+        break;
+      case PLUS:
+        specialLabels.addAll(Arrays.asList("p_throw_overflow_error", "p_throw_runtime_error"));
     }
-    availableRegs.add(0 , rd1);
-    return rd1;
+    availableRegs.add(0 , rd);
+    return rd;
   }
 
   public CodeGenData visitPrintExpression(PrintNode printNode) {
@@ -213,7 +228,7 @@ public class ASTVisitor {
     return rd;
   }
 
-  public String addStringField(String string) {
+  public static String addStringField(String string) {
     String labelName = "msg_" + (data.size() / 2);
     data.add(new LABEL(labelName));
     data.add(new STRING_FIELD(string));
@@ -333,109 +348,15 @@ public class ASTVisitor {
       case "p_read_char":
         addReadChar();
         break;
+      case "p_throw_overflow_error":
+        addOverflowErr();
+      case "p_throw_runtime_error":
+        addRuntimeErr();
+        break;
     }
   }
 
-  private void addPrintString() {
-    String labelName = addStringField("\"%.*s\\0\"");
-
-    instructions.addAll(Arrays.asList(
-        new LABEL("p_print_string"),
-        new PUSH(LR),
-        new LDR(R1, new Addr(R0), false),
-        new ADD(R2, R0, new Imm_INT(toInt("4"))),
-        new LDR(R0, new Imm_STRING_MEM(labelName), false),
-        new ADD(R0, R0, new Imm_INT(toInt("4")))));
-    jumpToFunctionLabel("printf");
-    instructions.addAll(Arrays.asList(
-        new MOV(R0, new Imm_INT(toInt("0"))),
-        new BL("fflush"),
-        new POP(PC)));
-
-  }
-
-  private void addPrintInt() {
-    String labelName = addStringField("\"%d\\0\"");
-
-    instructions.addAll(Arrays.asList(
-        new LABEL("p_print_int"),
-        new PUSH(LR),
-        new MOV(R1, R0),
-        new LDR(R0, new Imm_STRING_MEM(labelName), false),
-        new ADD(R0, R0, new Imm_INT(4))));
-
-    jumpToFunctionLabel("printf");
-    instructions.addAll(Arrays.asList(
-        new MOV(R0, new Imm_INT(toInt("0"))),
-        new BL("fflush"),
-        new POP(PC)));
-
-  }
-
-  private void addPrintln() {
-    String labelName = addStringField("\"\\0\"");
-
-    instructions.addAll(Arrays.asList(
-        new LABEL("p_print_ln"),
-        new PUSH(LR),
-        new LDR(R0, new Imm_STRING_MEM(labelName), false),
-        new ADD(R0, R0, new Imm_INT(toInt("4"))),
-        new BL("puts"),
-        new MOV(R0, new Imm_INT(toInt("0"))),
-        new BL("fflush"),
-        new POP(PC)));
-  }
-
-  private void addPrintBool() {
-    String trueLabel = addStringField("\"true\\0\"");
-    String falseLabel = addStringField("\"false\\0\"");
-
-    instructions.addAll(Arrays.asList(
-        new LABEL("p_print_bool"),
-        new PUSH(LR),
-        new CMP(R0, new Imm_INT(0)),
-        new LDR_COND(R0, new Imm_STRING_MEM(trueLabel), LDR_COND.COND.NE),
-        new LDR_COND(R0, new Imm_STRING_MEM(falseLabel), LDR_COND.COND.EQ),
-        new ADD(R0, R0, new Imm_INT(4))));
-
-    jumpToFunctionLabel("printf");
-
-    instructions.addAll(Arrays.asList(
-        new MOV(R0, new Imm_INT(0)),
-        new BL("fflush"),
-        new POP(PC)
-    ));
-  }
-
-  private void addReadInt() {
-    String labelName = addStringField("\"%d\\0\"");
-
-    instructions.addAll(Arrays.asList(
-        new LABEL("p_read_int"),
-        new PUSH(LR),
-        new MOV(R1, R0),
-        new LDR(R0, new Imm_STRING_MEM(labelName), false),
-        new ADD(R0, R0, new Imm_INT(4)),
-        new BL("scanf"),
-        new POP(PC)
-    ));
-  }
-
-  private void addReadChar() {
-    String labelName = addStringField("\"%c\\0\"");
-
-    instructions.addAll(Arrays.asList(
-        new LABEL("p_read_char"),
-        new PUSH(LR),
-        new MOV(R1, R0),
-        new LDR(R0, new Imm_STRING_MEM(labelName), false),
-        new ADD(R0, R0, new Imm_INT(4)),
-        new BL("scanf"),
-        new POP(PC)
-    ));
-  }
-
-  private void jumpToFunctionLabel(String label) {
+  public static void jumpToFunctionLabel(String label) {
     List<REG> usedRegs = getUsedRegs();
     if (!usedRegs.isEmpty()) {
       instructions.add(new PUSH(usedRegs)); // save onto stack all used regs
@@ -447,7 +368,7 @@ public class ASTVisitor {
     }
   }
 
-  private List<REG> getUsedRegs() {
+  private static List<REG> getUsedRegs() {
     List<REG> regs = new ArrayList<>(allUsableRegs);
     regs.removeAll(availableRegs);
     return regs;
@@ -461,7 +382,7 @@ public class ASTVisitor {
     return availableRegs.remove(0);
   }
 
-  private int toInt(String s) {
+  public static int toInt(String s) {
     return Integer.parseInt(s);
   }
 
@@ -527,4 +448,6 @@ public class ASTVisitor {
     }
     return null;
   }
+
+
 }

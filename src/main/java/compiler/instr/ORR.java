@@ -14,7 +14,6 @@ public class ORR extends Instr {
     this.op2 = op2;
   }
 
-
   @Override
   public String toString() {
     return "\tORR "
