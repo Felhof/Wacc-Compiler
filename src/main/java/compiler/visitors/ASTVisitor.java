@@ -109,7 +109,7 @@ public class ASTVisitor {
       case "addExpr":
         return new ADD(rd, rn, op2, false);
       case "sub":
-        return new SUB(rd, rn, op2);
+        return new SUB(rd, rn, op2, false);
       default:
         return null;
     }
@@ -157,9 +157,9 @@ public class ASTVisitor {
   }
 
   public CodeGenData visitBinaryExp(BinExpr binExpr) {
-    REG rd = (REG) visit(binExpr.rhs());
+    REG rd = (REG) visit(binExpr.lhs());
     availableRegs.remove(0);
-    REG rn = (REG) visit(binExpr.lhs());
+    REG rn = (REG) visit(binExpr.rhs());
     switch (binExpr.operator()) {
       case OR:
         instructions.add(new ORR(rd, rd, rn));
@@ -173,6 +173,11 @@ public class ASTVisitor {
         instructions.add(new ADD(rd, rd, rn, true));
         instructions.add(new BL("p_throw_overflow_error", true));
         break;
+      case MINUS:
+        specialLabels.addAll(Arrays.asList("p_throw_overflow_error", "p_throw_runtime_error", "p_print_string"));
+        instructions.add(new SUB(rd, rd, rn, true));
+        instructions.add(new BL("p_throw_overflow_error", true));
+
     }
     availableRegs.add(0, rd);
     return rd;
