@@ -164,7 +164,15 @@ public class ASTVisitor {
 
   public CodeGenData visitBinaryExp(BinExpr binExpr) {
     REG rd = (REG) visit(binExpr.lhs());
-    availableRegs.remove(0);
+
+    boolean pushedReg = false;
+    if(rd == R10){
+      instructions.add(new PUSH(R10));
+      pushedReg = true;
+    } else {
+      availableRegs.remove(0);
+    }
+
     REG rn = (REG) visit(binExpr.rhs());
     switch (binExpr.operator()) {
       case OR:
@@ -195,7 +203,13 @@ public class ASTVisitor {
         instructions.add(new CMP(rn, rd, new Shift(ASR, 31)));
         instructions.add(new BL("p_throw_overflow_error", "NE"));
     }
-    availableRegs.add(0, rd);
+
+    if(pushedReg){
+      instructions.add(new POP(R11));
+    }
+    else {
+      availableRegs.add(0, rd);
+    }
     return rd;
   }
 
