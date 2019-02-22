@@ -76,6 +76,15 @@ public class CodegenTests {
   }
 
   @Test
+  public void charExpressionTest() {
+    String path = "src/test/examples/valid/expressions/";
+    String[] filenames = {"charComparisonExpr"};
+    String[][] outputs = {{"false","true","true","true","false","false"}};
+
+    compileAndCheckExitAndOutput(path, filenames, null, null, outputs);
+  }
+
+  @Test
   public void longExpressionTest() {
     String path = "src/test/examples/valid/expressions/";
     String[] filenames = { "longExpr","longExpr2","longExpr3","longMultExpr"};
