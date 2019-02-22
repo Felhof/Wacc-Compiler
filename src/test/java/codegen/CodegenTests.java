@@ -67,10 +67,19 @@ public class CodegenTests {
   @Test
   public void integerExpressionTest() {
     String path = "src/test/examples/valid/expressions/";
-    String[] filenames = {"intCalc","divExpr"};
-    String[][] outputs = {{"72"},{"1"}};
+    String[] filenames = {"intCalc","divExpr","multExpr","modExpr"};
+    String[][] outputs = {{"72"},{"1"},{"15"},{"2"}};
 
     compileAndCheckExitAndOutput(path, filenames, null, null, outputs);
+  }
+
+  @Test
+  public void longExpressionTest() {
+    String path = "src/test/examples/valid/expressions/";
+    String[] filenames = { "longExpr","longExpr2","longExpr3","longMultExpr"};
+    int[] expectedExitCodes = { 153, 10, 9, 16};
+
+    compileAndCheckExitAndOutput(path, filenames, null, expectedExitCodes, null);
   }
 
   @Test
@@ -230,7 +239,7 @@ public class CodegenTests {
 
       emulator.waitFor();
 
-      //new File(filename + ".s").delete();
+      new File(filename + ".s").delete();
       new File(filename).delete();
       return emulator;
     } catch (IOException | InterruptedException e) {
