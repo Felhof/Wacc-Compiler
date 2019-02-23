@@ -129,9 +129,11 @@ public class CodegenTests {
   @Test
   public void PairTest() {
     String path = "src/test/examples/valid/pairs/";
-    String[] filenames = {"createPair", "createPair02", "createPair03"};
+    String[] filenames = {"createPair", "createPair02", "createPair03", "writeFst", "writeSnd"};
+    String[][] outputs = {{}, {}, {}, {"10", "42"}, {"a",
+        "Z"}};
 
-    compileAndCheckExitAndOutput(path, filenames, null, null, null);
+    compileAndCheckExitAndOutput(path, filenames, null, null, outputs);
   }
 
   @Test

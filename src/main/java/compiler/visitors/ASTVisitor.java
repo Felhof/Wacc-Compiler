@@ -13,8 +13,10 @@ import static compiler.instr.Shift.SHIFT_TYPE.LSL;
 
 import compiler.AST.NodeElements.ArrayElem;
 import compiler.AST.NodeElements.Ident;
+import compiler.AST.NodeElements.LHS;
 import compiler.AST.NodeElements.ListExpr;
 import compiler.AST.NodeElements.NodeElem;
+import compiler.AST.NodeElements.PairElem;
 import compiler.AST.NodeElements.RHS.ArrayLiter;
 import compiler.AST.NodeElements.RHS.BinExpr;
 import compiler.AST.NodeElements.RHS.BoolExpr;
@@ -23,6 +25,7 @@ import compiler.AST.NodeElements.RHS.Expr;
 import compiler.AST.NodeElements.RHS.FuncCall;
 import compiler.AST.NodeElements.RHS.IntExpr;
 import compiler.AST.NodeElements.RHS.Pair;
+import compiler.AST.NodeElements.RHS.PairExp;
 import compiler.AST.NodeElements.RHS.StringExpr;
 import compiler.AST.NodeElements.RHS.UnaryExpr;
 import compiler.AST.NodeElements.RHS.UnaryExpr.UNOP;
@@ -395,10 +398,10 @@ public class ASTVisitor {
 
     instructions.add(new MOV(R0, rd));
 
-    if (((NodeElem) readNode.lhs()).type().equals(IntType.getInstance())) {
+    if (( readNode.lhs()).type().equals(IntType.getInstance())) {
       instructions.add(new BL("p_read_int"));
       specialLabels.add("p_read_int");
-    } else if (((NodeElem) readNode.lhs()).type()
+    } else if (( readNode.lhs()).type()
         .equals(CharType.getInstance())) {
       instructions.add(new BL("p_read_char"));
       specialLabels.add("p_read_char");
@@ -461,6 +464,16 @@ public class ASTVisitor {
     if (varAssignNode.lhs() instanceof ArrayElem) {
       visitArrayAssign(varAssignNode);
     }
+    if (varAssignNode.lhs() instanceof PairElem) {
+      visitPairAssign(varAssignNode);
+    }
+    return null;
+  }
+
+  private CodeGenData visitPairAssign(VarAssignNode varAssignNode) {
+    REG rd = (REG) visit(varAssignNode.rhs());
+    REG rn = (REG) visitHeapAlloc(varAssignNode.lhs());
+    saveVarData(varAssignNode.lhs().type(), rd, rn, 0, false);
     return null;
   }
 
@@ -522,7 +535,7 @@ public class ASTVisitor {
 
   public CodeGenData visitArrayAssign(VarAssignNode varAssignNode) {
     REG rd = (REG) visit(varAssignNode.rhs());  // get new value
-    REG rn = (REG) visit(varAssignNode.lhs()); // get array data
+    REG rn = (REG) visit(varAssignNode.lhs());  // get array data
     instructions.add(new STR(rd, new Addr(rn)));
     freeReg(rn);
     freeReg(rd);
@@ -545,16 +558,29 @@ public class ASTVisitor {
   }
 
   private CodeGenData visitPairDeclare(VarDeclareNode varDeclareNode) {
+    REG rd = (REG) visit(varDeclareNode.rhs());
+    nextPosInStack -= WORD_SIZE;
+    currentST.lookUpAllVar(varDeclareNode.varName()).setStackOffset(nextPosInStack);
+    saveVarData(varDeclareNode.varType(), rd, SP, nextPosInStack,
+        false);
+    freeReg(rd);
+    return null;
+  }
+
+  public CodeGenData visitPair(Pair pair) {
     setArg(new Imm_INT_MEM(2 * WORD_SIZE));
     instructions.add(new BL("malloc"));
     REG rd = useAvailableReg();
     instructions.add(new MOV(rd, R0)); // fetch address of pair
-    Pair pair = (Pair) varDeclareNode.rhs();
     storeExpInHeap(pair.fst(), rd, 0);
     storeExpInHeap(pair.snd(), rd, 4);
-    instructions.add(new STR(rd, new Addr(SP), false, false));
-    freeReg(rd);
-    return null;
+    return rd;
+  }
+
+  public CodeGenData visitNullPair() {
+    REG rd = useAvailableReg();
+    instructions.add(new LDR(rd, new Imm_INT_MEM(0), false));
+    return rd;
   }
 
   private void storeExpInHeap(Expr expr, REG objectAddr, int offset) {
@@ -562,7 +588,7 @@ public class ASTVisitor {
     setArg(new Imm_INT_MEM(expr.sizeOf()));
     instructions.add(new BL("malloc"));
     saveVarData(expr.type(), rd, R0, 0, false);
-    saveVarData(expr.type(), R0, objectAddr, offset, false);
+    instructions.add(new STR(R0, new Addr(objectAddr, true, new Imm_INT(offset))));
     freeReg(rd);
   }
 
@@ -663,5 +689,22 @@ public class ASTVisitor {
     return null;
   }
 
+  public CodeGenData visitPairExpr(PairElem pairElem) {
+    specialLabels.addAll(Arrays.asList("p_check_null_pointer", "p_throw_runtime_error", "p_print_string"));
+    REG rd = (REG) visit(pairElem.expr());
+    instructions.add(new MOV(R0, rd));
+    instructions.add(new BL("p_check_null_pointer"));
+    instructions.add(new LDR(rd, new Addr(rd,true, new Imm_INT(pairElem.posInPair() * WORD_SIZE)), false));
+    instructions.add(new LDR(rd, new Addr(rd), false));
+    return rd;
+  }
 
+  private Operand visitHeapAlloc(LHS pairElem) {
+    specialLabels.addAll(Arrays.asList("p_check_null_pointer", "p_throw_runtime_error", "p_print_string"));
+    REG rd = (REG) visit(((PairElem)pairElem).expr());
+    instructions.add(new MOV(R0, rd));
+    instructions.add(new BL("p_check_null_pointer"));
+    instructions.add(new LDR(rd, new Addr(rd,true, new Imm_INT(((PairElem) pairElem).posInPair() * WORD_SIZE)), false));
+    return rd;
+  }
 }

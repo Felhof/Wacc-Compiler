@@ -68,6 +68,9 @@ public class SubRoutines {
       case "p_check_array_bounds":
         addCheckArrayBounds();
         break;
+      case "p_check_null_pointer":
+        addNullPointerCheck();
+        break;
       default:
         break;
     }
@@ -243,6 +246,17 @@ public class SubRoutines {
         new LDR_COND(R0, new Imm_STRING_MEM(msg1), COND.CS),
         new BL("p_throw_runtime_error", COND.CS),
         new POP(PC)));
+  }
+
+  public static void addNullPointerCheck() {
+    String labelName = addStringField(
+        "\"NullReferenceError: dereference a null reference\\n\\0\"");
+
+    instructions
+        .addAll(Arrays.asList(new LABEL("p_check_null_pointer"), new PUSH(LR),
+            new CMP(R0, new Imm_INT(0)),
+            new LDR_COND(R0, new Imm_STRING_MEM(labelName), COND.EQ),
+            new BL("p_throw_runtime_error", COND.EQ), new POP(PC)));
   }
 
 }

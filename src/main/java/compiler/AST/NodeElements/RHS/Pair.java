@@ -27,14 +27,14 @@ public class Pair extends Expr implements ASTData {
   @Override
   public String toString() {
     return "Pair" +
-        "["+ fstExpr.toString() +
+        "[" + fstExpr.toString() +
         ", " + sndExpr.toString() +
         "]";
   }
 
   @Override
   public CodeGenData accept(ASTVisitor visitor) {
-    return null;
+    return visitor.visitPair(this);
   }
 
   @Override
