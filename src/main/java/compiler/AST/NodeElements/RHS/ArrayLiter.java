@@ -18,6 +18,10 @@ public class ArrayLiter extends NodeElem implements ASTData {
     return elems.length == 0;
   }
 
+  public Expr[] elems() {
+    return elems;
+  }
+
   @Override
   public CodeGenData accept(ASTVisitor visitor) {
     return null;

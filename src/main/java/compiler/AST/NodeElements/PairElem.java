@@ -5,7 +5,7 @@ import compiler.AST.Types.Type;
 import compiler.visitors.ASTVisitor;
 import compiler.visitors.CodeGenData;
 
-public class PairElem extends NodeElem implements LHS {
+public class PairElem extends LHS {
 
   private Expr expr;
   private int posInPair;
@@ -24,5 +24,11 @@ public class PairElem extends NodeElem implements LHS {
   @Override
   public String varName() {
     return "";
+  }
+
+  @Override
+  public int sizeOf() {
+    // todo
+    return 0;
   }
 }
