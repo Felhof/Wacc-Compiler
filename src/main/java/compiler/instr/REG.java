@@ -23,12 +23,4 @@ public enum REG implements Operand, CodeGenData {
   public static final List<REG> allUsableRegs =
       new ArrayList<>(Arrays.asList(R4, R5, R6, R7, R8, R9, R10, R11, R12));
 
-  // enable CodeGenData to be an array of registers
-  public static class Regs implements CodeGenData {
-    public REG[] regs;
-
-    public Regs(REG[] regs) {
-      this.regs = regs;
-    }
-  }
 }

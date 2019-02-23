@@ -504,9 +504,10 @@ public class ASTVisitor {
         .add(new STR(sizeReg, new Addr(arrAddress, true, null), false, false));
 
     // set sp at the array's address
-    instructions
-        .add(new STR(arrAddress, new Addr(SP, true, null), false, false));
     nextPosInStack -= 4;
+    instructions
+        .add(new STR(arrAddress, new Addr(SP, true, new Imm_INT(nextPosInStack)), false,
+            false));
     currentST.lookUpAllVar(varDeclareNode.varName())
         .setStackOffset(nextPosInStack);
     freeReg(sizeReg);
@@ -530,17 +531,20 @@ public class ASTVisitor {
   }
 
   public CodeGenData visitArrayElem(ArrayElem arrayElem) {
-    REG arrAddress = loadVar(arrayElem.varName(), false);
-    REG index = (REG) visit(arrayElem.indexes()[0]); // simple array case
-    setArgs(new REG[]{index, arrAddress});
-    specialLabels.addAll(Arrays.asList(
-        "p_check_array_bounds", "p_throw_runtime_error", "p_print_string"));
-    instructions.addAll(Arrays.asList(
-        new BL("p_check_array_bounds"),
-        new ADD(arrAddress, arrAddress, new Imm_INT(WORD_SIZE)),
-        new ADD(arrAddress, arrAddress, new Reg_Shift(index,
-            new Shift(LSL, SHIFT_TIMES_4)))));
-    freeReg(index);
+    REG arrAddress = loadFromStack(arrayElem.varName());
+    for(Expr indexExpr : arrayElem.indexes()) {
+      REG index = (REG) visit(indexExpr); // simple array case
+      instructions.add(new LDR(arrAddress, new Addr(arrAddress)));
+      setArgs(new REG[]{index, arrAddress});
+      specialLabels.addAll(Arrays.asList(
+          "p_check_array_bounds", "p_throw_runtime_error", "p_print_string"));
+      instructions.addAll(Arrays.asList(
+          new BL("p_check_array_bounds"),
+          new ADD(arrAddress, arrAddress, new Imm_INT(WORD_SIZE)),
+          new ADD(arrAddress, arrAddress, new Reg_Shift(index,
+              new Shift(LSL, SHIFT_TIMES_4)))));
+      freeReg(index);
+    }
     return arrAddress;
   }
 
@@ -600,6 +604,14 @@ public class ASTVisitor {
         - offsetFromInitialSP;
     instructions.add(new LDR(rd,
         new Addr(SP, true, new Imm_INT(offset)), isByteInstr));
+    return rd;
+  }
+
+  private REG loadFromStack(String varName) {
+    REG rd = useAvailableReg();
+    int offset = currentST.lookUpAllVar(varName).getStackOffset()
+        - offsetFromInitialSP;
+    instructions.add(new ADD(rd, SP, new Imm_INT(offset)));
     return rd;
   }
 
