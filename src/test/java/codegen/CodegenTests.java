@@ -6,9 +6,10 @@ import static org.hamcrest.core.Is.is;
 import compiler.AST.Nodes.AST;
 import compiler.Main;
 
-import compiler.instr.STR;
 import java.io.*;
 import java.util.stream.IntStream;
+
+import compiler.instr.STR;
 import org.junit.Test;
 
 public class CodegenTests {
@@ -56,12 +57,40 @@ public class CodegenTests {
   public void boolExpressionTest() {
     String path = "src/test/examples/valid/expressions/";
     String[] filenames = {"boolCalc", "andExpr", "boolOrExpr",
-        "boolNestedExpr"};
+        "boolNestedExpr", "boolLongExpr"};
     String[][] outputs = {{"false"}, {"false", "true", "false"},
-        {"true", "true", "true", "false"}, {"true"}};
+        {"true", "true", "true", "false"}, {"true"}, {"true"}};
 
     compileAndCheckExitAndOutput(path, filenames, null, null, outputs);
+  }
 
+  @Test
+  public void integerExpressionTest() {
+    String path = "src/test/examples/valid/expressions/";
+    String[] filenames = {"intCalc","divExpr","multExpr","modExpr", "equalsExpr", "greaterEqExpr", "greaterExpr",
+            "lessEqExpr","lessExpr","notequalsExpr"};
+    String[][] outputs = {{"72"},{"1"},{"15"},{"2"}, {"false","false","true"}, {"false","true", "true"},
+            {"false","true"},{"true","false","true"},{"true","false"},{"true","true","false"}};
+
+    compileAndCheckExitAndOutput(path, filenames, null, null, outputs);
+  }
+
+  @Test
+  public void charExpressionTest() {
+    String path = "src/test/examples/valid/expressions/";
+    String[] filenames = {"charComparisonExpr"};
+    String[][] outputs = {{"false","true","true","true","false","false"}};
+
+    compileAndCheckExitAndOutput(path, filenames, null, null, outputs);
+  }
+
+  @Test
+  public void longExpressionTest() {
+    String path = "src/test/examples/valid/expressions/";
+    String[] filenames = { "longExpr","longExpr2","longExpr3","longMultExpr"};
+    int[] expectedExitCodes = { 153, 10, 9, 16};
+
+    compileAndCheckExitAndOutput(path, filenames, null, expectedExitCodes, null);
   }
 
   @Test
@@ -130,9 +159,10 @@ public class CodegenTests {
     String path = "src/test/examples/valid/runtimeErr/integerOverflow/";
     String[] filenames = {"intWayOverflow", "intnegateOverflow4",
         "intUnderflow", "intJustOverflow", "intmultOverflow",
-        "intnegateOverflow2", "intnegateOverflow3"};
-    int[] expectedExitCodes = {255, 255, 255, 255, 255, 255, 255};
-    String[][] outputs = {{"2000000000",
+        "intnegateOverflow2", "intnegateOverflow3", "intnegateOverflow"};
+    int[] expectedExitCodes = {255, 255, 255, 255, 255, 255, 255, 255};
+    String[][] outputs = {
+        {"2000000000",
         "OverflowError: the result is too small/large to store in a 4-byte signed-integer."},
         {"-2000000000",
             "OverflowError: the result is too small/large to store in a 4-byte signed-integer."},
@@ -149,13 +179,12 @@ public class CodegenTests {
             "OverflowError: the result is too small/large to store in a 4-byte signed-integer."},
         {"-20000",
             "OverflowError: the result is too small/large to store in a 4-byte signed-integer."},
-        {"-2000000000",
-            "OverflowError: the result is too small/large to store in a 4-byte signed-integer."}};
+        { "-2147483648",
+        "OverflowError: the result is too small/large to store in a 4-byte signed-integer."}};
     compileAndCheckExitAndOutput(path, filenames, null, expectedExitCodes,
         outputs);
   }
-
-
+  
   // provide path, filenames, exit codes, and expected output
   private void compileAndCheckExitAndOutput(String path, String[] filenames,
       String[] inputs,
