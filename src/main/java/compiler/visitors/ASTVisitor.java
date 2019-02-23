@@ -322,6 +322,11 @@ public class ASTVisitor {
 
   public CodeGenData visitPrintExpression(PrintNode printNode) {
     REG rd = (REG) visit(printNode.expr());
+    if (printNode.expr() instanceof ArrayElem){
+      instructions.add(new LDR(rd, new Addr(rd),
+          printNode.expr().sizeOf() == 1));
+    }
+
     // mov result into arg register
     instructions.add(new MOV(R0, rd));
 
@@ -423,7 +428,7 @@ public class ASTVisitor {
   }
 
   public CodeGenData visitAssignNode(VarAssignNode varAssignNode) {
-    //TODO: IMPLEMENT OTHER TYPES OF RHS
+    //TODO: refactor concat in one
     if (varAssignNode.lhs() instanceof Ident) {
       visitIdentAssign(varAssignNode);
     }
@@ -490,28 +495,27 @@ public class ASTVisitor {
   }
 
   public CodeGenData visitArrayAssign(VarAssignNode varAssignNode) {
-    REG newValue = (REG) visit(varAssignNode.rhs());  // get new value
-    Regs arrayData = (Regs) visit(varAssignNode.lhs()); // get array data
-    setArgs(arrayData.regs);
-    specialLabels.addAll(Arrays.asList("p_check_array_bounds", "p_throw_runtime_error",
-        "p_print_string"));
-    instructions.add(new BL("p_check_array_bounds"));
-    REG index = arrayData.regs[0];
-    REG arrAddress = arrayData.regs[1];
-    instructions.addAll(Arrays.asList(
-        new ADD(arrAddress, arrAddress, new Imm_INT(WORD_SIZE)),
-        new ADD(arrAddress, arrAddress, new Reg_Shift(index, new Shift(LSL,
-            SHIFT_TIMES_4))),
-        new STR(newValue, new Addr(arrAddress))));
-    freeRegs(arrayData.regs);
-    freeReg(newValue);
+    REG rd = (REG) visit(varAssignNode.rhs());  // get new value
+    REG rn = (REG) visit(varAssignNode.lhs()); // get array data
+    instructions.add(new STR(rd, new Addr(rn)));
+    freeReg(rn);
+    freeReg(rd);
     return null;
   }
 
   public CodeGenData visitArrayElem(ArrayElem arrayElem) {
     REG arrAddress = loadVar(arrayElem.varName(), false);
     REG index = (REG) visit(arrayElem.indexes()[0]); // simple array case
-    return new Regs(new REG[]{index, arrAddress});
+    setArgs(new REG[]{index, arrAddress});
+    specialLabels.addAll(Arrays.asList(
+        "p_check_array_bounds", "p_throw_runtime_error", "p_print_string"));
+    instructions.addAll(Arrays.asList(
+        new BL("p_check_array_bounds"),
+        new ADD(arrAddress, arrAddress, new Imm_INT(WORD_SIZE)),
+        new ADD(arrAddress, arrAddress, new Reg_Shift(index,
+            new Shift(LSL, SHIFT_TIMES_4)))));
+    freeReg(index);
+    return arrAddress;
   }
 
   private CodeGenData visitPairDeclare(VarDeclareNode varDeclareNode) {

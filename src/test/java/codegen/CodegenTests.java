@@ -184,6 +184,14 @@ public class CodegenTests {
     compileAndCheckExitAndOutput(path, filenames, null, expectedExitCodes,
         outputs);
   }
+
+  @Test
+  public void arrayTests() {
+    String path = "src/test/examples/valid/array/";
+    String[] filenames = {"arraySimple", "arrayLookup"};
+    String[][] outputs = {{"42"}, {"43"}};
+    compileAndCheckExitAndOutput(path, filenames, null, null, outputs);
+  }
   
   // provide path, filenames, exit codes, and expected output
   private void compileAndCheckExitAndOutput(String path, String[] filenames,

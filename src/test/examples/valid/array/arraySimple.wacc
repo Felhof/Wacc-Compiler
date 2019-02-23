@@ -7,7 +7,7 @@
 
 begin
   int[] a = [0,1,2,3] ;
-  a[0] = 42
-#  println a[0]
+  a[0] = 42 ;
+  println a[0]
 end
 
