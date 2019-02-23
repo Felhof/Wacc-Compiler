@@ -8,6 +8,11 @@ public class CMP extends Instr {
   private Operand op;
   private Shift s;
 
+  public CMP(REG rd, Operand op) {
+    this.rd = rd;
+    this.op = op;
+  }
+
   public CMP(REG rd, Operand op, Shift s) {
     this.rd = rd;
     this.op = op;

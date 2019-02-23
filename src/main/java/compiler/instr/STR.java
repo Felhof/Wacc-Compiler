@@ -9,6 +9,10 @@ public class STR extends Instr {
   private boolean isByteInstr;
   private boolean updateRn;
 
+  public STR(REG rd, Operand op2) {
+    this(rd, op2, false, false);
+  }
+
   public STR(REG rd, Operand op2, boolean isByteInstr, boolean updateRn) {
     this.rd = rd;
     this.op2 = op2;

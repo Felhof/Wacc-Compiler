@@ -16,6 +16,7 @@ import compiler.instr.Instr;
 import compiler.instr.LABEL;
 import compiler.instr.LDR;
 import compiler.instr.LDR_COND;
+import compiler.instr.LDR_COND.COND;
 import compiler.instr.MOV;
 import compiler.instr.Operand.Addr;
 import compiler.instr.Operand.Imm_INT;
@@ -33,6 +34,43 @@ public class SubRoutines {
     SubRoutines.instructions = instructions;
   }
 
+  public static void addSpecialFunction(String name) {
+    switch (name) {
+      case "p_print_string":
+        addPrintString();
+        break;
+      case "p_print_int":
+        addPrintInt();
+        break;
+      case "p_print_bool":
+        addPrintBool();
+        break;
+      case "p_print_ln":
+        addPrintln();
+        break;
+      case "p_read_int":
+        addReadInt();
+        break;
+      case "p_read_char":
+        addReadChar();
+        break;
+      case "p_throw_overflow_error":
+        addOverflowErr();
+        break;
+      case "p_throw_runtime_error":
+        addRuntimeErr();
+        break;
+      case "p_check_divide_by_zero":
+        addCheckDivideByZero();
+        break;
+      case "p_check_array_bounds":
+        addCheckArrayBounds();
+        break;
+      default:
+        break;
+    }
+  }
+
   public static void addPrintString() {
     String labelName = addStringField("\"%.*s\\0\"");
 
@@ -46,7 +84,7 @@ public class SubRoutines {
     jumpToFunctionLabel("printf");
     instructions.addAll(Arrays.asList(
       new MOV(R0, new Imm_INT(toInt("0"))),
-      new BL("fflush",  ""),
+      new BL("fflush"),
       new POP(PC)));
   }
 
@@ -63,7 +101,7 @@ public class SubRoutines {
     jumpToFunctionLabel("printf");
     instructions.addAll(Arrays.asList(
       new MOV(R0, new Imm_INT(toInt("0"))),
-      new BL("fflush",  ""),
+      new BL("fflush"),
       new POP(PC)));
 
   }
@@ -76,9 +114,9 @@ public class SubRoutines {
       new PUSH(LR),
       new LDR(R0, new Imm_STRING_MEM(labelName), false),
       new ADD(R0, R0, new Imm_INT(toInt("4")), false),
-      new BL("puts",  ""),
+      new BL("puts"),
       new MOV(R0, new Imm_INT(toInt("0"))),
-      new BL("fflush",  ""),
+      new BL("fflush"),
       new POP(PC)));
   }
 
@@ -98,7 +136,7 @@ public class SubRoutines {
 
     instructions.addAll(Arrays.asList(
       new MOV(R0, new Imm_INT(0)),
-      new BL("fflush",  ""),
+      new BL("fflush"),
       new POP(PC)
     ));
   }
@@ -112,7 +150,7 @@ public class SubRoutines {
       new MOV(R1, R0),
       new LDR(R0, new Imm_STRING_MEM(labelName), false),
       new ADD(R0, R0, new Imm_INT(4), false),
-      new BL("scanf",  ""),
+      new BL("scanf"),
       new POP(PC)
     ));
   }
@@ -126,7 +164,7 @@ public class SubRoutines {
       new MOV(R1, R0),
       new LDR(R0, new Imm_STRING_MEM(labelName), false),
       new ADD(R0, R0, new Imm_INT(4), false),
-      new BL("scanf",  ""),
+      new BL("scanf"),
       new POP(PC)
     ));
   }
@@ -136,16 +174,21 @@ public class SubRoutines {
       "\"OverflowError: the result is too small/large to store in a 4-byte signed-integer." +"\\n\"");
 
     instructions.addAll(Arrays
-      .asList(new LABEL("p_throw_overflow_error"), new LDR(R0, new Imm_STRING_MEM(labelName), false), new BL("p_throw_runtime_error",
-         "")));
+      .asList(
+          new LABEL("p_throw_overflow_error"),
+          new LDR(R0, new Imm_STRING_MEM(labelName), false),
+          new BL("p_throw_runtime_error")));
 
   }
 
   public static void addRuntimeErr() {
 
     instructions.addAll(
-      Arrays.asList(new LABEL("p_throw_runtime_error"), new BL("p_print_string",
-          ""), new MOV(R0, new Imm_INT(-1)), new BL("exit", "")));
+      Arrays.asList(
+          new LABEL("p_throw_runtime_error"),
+          new BL("p_print_string"),
+          new MOV(R0, new Imm_INT(-1)),
+          new BL("exit")));
   }
 
   public static void addCheckDivideByZero() {
@@ -153,10 +196,34 @@ public class SubRoutines {
     String labelName = addStringField("\"DivideByZeroError: divide or modulo by zero\\n\\0\"");
 
     instructions.addAll(
-      Arrays.asList( new LABEL("p_check_divide_by_zero"), new PUSH(LR), new CMP(R1, new Imm_INT(0), null),
-              new LDR_COND(R0, new Imm_STRING_MEM(labelName), LDR_COND.COND.EQ),
-              new BL("p_throw_runtime_error", "EQ"),
-              new POP(PC)));
+      Arrays.asList(
+          new LABEL("p_check_divide_by_zero"),
+          new PUSH(LR),
+          new CMP(R1, new Imm_INT(0)),
+          new LDR_COND(R0, new Imm_STRING_MEM(labelName), LDR_COND.COND.EQ),
+          new BL("p_throw_runtime_error", COND.EQ),
+          new POP(PC)));
 
   }
+
+  public static void addCheckArrayBounds() {
+    // todo pass ArrayElem to give index out of bounds used
+    String msg0 = addStringField("\"ArrayOutOfBoundError: "
+        + "negative index\\n\\0\"");
+    String msg1 = addStringField("\"ArrayIndexOutOfBoundsError: "
+        + "index too large\\n\\0\"");
+
+    instructions.addAll(Arrays.asList(
+        new LABEL("p_check_array_bounds"),
+        new PUSH(LR),
+        new CMP(R0, new Imm_INT(0)),
+        new LDR_COND(R0, new Imm_STRING_MEM(msg0), COND.LT),
+        new BL("p_throw_runtime_error", COND.LT),
+        new LDR(R1, new Addr(R1), false),
+        new CMP(R0, R1),
+        new LDR_COND(R0, new Imm_STRING_MEM(msg1), COND.CS),
+        new BL("p_throw_runtime_error", COND.CS),
+        new POP(PC)));
+  }
+
 }

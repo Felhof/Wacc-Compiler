@@ -1,12 +1,41 @@
 package compiler.visitors;
 
+import static compiler.SubRoutines.addSpecialFunction;
+import static compiler.instr.REG.LR;
+import static compiler.instr.REG.PC;
+import static compiler.instr.REG.R0;
+import static compiler.instr.REG.R1;
+import static compiler.instr.REG.R10;
+import static compiler.instr.REG.Regs;
+import static compiler.instr.REG.SP;
+import static compiler.instr.REG.allUsableRegs;
+
+import static compiler.instr.Shift.SHIFT_TYPE.*;
+
 import compiler.AST.NodeElements.ArrayElem;
 import compiler.AST.NodeElements.Ident;
 import compiler.AST.NodeElements.ListExpr;
 import compiler.AST.NodeElements.NodeElem;
-import compiler.AST.NodeElements.RHS.*;
+import compiler.AST.NodeElements.RHS.ArrayLiter;
+import compiler.AST.NodeElements.RHS.BinExpr;
+import compiler.AST.NodeElements.RHS.BoolExpr;
+import compiler.AST.NodeElements.RHS.CharExpr;
+import compiler.AST.NodeElements.RHS.Expr;
+import compiler.AST.NodeElements.RHS.FuncCall;
+import compiler.AST.NodeElements.RHS.IntExpr;
+import compiler.AST.NodeElements.RHS.Pair;
+import compiler.AST.NodeElements.RHS.StringExpr;
+import compiler.AST.NodeElements.RHS.UnaryExpr;
 import compiler.AST.NodeElements.RHS.UnaryExpr.UNOP;
-import compiler.AST.Nodes.*;
+import compiler.AST.Nodes.AST;
+import compiler.AST.Nodes.ExitNode;
+import compiler.AST.Nodes.FuncNode;
+import compiler.AST.Nodes.ParentNode;
+import compiler.AST.Nodes.PrintNode;
+import compiler.AST.Nodes.ReadNode;
+import compiler.AST.Nodes.ReturnNode;
+import compiler.AST.Nodes.VarAssignNode;
+import compiler.AST.Nodes.VarDeclareNode;
 import compiler.AST.SymbolTable.SymbolTable;
 import compiler.AST.Types.ArrType;
 import compiler.AST.Types.BoolType;
@@ -15,28 +44,47 @@ import compiler.AST.Types.IntType;
 import compiler.AST.Types.PairType;
 import compiler.AST.Types.Type;
 import compiler.SubRoutines;
-import compiler.instr.*;
-import compiler.instr.Operand.*;
+import compiler.instr.ADD;
+import compiler.instr.AND;
 import compiler.instr.BL;
+import compiler.instr.CMP;
 import compiler.instr.Instr;
 import compiler.instr.LABEL;
 import compiler.instr.LDR;
+import compiler.instr.LDR_COND.COND;
 import compiler.instr.MOV;
+import compiler.instr.MUL;
+import compiler.instr.ORR;
+import compiler.instr.Operand.Addr;
+import compiler.instr.Operand.Imm_INT;
+import compiler.instr.Operand.Imm_INT_MEM;
+import compiler.instr.Operand.Imm_STRING;
+import compiler.instr.Operand.Imm_STRING_MEM;
+import compiler.instr.Operand.Operand;
+import compiler.instr.Operand.Reg_Shift;
 import compiler.instr.POP;
 import compiler.instr.PUSH;
 import compiler.instr.REG;
-
-import java.util.*;
+import compiler.instr.RS;
+import compiler.instr.SECTION;
+import compiler.instr.STR;
+import compiler.instr.STRING_FIELD;
+import compiler.instr.SUB;
+import compiler.instr.Shift;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
-
-import static compiler.SubRoutines.*;
-import static compiler.instr.REG.*;
-import static compiler.instr.ShiftType.ASR;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 public class ASTVisitor {
 
   private static final int WORD_SIZE = 4;
+  private static final int SHIFT_TIMES_4 = 2;
   private static final int BYTE = 1;
+
+
   private static List<Instr> instructions;
   private static List<Instr> data;
   private Set<String> specialLabels;
@@ -135,7 +183,7 @@ public class ASTVisitor {
   public void visitExit(ExitNode exitNode) {
     REG rd = (REG) visit(exitNode.exitStatus());
     instructions.add(new MOV(R0, rd));
-    instructions.add(new BL("exit", ""));
+    instructions.add(new BL("exit"));
     freeReg(rd);
   }
 
@@ -151,7 +199,7 @@ public class ASTVisitor {
           Arrays.asList("p_throw_overflow_error", "p_throw_runtime_error",
               "p_print_string"));
       instructions.add(new RS(rd, rd, new Imm_INT(0), "BS"));
-      instructions.add(new BL("p_throw_overflow_error", "VS"));
+      instructions.add(new BL("p_throw_overflow_error", COND.VS));
       return rd;
     }
 
@@ -191,14 +239,14 @@ public class ASTVisitor {
             Arrays.asList("p_throw_overflow_error", "p_throw_runtime_error",
                 "p_print_string"));
         instructions.add(new ADD(rd, rd, rn, true));
-        instructions.add(new BL("p_throw_overflow_error", "VS"));
+        instructions.add(new BL("p_throw_overflow_error", COND.VS));
         break;
       case MINUS:
         specialLabels.addAll(Arrays
             .asList("p_throw_overflow_error", "p_throw_runtime_error",
                 "p_print_string"));
         instructions.add(new SUB(rd, rd, rn, true));
-        instructions.add(new BL("p_throw_overflow_error", "VS"));
+        instructions.add(new BL("p_throw_overflow_error", COND.VS));
         break;
       case MUL:
         specialLabels.addAll(Arrays
@@ -207,59 +255,64 @@ public class ASTVisitor {
 
         instructions.add(new MUL(rd, rn, rd, rn));
         instructions.add(new CMP(rn, rd, new Shift(ASR, 31)));
-        instructions.add(new BL("p_throw_overflow_error", "NE"));
+        instructions.add(new BL("p_throw_overflow_error", COND.NE));
         break;
       case DIV:
         specialLabels.addAll(Arrays
           .asList("p_check_divide_by_zero","p_throw_runtime_error","p_print_string"));
 
         instructions.addAll(Arrays
-          .asList(new MOV(R0, rd), new MOV(R1, rn), new BL("p_check_divide_by_zero",""),
-                  new BL("__aeabi_idiv", ""),new MOV(rd, R0)));
+          .asList(new MOV(R0, rd), new MOV(R1, rn), new BL("p_check_divide_by_zero"),
+                  new BL("__aeabi_idiv"),new MOV(rd, R0)));
         break;
       case MOD:
         specialLabels.addAll(Arrays
           .asList("p_check_divide_by_zero","p_throw_runtime_error","p_print_string"));
 
         instructions.addAll(Arrays
-          .asList(new MOV(R0, rd), new MOV(R1, rn), new BL("p_check_divide_by_zero",""),
-                  new BL("__aeabi_idivmod", ""),new MOV(rd, R1)));
+          .asList(new MOV(R0, rd), new MOV(R1, rn), new BL("p_check_divide_by_zero"),
+                  new BL("__aeabi_idivmod"),new MOV(rd, R1)));
         break;
 
       case EQUAL:
         instructions.addAll(Arrays
-          .asList(new CMP(rd, rn, null), new MOV(rd, new Imm_INT(1), "EQ"),
-                  new MOV(rd, new Imm_INT(0), "NE")));
+          .asList(new CMP(rd, rn, null), new MOV(rd, new Imm_INT(1), COND.EQ),
+                  new MOV(rd, new Imm_INT(0), COND.NE)));
         break;
 
       case GE:
         instructions.addAll(Arrays
-                .asList(new CMP(rd, rn, null), new MOV(rd, new Imm_INT(1), "GE"),
-                        new MOV(rd, new Imm_INT(0), "LT")));
+                .asList(new CMP(rd, rn, null), new MOV(rd, new Imm_INT(1),
+                        COND.GE),
+                        new MOV(rd, new Imm_INT(0), COND.LT)));
         break;
 
       case GT:
         instructions.addAll(Arrays
-                .asList(new CMP(rd, rn, null), new MOV(rd, new Imm_INT(1), "GT"),
-                        new MOV(rd, new Imm_INT(0), "LE")));
+                .asList(new CMP(rd, rn, null), new MOV(rd, new Imm_INT(1),
+                        COND.GT),
+                        new MOV(rd, new Imm_INT(0), COND.LE)));
         break;
 
       case LE:
         instructions.addAll(Arrays
-                .asList(new CMP(rd, rn, null), new MOV(rd, new Imm_INT(1), "LE"),
-                        new MOV(rd, new Imm_INT(0), "GT")));
+                .asList(new CMP(rd, rn, null), new MOV(rd, new Imm_INT(1),
+                        COND.LE),
+                        new MOV(rd, new Imm_INT(0), COND.GT)));
         break;
 
       case LT:
         instructions.addAll(Arrays
-                .asList(new CMP(rd, rn, null), new MOV(rd, new Imm_INT(1), "LT"),
-                        new MOV(rd, new Imm_INT(0), "GE")));
+                .asList(new CMP(rd, rn, null), new MOV(rd, new Imm_INT(1),
+                        COND.LT),
+                        new MOV(rd, new Imm_INT(0), COND.GE)));
         break;
 
       case NOTEQUAL:
         instructions.addAll(Arrays
-                .asList(new CMP(rd, rn, null), new MOV(rd, new Imm_INT(1), "NE"),
-                        new MOV(rd, new Imm_INT(0), "EQ")));
+                .asList(new CMP(rd, rn, null), new MOV(rd, new Imm_INT(1),
+                        COND.NE),
+                        new MOV(rd, new Imm_INT(0), COND.EQ)));
         break;
 
     }
@@ -305,11 +358,11 @@ public class ASTVisitor {
     instructions.add(new MOV(R0, rd));
 
     if (((NodeElem) readNode.lhs()).type().equals(IntType.getInstance())) {
-      instructions.add(new BL("p_read_int", ""));
+      instructions.add(new BL("p_read_int"));
       specialLabels.add("p_read_int");
     } else if (((NodeElem) readNode.lhs()).type()
         .equals(CharType.getInstance())) {
-      instructions.add(new BL("p_read_char", ""));
+      instructions.add(new BL("p_read_char"));
       specialLabels.add("p_read_char");
     }
     freeReg(rd);
@@ -407,7 +460,7 @@ public class ASTVisitor {
     // malloc the number of elems plus one
     // to hold the size of the array for runtime errors
     setArg(new Imm_INT_MEM((size + 1) * WORD_SIZE));
-    instructions.add(new BL("malloc", ""));
+    instructions.add(new BL("malloc"));
     REG arrAddress = useAvailableReg();
     instructions.add(new MOV(arrAddress, R0));
     for (int i = 0; i < size; i++) { // store array elements
@@ -422,7 +475,7 @@ public class ASTVisitor {
     // set sp at the array's address
     instructions
         .add(new STR(arrAddress, new Addr(SP, true, null), false, false));
-    //nextPosInStack -= 4; ??
+    nextPosInStack -= 4;
     currentST.lookUpAllVar(varDeclareNode.varName())
         .setStackOffset(nextPosInStack);
     freeReg(sizeReg);
@@ -438,22 +491,32 @@ public class ASTVisitor {
 
   public CodeGenData visitArrayAssign(VarAssignNode varAssignNode) {
     REG newValue = (REG) visit(varAssignNode.rhs());  // get new value
-    REG elem = (REG) visit(varAssignNode.lhs()); // get array elem address
-
-    // todo
-    freeReg(elem);
+    Regs arrayData = (Regs) visit(varAssignNode.lhs()); // get array data
+    setArgs(arrayData.regs);
+    specialLabels.addAll(Arrays.asList("p_check_array_bounds", "p_throw_runtime_error",
+        "p_print_string"));
+    instructions.add(new BL("p_check_array_bounds"));
+    REG index = arrayData.regs[0];
+    REG arrAddress = arrayData.regs[1];
+    instructions.addAll(Arrays.asList(
+        new ADD(arrAddress, arrAddress, new Imm_INT(WORD_SIZE)),
+        new ADD(arrAddress, arrAddress, new Reg_Shift(index, new Shift(LSL,
+            SHIFT_TIMES_4))),
+        new STR(newValue, new Addr(arrAddress))));
+    freeRegs(arrayData.regs);
     freeReg(newValue);
     return null;
   }
 
   public CodeGenData visitArrayElem(ArrayElem arrayElem) {
-    loadVar(arrayElem.varName(), false); // todo fix isByteInstr
-    return visit(arrayElem.indexes()[0]);         // simple array case
+    REG arrAddress = loadVar(arrayElem.varName(), false);
+    REG index = (REG) visit(arrayElem.indexes()[0]); // simple array case
+    return new Regs(new REG[]{index, arrAddress});
   }
 
   private CodeGenData visitPairDeclare(VarDeclareNode varDeclareNode) {
     setArg(new Imm_INT_MEM(2 * WORD_SIZE));
-    instructions.add(new BL("malloc", ""));
+    instructions.add(new BL("malloc"));
     REG rd = useAvailableReg();
     instructions.add(new MOV(rd, R0)); // fetch address of pair
     Pair pair = (Pair) varDeclareNode.rhs();
@@ -467,7 +530,7 @@ public class ASTVisitor {
   private void storeExpInHeap(Expr expr, REG objectAddr, int offset) {
     REG rd = (REG) visit(expr);
     setArg(new Imm_INT_MEM(expr.sizeOf()));
-    instructions.add(new BL("malloc", ""));
+    instructions.add(new BL("malloc"));
     saveVarData(expr.type(), rd, R0, 0, false);
     saveVarData(expr.type(), R0, objectAddr, offset, false);
     freeReg(rd);
@@ -477,34 +540,9 @@ public class ASTVisitor {
     instructions.add(new LDR(R0, op2, false));
   }
 
-  private void addSpecialFunction(String name) {
-    switch (name) {
-      case "p_print_string":
-        addPrintString();
-        break;
-      case "p_print_int":
-        addPrintInt();
-        break;
-      case "p_print_bool":
-        addPrintBool();
-        break;
-      case "p_print_ln":
-        addPrintln();
-        break;
-      case "p_read_int":
-        addReadInt();
-        break;
-      case "p_read_char":
-        addReadChar();
-        break;
-      case "p_throw_overflow_error":
-        addOverflowErr();
-        break;
-      case "p_throw_runtime_error":
-        addRuntimeErr();
-        break;
-      case "p_check_divide_by_zero":
-        addCheckDivideByZero();
+  private void setArgs(Operand[] ops) {
+    for (int i = 0; i < ops.length && i < 4; i++) {
+      instructions.add(new MOV(REG.values()[i], ops[i]));
     }
   }
 
@@ -513,7 +551,7 @@ public class ASTVisitor {
     if (!usedRegs.isEmpty()) {
       instructions.add(new PUSH(usedRegs)); // save onto stack all used regs
     }
-    instructions.add(new BL(label, ""));
+    instructions.add(new BL(label));
     if (!usedRegs.isEmpty()) {
       Collections.reverse(usedRegs);
       instructions.add(new POP(usedRegs));  // restore previous regs from stack
@@ -537,6 +575,12 @@ public class ASTVisitor {
   private void freeReg(REG reg) {
     if (allUsableRegs.contains(reg)) {
       availableRegs.add(0, reg);
+    }
+  }
+
+  private void freeRegs(REG[] regs) {
+    for(REG r : regs) {
+      freeReg(r);
     }
   }
 

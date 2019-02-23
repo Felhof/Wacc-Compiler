@@ -24,8 +24,10 @@ public class LDR_COND extends Instr {
             + ", " + op.toString();
   }
 
-  public enum COND {
+  public static enum COND {
     EQ, NE, GT, LT,
-    GEQ, LEQ
+    GE, LE, VS, CS
   }
+
+
 }

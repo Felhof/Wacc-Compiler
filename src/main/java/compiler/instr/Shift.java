@@ -1,10 +1,10 @@
 package compiler.instr;
 
 public class Shift {
-  private ShiftType type;
+  private SHIFT_TYPE type;
   private int value;
 
-  public Shift(ShiftType type, int value) {
+  public Shift(SHIFT_TYPE type, int value) {
     this.type = type;
     this.value = value;
   }
@@ -13,5 +13,9 @@ public class Shift {
   public String toString() {
     return type.toString() +
         " #" + value;
+  }
+
+  public static enum SHIFT_TYPE {
+    ASR, LSR, LSL;
   }
 }

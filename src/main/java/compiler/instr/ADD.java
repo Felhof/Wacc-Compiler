@@ -16,6 +16,9 @@ public class ADD extends Instr {
     this.setCPSR = setCPSR;
   }
 
+  public ADD(REG rd, REG rn, Operand op) {
+    this(rd, rn, op, false);
+  }
 
   @Override
   public String toString() {
