@@ -5,6 +5,8 @@ import compiler.visitors.CodeGenData;
 
 public class ArrType extends Type {
 
+  private static ArrType stringType = new ArrType(CharType.getInstance(), 1);
+
   private Type elemType;
   private int dimension;
 
@@ -31,8 +33,6 @@ public class ArrType extends Type {
     return this;
   }
 
-
-
   @Override
   public boolean equals(Type type) {
     return type instanceof ArrType
@@ -58,6 +58,11 @@ public class ArrType extends Type {
     return (indexes == this.dimension) ? elemType() :
         new ArrType(this.elemType, dimension - indexes);
   }
+
+  public static ArrType stringType() {
+    return stringType;
+  }
+
 
   @Override
   public CodeGenData accept(ASTVisitor visitor) {

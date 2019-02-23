@@ -14,7 +14,7 @@ import org.junit.Test;
 
 public class CodegenTests {
 
-  private final String outputFolder = "src/test/java/codegen/output/";
+  private static final String outputFolder = "src/test/java/codegen/output/";
 
   @Test
   public void ExitCodeTest() {
@@ -184,17 +184,9 @@ public class CodegenTests {
     compileAndCheckExitAndOutput(path, filenames, null, expectedExitCodes,
         outputs);
   }
-
-  @Test
-  public void arrayTests() {
-    String path = "src/test/examples/valid/array/";
-    String[] filenames = {"arraySimple", "arrayLookup"};
-    String[][] outputs = {{"42"}, {"43"}};
-    compileAndCheckExitAndOutput(path, filenames, null, null, outputs);
-  }
   
   // provide path, filenames, exit codes, and expected output
-  private void compileAndCheckExitAndOutput(String path, String[] filenames,
+  public static void compileAndCheckExitAndOutput(String path, String[] filenames,
       String[] inputs,
       int[] expectedExitCodes, String[][] expectedOutput) {
     IntStream.range(0, filenames.length).forEach(i -> {
@@ -220,7 +212,7 @@ public class CodegenTests {
     });
   }
 
-  private void checkPrintsAreCorrect(Process emulator, String[] expected) {
+  public static void checkPrintsAreCorrect(Process emulator, String[] expected) {
     try {
       //Read each line of the output into the sb
       BufferedReader br = new BufferedReader(new InputStreamReader(emulator
@@ -235,7 +227,7 @@ public class CodegenTests {
     }
   }
 
-  private Process assembleAndEmulate(String filename, String input) {
+  public static Process assembleAndEmulate(String filename, String input) {
 
     try {
       // Assembler
