@@ -14,6 +14,10 @@ public class LDR extends Instr {
     this.isByteInstr = isByteInstr;
   }
 
+  public LDR(REG rd, Operand op2) {
+    this(rd, op2, false);
+  }
+
   @Override
   public String toString() {
     return "\tLDR" + (isByteInstr ? "SB " : " ") + rd.toString()+ ", " + op2.toString();
