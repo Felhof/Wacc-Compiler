@@ -7,15 +7,18 @@ public class SUB extends Instr {
   private REG rd;
   private REG rn;
   private Operand op2;
-  private boolean setCPSR;
+  private boolean setCPSR = false;
 
-  public SUB(REG rd, REG rn, Operand op2, boolean setCPSR) {
+  public SUB(REG rd, REG rn, Operand op2) {
     this.rd = rd;
     this.rn = rn;
     this.op2 = op2;
-    this.setCPSR = setCPSR;
   }
 
+  public SUB(REG rd, REG rn, Operand op2, boolean setCPSR) {
+    this(rd, rn, op2);
+    this.setCPSR = setCPSR;
+  }
 
   @Override
   public String toString() {

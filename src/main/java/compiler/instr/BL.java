@@ -1,6 +1,7 @@
 package compiler.instr;
 
-import compiler.instr.LDR_COND.COND;
+
+import compiler.instr.LDR.COND;
 
 public class BL extends Instr {
 
@@ -12,7 +13,7 @@ public class BL extends Instr {
   }
 
   public BL(String label, COND cond) {
-    this.label = label;
+    this(label);
     this.cond = cond;
   }
 

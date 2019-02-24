@@ -3,15 +3,14 @@ package compiler.instr;
 public class SECTION extends Instr {
 
   private String name;
-  private boolean global;
+  private boolean global = false;
 
   public SECTION(String name){
     this.name = name;
-    this.global = false;
   }
 
   public SECTION(String name, boolean global) {
-    this.name = name;
+    this(name);
     this.global = global;
   }
 

@@ -6,16 +6,16 @@ public class STR extends Instr {
 
   private REG rd;
   private Operand op2;
-  private boolean isByteInstr;
-  private boolean updateRn;
+  private boolean isByteInstr = false;
+  private boolean updateRn = false;
 
   public STR(REG rd, Operand op2) {
-    this(rd, op2, false, false);
+    this.rd = rd;
+    this.op2 = op2;
   }
 
   public STR(REG rd, Operand op2, boolean isByteInstr, boolean updateRn) {
-    this.rd = rd;
-    this.op2 = op2;
+    this(rd, op2);
     this.isByteInstr = isByteInstr;
     this.updateRn = updateRn;
   }

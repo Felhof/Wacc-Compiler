@@ -13,7 +13,6 @@ import static compiler.instr.Shift.SHIFT_TYPE.LSL;
 
 import compiler.AST.NodeElements.ArrayElem;
 import compiler.AST.NodeElements.Ident;
-import compiler.AST.NodeElements.LHS;
 import compiler.AST.NodeElements.ListExpr;
 import compiler.AST.NodeElements.PairElem;
 import compiler.AST.NodeElements.RHS.ArrayLiter;
@@ -52,7 +51,7 @@ import compiler.instr.CMP;
 import compiler.instr.Instr;
 import compiler.instr.LABEL;
 import compiler.instr.LDR;
-import compiler.instr.LDR_COND.COND;
+import compiler.instr.LDR.COND;
 import compiler.instr.MOV;
 import compiler.instr.MUL;
 import compiler.instr.ORR;
@@ -181,9 +180,9 @@ public class ASTVisitor {
   private Instr buildInstr(String type, REG rd, REG rn, Operand op2) {
     switch (type) {
       case "addExpr":
-        return new ADD(rd, rn, op2, false);
+        return new ADD(rd, rn, op2);
       case "sub":
-        return new SUB(rd, rn, op2, false);
+        return new SUB(rd, rn, op2);
       default:
         return null;
     }
@@ -607,7 +606,7 @@ public class ASTVisitor {
       instructions.add(new MOV(REG.values()[i], ops[i]));
     }
   }
-  
+
   private REG useAvailableReg() {
     return availableRegs.remove(0);
   }

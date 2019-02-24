@@ -14,8 +14,7 @@ public class CMP extends Instr {
   }
 
   public CMP(REG rd, Operand op, Shift s) {
-    this.rd = rd;
-    this.op = op;
+    this(rd, op);
     this.s = s;
   }
 
