@@ -17,13 +17,13 @@ public class IfCodegenTests {
     compileAndCheckExitAndOutput(path, filenames, null, null, outputs);
   }
 
-//  @Test
-//  public void IfNested() {
-//    String path = "src/test/examples/valid/scope/";
-//    String[] filenames = {"ifNested1"};
-//    String[][] outputs = {{"correct"}};
-//
-//    compileAndCheckExitAndOutput(path, filenames, null, null, outputs);
-//  }
+  @Test
+  public void IfNested() {
+    String path = "src/test/examples/valid/scope/";
+    String[] filenames = {"ifNested1", "ifNested2"};
+    String[][] outputs = {{"correct"}, {"correct"}};
+
+    compileAndCheckExitAndOutput(path, filenames, null, null, outputs);
+  }
 
 }
