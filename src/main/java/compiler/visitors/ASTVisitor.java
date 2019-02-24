@@ -474,6 +474,7 @@ public class ASTVisitor {
     REG rd = (REG) visit(varAssignNode.rhs());
     REG rn = (REG) visitHeapAlloc(varAssignNode.lhs());
     saveVarData(varAssignNode.lhs().type(), rd, rn, 0, false);
+    freeReg(rd);
     return null;
   }
 

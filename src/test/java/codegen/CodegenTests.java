@@ -129,9 +129,10 @@ public class CodegenTests {
   @Test
   public void PairTest() {
     String path = "src/test/examples/valid/pairs/";
-    String[] filenames = {"createPair", "createPair02", "createPair03", "writeFst", "writeSnd"};
+    String[] filenames = {"createPair", "createPair02", "createPair03", "writeFst", "writeSnd"};//, "readPair"};
     String[][] outputs = {{}, {}, {}, {"10", "42"}, {"a",
-        "Z"}};
+        "Z"}};// {"Please enter the first element (char): Please enter the second element (int): The first element was 0",
+    //"The second element was 0"}};
 
     compileAndCheckExitAndOutput(path, filenames, null, null, outputs);
   }
