@@ -17,7 +17,6 @@ public class ArraysCodegenTests {
 
   @Test
   public void arrayNested() {
-    // todo implement nested array case
     String path = "src/test/examples/valid/array/";
     String[] filenames = {"arrayNested"};
     String[][] outputs = {{"3", "3"}};
@@ -46,6 +45,7 @@ public class ArraysCodegenTests {
 
   @Test
   public void arrayPrint() {
+    // todo implement if and while
     String path = "src/test/examples/valid/array/";
     String[] filenames = {"arrayPrint"};
     String[][] outputs = {{"0x22008 = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9}"}};
@@ -54,12 +54,14 @@ public class ArraysCodegenTests {
 
   @Test
   public void array() {
+    // todo implement if and while
     String path = "src/test/examples/valid/array/";
     String[] filenames = {"array"};
     String[][] outputs = {{"0x22008 = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9}"}};
     compileAndCheckExitAndOutput(path, filenames, null, null, outputs);
-  }
+  }*/
 
+  /*
     @Test
   public void printArrayRef() {
     // different address but should be ok
@@ -70,4 +72,5 @@ public class ArraysCodegenTests {
     compileAndCheckExitAndOutput(path, filenames, null, null, outputs);
   }
   */
+
 }
