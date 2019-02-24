@@ -472,7 +472,7 @@ public class ASTVisitor {
 
   private CodeGenData visitPairAssign(VarAssignNode varAssignNode) {
     REG rd = (REG) visit(varAssignNode.rhs());
-    REG rn = (REG) visitHeapAlloc(varAssignNode.lhs());
+    REG rn = (REG) visitHeapPairAddr((PairElem) varAssignNode.lhs());
     saveVarData(varAssignNode.lhs().type(), rd, rn, 0, false);
     freeReg(rd);
     freeReg(rn);
@@ -607,11 +607,7 @@ public class ASTVisitor {
       instructions.add(new MOV(REG.values()[i], ops[i]));
     }
   }
-
-  private REG topRegAvailable() {
-    return availableRegs.get(0);
-  }
-
+  
   private REG useAvailableReg() {
     return availableRegs.remove(0);
   }
@@ -704,6 +700,12 @@ public class ASTVisitor {
   }
 
   public CodeGenData visitPairExpr(PairElem pairElem) {
+    REG rd = visitHeapPairAddr(pairElem);
+    instructions.add(new LDR(rd, new Addr(rd), false));
+    return rd;
+  }
+
+  private REG visitHeapPairAddr(PairElem pairElem) {
     specialLabels
       .addAll(Arrays.asList("p_check_null_pointer", "p_throw_runtime_error", "p_print_string"));
     REG rd = (REG) visit(pairElem.expr());
@@ -711,19 +713,6 @@ public class ASTVisitor {
     instructions.add(new BL("p_check_null_pointer"));
     instructions
       .add(new LDR(rd, new Addr(rd, true, new Imm_INT(pairElem.posInPair() * WORD_SIZE)), false));
-    instructions.add(new LDR(rd, new Addr(rd), false));
-    return rd;
-  }
-
-  private Operand visitHeapAlloc(LHS pairElem) {
-    specialLabels
-      .addAll(Arrays.asList("p_check_null_pointer", "p_throw_runtime_error", "p_print_string"));
-    REG rd = (REG) visit(((PairElem) pairElem).expr());
-    instructions.add(new MOV(R0, rd));
-    instructions.add(new BL("p_check_null_pointer"));
-    instructions.add(
-      new LDR(rd, new Addr(rd, true, new Imm_INT(((PairElem) pairElem).posInPair() * WORD_SIZE)),
-        false));
     return rd;
   }
 
