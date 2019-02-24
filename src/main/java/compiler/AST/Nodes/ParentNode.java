@@ -30,7 +30,7 @@ public class ParentNode extends Node {
 
   @Override
   public CodeGenData accept(ASTVisitor visitor) {
-    return null;
+    return visitor.visitParentNode(this);
   }
 
   public List<Node> children() {

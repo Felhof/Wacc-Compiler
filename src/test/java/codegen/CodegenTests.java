@@ -97,6 +97,11 @@ public class CodegenTests {
   }
 
   @Test
+  public void whileTest() {
+    compileAndCheckExitAndOutput(path + "while.txt");
+  }
+
+  @Test
   public void IfSimpleTest() {
     compileAndCheckExitAndOutput(path + "if.txt");
   }

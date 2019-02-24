@@ -38,13 +38,13 @@ import compiler.AST.Nodes.ReturnNode;
 import compiler.AST.Nodes.ScopeNode;
 import compiler.AST.Nodes.VarAssignNode;
 import compiler.AST.Nodes.VarDeclareNode;
+import compiler.AST.Nodes.WhileNode;
 import compiler.AST.SymbolTable.SymbolTable;
 import compiler.AST.SymbolTable.VarInfo;
 import compiler.AST.Types.ArrType;
 import compiler.AST.Types.BoolType;
 import compiler.AST.Types.CharType;
 import compiler.AST.Types.IntType;
-import compiler.AST.Types.PairType;
 import compiler.AST.Types.Type;
 import compiler.SubRoutines;
 import compiler.instr.ADD;
@@ -164,8 +164,9 @@ public class ASTVisitor {
 
   }
 
-  public void visitParentNode(ParentNode node) {
+  public CodeGenData visitParentNode(ParentNode node) {
     node.children().forEach(this::visit);
+    return null;
   }
 
   private void configureStack(String type) {
@@ -733,17 +734,38 @@ public class ASTVisitor {
     freeReg(rd);
 
     int scopeBranchNb = branchNb;
-    branchNb = branchNb + 2;
+    branchNb += 2;
 
     enterScope(ifElseNode.thenST());
-    ifElseNode.thenStat().children().forEach(this::visit);
+    visit(ifElseNode.thenStat());
     instructions.add(new B("L" + (scopeBranchNb + 1)));
     instructions.add(new LABEL("L" + (scopeBranchNb)));
 
     enterScope(ifElseNode.elseST());
-    ifElseNode.elseStat().children().forEach(this::visit);
+    visit(ifElseNode.elseStat());
     instructions.add(new LABEL("L" + (scopeBranchNb + 1)));
     exitScope(currentST.getEncSymTable());
+    return null;
+  }
+
+  public CodeGenData visitWhileNode(WhileNode whileNode) {
+    instructions.add(new B("L" + branchNb));
+
+    int condBranchNb = branchNb;
+    branchNb += 2;
+
+    // Add label for do statement
+    instructions.add(new LABEL("L" + (condBranchNb + 1)));
+    visit(whileNode.stat());
+
+    // Add label for condition
+    instructions.add(new LABEL("L" + condBranchNb));
+    REG rd = (REG) visit(whileNode.condition());
+
+    instructions.add(new CMP(rd, new Imm_INT(1)));
+    instructions.add(new B("L" + (condBranchNb + 1), COND.EQ));
+
+    freeReg(rd);
     return null;
   }
 

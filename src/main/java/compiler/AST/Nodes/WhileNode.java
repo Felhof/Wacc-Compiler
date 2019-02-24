@@ -18,6 +18,14 @@ public class WhileNode extends Node {
     this.statST = statST;
   }
 
+  public Expr condition() {
+    return condition;
+  }
+
+  public ParentNode stat() {
+    return stat;
+  }
+
   @Override
   public String toString() {
     return "While (" + condition + ")" +
@@ -26,6 +34,6 @@ public class WhileNode extends Node {
 
   @Override
   public CodeGenData accept(ASTVisitor visitor) {
-    return null;
+    return visitor.visitWhileNode(this);
   }
 }
