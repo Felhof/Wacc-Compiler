@@ -14,26 +14,16 @@ public class ArraysCodegenTests {
     compileAndCheckExitAndOutput(path, filenames, null, null, outputs);
   }
 
-  /*
-  @Test
-  public void printArrayRef() {
-    // different address but should be ok
-    String path = "src/test/examples/valid/array/";
-    String[] filenames = {"printRef"};
-    String[][] outputs =
-        {{"Printing an array variable gives an address, such as 0x23010"}};
-    compileAndCheckExitAndOutput(path, filenames, null, null, outputs);
-  }
 
   @Test
   public void arrayNested() {
     // todo implement nested array case
     String path = "src/test/examples/valid/array/";
     String[] filenames = {"arrayNested"};
-    String[][] outputs = {{"3\n3"}};
+    String[][] outputs = {{"3", "3"}};
     compileAndCheckExitAndOutput(path, filenames, null, null, outputs);
   }
-
+/*
   @Test
   public void stringAsArray() {
     // todo implement string as array behaviour
@@ -67,6 +57,16 @@ public class ArraysCodegenTests {
     String path = "src/test/examples/valid/array/";
     String[] filenames = {"array"};
     String[][] outputs = {{"0x22008 = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9}"}};
+    compileAndCheckExitAndOutput(path, filenames, null, null, outputs);
+  }
+
+    @Test
+  public void printArrayRef() {
+    // different address but should be ok
+    String path = "src/test/examples/valid/array/";
+    String[] filenames = {"printRef"};
+    String[][] outputs =
+        {{"Printing an array variable gives an address, such as 0x23010"}};
     compileAndCheckExitAndOutput(path, filenames, null, null, outputs);
   }
   */
