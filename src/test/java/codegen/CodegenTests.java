@@ -132,10 +132,9 @@ public class CodegenTests {
   public void PairTest() {
     String path = "src/test/examples/valid/pairs/";
     String[] filenames = {"createPair", "createPair02", "createPair03", "writeFst", "writeSnd",
-      "printNullPair", "printNull", "null", "createRefPair", "nestedPair", "checkRefPair", "free"};//, "linkedList"};
+      "printNullPair", "printNull", "null", "createRefPair", "nestedPair", "free"};//, "linkedList"};
     String[][] outputs = {{}, {}, {}, {"10", "42"}, {"a",
-      "Z"}, {"(nil)"}, {"(nil)"}, {"(nil)", "(nil)"}, {}, {},
-      {"0x22008", "0x22008", "true", "10", "10", "true", "a", "a"}, {}};//, {"list = {1, 2, 4, 11}"}};
+      "Z"}, {"(nil)"}, {"(nil)"}, {"(nil)", "(nil)"}, {}, {}, {}};//, {"list = {1, 2, 4, 11}"}};
 
     compileAndCheckExitAndOutput(path, filenames, null, null, outputs);
   }

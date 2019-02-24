@@ -31,6 +31,26 @@ public class IfElseNode extends Node {
 
   @Override
   public CodeGenData accept(ASTVisitor visitor) {
-    return null;
+    return visitor.visitIfElseNode(this);
+  }
+
+  public SymbolTable thenST() {
+    return thenST;
+  }
+
+  public SymbolTable elseST() {
+    return elseST;
+  }
+
+  public Expr cond() {
+    return condition;
+  }
+
+  public ParentNode thenStat() {
+    return thenStat;
+  }
+
+  public ParentNode elseStat() {
+    return elseStat;
   }
 }
