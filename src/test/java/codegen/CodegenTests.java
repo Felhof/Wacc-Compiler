@@ -66,7 +66,7 @@ public class CodegenTests {
 
   @Test
   public void PairTest() {
-    compileAndCheckExitAndOutput(path + "print.txt");
+    compileAndCheckExitAndOutput(path + "pair.txt");
   }
 
   @Test
@@ -87,6 +87,12 @@ public class CodegenTests {
   @Test
   public void simpleRuntimeErr() {
     compileAndCheckExitAndOutput(path + "runtime_errors.txt");
+
+  }
+
+  @Test
+  public void scopeTest() {
+    compileAndCheckExitAndOutput(path + "scope.txt");
 
   }
 
