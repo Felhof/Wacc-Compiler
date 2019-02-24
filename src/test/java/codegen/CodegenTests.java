@@ -138,16 +138,6 @@ public class CodegenTests {
   }
 
   @Test
-  public void simpleFunctions() {
-    String path = "src/test/examples/valid/function/simple_functions/";
-    String[] filenames = {"functionDeclaration", "functionSimple",
-      "sameArgName2"};
-    String[][] outputs = {{}, {}, {"99"}};
-
-    compileAndCheckExitAndOutput(path, filenames, null, null, outputs);
-  }
-
-  @Test
   public void simpleRuntimeErr() {
     String path = "src/test/examples/valid/runtimeErr/integerOverflow/";
     String[] filenames = {"intWayOverflow", "intnegateOverflow4",

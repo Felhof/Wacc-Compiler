@@ -13,15 +13,17 @@ public class FuncNode extends Node {
   private ListExpr paramList;
   private ParentNode parentNode;
   private SymbolTable symbolTable;
+  private int stackOffset;
 
   public FuncNode(Type returnType, String name,
-      ListExpr paramList, ParentNode parentNode, SymbolTable st, int lineNumber) {
+      ListExpr paramList, ParentNode parentNode, SymbolTable st, int lineNumber, int stackOffset) {
     super(lineNumber);
     this.returnType = returnType;
     this.name = name;
     this.paramList = paramList;
     this.parentNode = parentNode;
     symbolTable = st;
+    this.stackOffset = stackOffset;
   }
 
   @Override
@@ -52,5 +54,9 @@ public class FuncNode extends Node {
 
   public ListExpr paramList() {
     return paramList;
+  }
+
+  public int funcStackOffset() {
+    return stackOffset;
   }
 }

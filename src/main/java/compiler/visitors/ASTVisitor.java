@@ -74,6 +74,7 @@ import compiler.instr.STR;
 import compiler.instr.STRING_FIELD;
 import compiler.instr.SUB;
 import compiler.instr.Shift;
+import compiler.instr.EOR;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -138,8 +139,6 @@ public class ASTVisitor {
   }
 
   public List<Instr> generate(AST root) {
-    totalStackOffset = Integer.parseInt(root.stackOffset());
-    nextPosInStack = totalStackOffset;
     constructStartProgram();
     visitFuncsAndChildren(root);
     constructEndProgram();
@@ -152,8 +151,13 @@ public class ASTVisitor {
 
   private void visitFuncsAndChildren(AST root) {
     root.root().children().stream().filter(node -> node instanceof FuncNode)
-        .forEach(
-            this::visit);
+        .forEach(f -> {
+          totalStackOffset = ((FuncNode) f).funcStackOffset();
+          nextPosInStack = totalStackOffset;
+          visit(f);
+        });
+    totalStackOffset = Integer.parseInt(root.stackOffset());
+    nextPosInStack = totalStackOffset;
     enterScope(root.symbolTable());
     instructions.add(new LABEL("main"));
     instructions.add(new PUSH(LR));
@@ -183,7 +187,7 @@ public class ASTVisitor {
 
   private Instr buildInstr(String type, REG rd, REG rn, Operand op2) {
     switch (type) {
-      case "addExpr":
+      case "add":
         return new ADD(rd, rn, op2);
       case "sub":
         return new SUB(rd, rn, op2);
@@ -193,7 +197,7 @@ public class ASTVisitor {
   }
 
   private void constructEndProgram() {
-    configureStack("addExpr");
+    configureStack("add");
     setArg(new Imm_INT_MEM(toInt("0")));
     instructions.add(new POP(PC));
     instructions.add(new SECTION("ltorg"));
@@ -222,19 +226,29 @@ public class ASTVisitor {
         && expr.operator() == UNOP.MINUS) {
       ((IntExpr) expr.insideExpr()).setNegative();
       return visit(expr.insideExpr());
-    } else if (expr.insideExpr() instanceof Ident
-        && expr.operator() == UNOP.MINUS) {
-      REG rd = (REG) visit(expr.insideExpr());
-      specialLabels.addAll(
-          Arrays.asList("p_throw_overflow_error", "p_throw_runtime_error",
-              "p_print_string"));
-      instructions.add(new RS(rd, rd, new Imm_INT(0), "BS"));
-      instructions.add(new B("p_throw_overflow_error", true, COND.VS));
-      return rd;
     }
 
+    REG rd = (REG) visit(expr.insideExpr());
+    switch (expr.operator()) {
+      case MINUS:
+        specialLabels.addAll(
+            Arrays.asList("p_throw_overflow_error", "p_throw_runtime_error",
+                "p_print_string"));
+        instructions.add(new RS(rd, rd, new Imm_INT(0), "BS"));
+        instructions.add(new B("p_throw_overflow_error", true, COND.VS));
+        return rd;
+      case NEG:
+        instructions.add(new EOR(rd, rd, new Imm_INT(1)));
+        return rd;
+      default:
+        return null;
+    }
+
+//    else if (expr.insideExpr() instanceof Ident
+//        && expr.operator() == UNOP.MINUS) {
+//            return rd;
     //TODO: handle other types
-    return null;
+
   }
 
   public CodeGenData visitIntExpr(IntExpr expr) {
@@ -660,10 +674,12 @@ public class ASTVisitor {
     enterScope(funcNode.symbolTable());
     instructions.add(new LABEL("f_" + funcNode.name()));
     instructions.add(new PUSH(LR));
+    configureStack("sub");
     if (!funcNode.paramList().exprList().isEmpty()) {
       visit(funcNode.paramList());
     }
     funcNode.getParentNode().children().forEach(this::visit);
+    configureStack("add");
     instructions.addAll(Arrays.asList(new POP(PC), new POP(PC)));
     instructions.add(new SECTION("ltorg"));
     exitScope(currentST.getEncSymTable());
@@ -691,11 +707,10 @@ public class ASTVisitor {
   public CodeGenData visitParams(ListExpr listExpr) {
     List<String> paramNames = listExpr.paramNames();
     List<Expr> exprList = listExpr.exprList();
-    int offset =
-        listExpr.bytesPushed() + exprList.get(exprList.size() - 1).sizeOf();
-    for (int i = exprList.size() - 1; i >= 0; i--) {
-      offset -= exprList.get(i).sizeOf();
-      currentST.lookUpAllVar(paramNames.get(i)).setStackOffset(offset);
+    int offset = WORD_SIZE + totalStackOffset;
+    for (int i = 0; i < exprList.size(); i++) {
+      currentST.lookUpVarScope(paramNames.get(i)).setStackOffset(offset);
+      offset += exprList.get(i).sizeOf();
     }
     return null;
   }
