@@ -96,7 +96,7 @@ public class ASTVisitor {
   private SymbolTable currentST;
   private int totalStackOffset;
   private int nextPosInStack;
-  private int offsetFromInitialSP;
+  private int offsetToStoredVariablesInTheStack;
   private int branchNb = 0;
 
   public ASTVisitor() {
@@ -104,7 +104,7 @@ public class ASTVisitor {
     data = new ArrayList<>();
     this.specialLabels = new LinkedHashSet<>();
     availableRegs = new ArrayList<>(allUsableRegs);
-    offsetFromInitialSP = 0;
+    offsetToStoredVariablesInTheStack = 0;
     new SubRoutines(instructions);
   }
 
@@ -409,7 +409,7 @@ public class ASTVisitor {
     REG rd = useAvailableReg();
     instructions.add(new ADD(rd, SP, new Imm_INT(
         currentST.lookUpAllVar(readNode.lhs().varName()).getStackOffset()
-            - offsetFromInitialSP),
+            + offsetToStoredVariablesInTheStack),
         false));
 
     instructions.add(new MOV(R0, rd));
@@ -506,10 +506,10 @@ public class ASTVisitor {
     if (varInScope != null && !varInScope.getType()
         .equals(varAssignNode.lhs().type())) {
       offset = currentST.getEncSymTable().lookUpAllVar(varName).getStackOffset()
-          - offsetFromInitialSP;
+          + offsetToStoredVariablesInTheStack;
     } else {
       offset = currentST.lookUpAllVar(varName)
-          .getStackOffset() - offsetFromInitialSP;
+          .getStackOffset() + offsetToStoredVariablesInTheStack;
     }
     saveVarData(varAssignNode.rhs().type(), rd, SP, offset, false);
     freeReg(rd);
@@ -656,7 +656,7 @@ public class ASTVisitor {
   private REG loadVar(String varName, boolean isByteInstr) {
     REG rd = useAvailableReg();
     int offset = currentST.lookUpAllVar(varName).getStackOffset()
-        - offsetFromInitialSP;
+        + offsetToStoredVariablesInTheStack;
     instructions.add(new LDR(rd,
         new Addr(SP, true, new Imm_INT(offset)), isByteInstr));
     return rd;
@@ -665,7 +665,7 @@ public class ASTVisitor {
   private REG loadFromStack(String varName) {
     REG rd = useAvailableReg();
     int offset = currentST.lookUpAllVar(varName).getStackOffset()
-        - offsetFromInitialSP;
+        + offsetToStoredVariablesInTheStack;
     instructions.add(new ADD(rd, SP, new Imm_INT(offset)));
     return rd;
   }
@@ -696,7 +696,7 @@ public class ASTVisitor {
   public CodeGenData visitFuncCall(FuncCall funcCall) {
     visit(funcCall.argsList());
     instructions.add(new B("f_" + funcCall.funcName(), true));
-    offsetFromInitialSP = 0;
+    offsetToStoredVariablesInTheStack = 0;
     instructions.add(
         new ADD(SP, SP, new Imm_INT(funcCall.argsList().bytesPushed()), false));
     REG rd = useAvailableReg();
@@ -707,6 +707,8 @@ public class ASTVisitor {
   public CodeGenData visitParams(ListExpr listExpr) {
     List<String> paramNames = listExpr.paramNames();
     List<Expr> exprList = listExpr.exprList();
+    // LR has been pushed and we have some space for the variable declaration
+    // the arguments reside at this offset from the current stack pointer
     int offset = WORD_SIZE + totalStackOffset;
     for (int i = 0; i < exprList.size(); i++) {
       currentST.lookUpVarScope(paramNames.get(i)).setStackOffset(offset);
@@ -723,7 +725,7 @@ public class ASTVisitor {
       int offsetFromBase =
           (!(e.type() instanceof CharType) && !(e.type() instanceof BoolType))
               ? -WORD_SIZE : -BYTE;
-      offsetFromInitialSP += offsetFromBase;
+      offsetToStoredVariablesInTheStack -= offsetFromBase;
       saveVarData(e.type(), rd, SP, offsetFromBase,
           true);
       freeReg(rd);
