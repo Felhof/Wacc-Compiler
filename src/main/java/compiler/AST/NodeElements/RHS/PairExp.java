@@ -23,6 +23,6 @@ public class PairExp extends Expr {
 
   @Override
   public CodeGenData accept(ASTVisitor visitor) {
-    return null;
+    return visitor.visitNullPair();
   }
 }

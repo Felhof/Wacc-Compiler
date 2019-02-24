@@ -596,10 +596,10 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
     int pos;
     if (ctx.SND() == null) {
       type = ((PairType) expr.type()).getFst();
-      pos = 1;
+      pos = 0;
     } else {
       type = ((PairType) expr.type()).getSnd();
-      pos = 2;
+      pos = 1;
     }
     return new PairElem(type, expr, pos);
   }

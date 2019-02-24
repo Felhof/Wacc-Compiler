@@ -23,7 +23,7 @@ public class CodegenTests {
     int[] expectedExitCodes = {255, 7, 42, 0};
 
     compileAndCheckExitAndOutput(path, filenames, null, expectedExitCodes,
-        null);
+      null);
   }
 
   @Test
@@ -46,9 +46,9 @@ public class CodegenTests {
   public void basicVariableTest() {
     String path = "src/test/examples/valid/variables/";
     String[] filenames = {"boolDeclaration", "boolDeclaration2",
-        "charDeclaration", "charDeclaration2",
-        "capCharDeclaration", "intDeclaration", "negIntDeclaration",
-        "zeroIntDeclaration", "manyVariables"};// "puncCharDeclaration"};
+      "charDeclaration", "charDeclaration2",
+      "capCharDeclaration", "intDeclaration", "negIntDeclaration",
+      "zeroIntDeclaration", "manyVariables"};// "puncCharDeclaration"};
 
     compileAndCheckExitAndOutput(path, filenames, null, null, null);
   }
@@ -57,9 +57,9 @@ public class CodegenTests {
   public void boolExpressionTest() {
     String path = "src/test/examples/valid/expressions/";
     String[] filenames = {"boolCalc", "andExpr", "boolOrExpr",
-        "boolNestedExpr", "boolLongExpr"};
+      "boolNestedExpr", "boolLongExpr"};
     String[][] outputs = {{"false"}, {"false", "true", "false"},
-        {"true", "true", "true", "false"}, {"true"}, {"true"}};
+      {"true", "true", "true", "false"}, {"true"}, {"true"}};
 
     compileAndCheckExitAndOutput(path, filenames, null, null, outputs);
   }
@@ -67,10 +67,12 @@ public class CodegenTests {
   @Test
   public void integerExpressionTest() {
     String path = "src/test/examples/valid/expressions/";
-    String[] filenames = {"intCalc","divExpr","multExpr","modExpr", "equalsExpr", "greaterEqExpr", "greaterExpr",
-            "lessEqExpr","lessExpr","notequalsExpr"};
-    String[][] outputs = {{"72"},{"1"},{"15"},{"2"}, {"false","false","true"}, {"false","true", "true"},
-            {"false","true"},{"true","false","true"},{"true","false"},{"true","true","false"}};
+    String[] filenames = {"intCalc", "divExpr", "multExpr", "modExpr", "equalsExpr",
+      "greaterEqExpr", "greaterExpr",
+      "lessEqExpr", "lessExpr", "notequalsExpr"};
+    String[][] outputs = {{"72"}, {"1"}, {"15"}, {"2"}, {"false", "false", "true"},
+      {"false", "true", "true"},
+      {"false", "true"}, {"true", "false", "true"}, {"true", "false"}, {"true", "true", "false"}};
 
     compileAndCheckExitAndOutput(path, filenames, null, null, outputs);
   }
@@ -79,7 +81,7 @@ public class CodegenTests {
   public void charExpressionTest() {
     String path = "src/test/examples/valid/expressions/";
     String[] filenames = {"charComparisonExpr"};
-    String[][] outputs = {{"false","true","true","true","false","false"}};
+    String[][] outputs = {{"false", "true", "true", "true", "false", "false"}};
 
     compileAndCheckExitAndOutput(path, filenames, null, null, outputs);
   }
@@ -87,8 +89,8 @@ public class CodegenTests {
   @Test
   public void longExpressionTest() {
     String path = "src/test/examples/valid/expressions/";
-    String[] filenames = { "longExpr","longExpr2","longExpr3","longMultExpr"};
-    int[] expectedExitCodes = { 153, 10, 9, 16};
+    String[] filenames = {"longExpr", "longExpr2", "longExpr3", "longMultExpr"};
+    int[] expectedExitCodes = {153, 10, 9, 16};
 
     compileAndCheckExitAndOutput(path, filenames, null, expectedExitCodes, null);
   }
@@ -109,19 +111,19 @@ public class CodegenTests {
     int[] expectedExitCodes = {5, 19};
 
     compileAndCheckExitAndOutput(path, filenames, null, expectedExitCodes,
-        null);
+      null);
   }
 
   @Test
   public void PrintTest() {
     String path = "src/test/examples/valid/IO/print/";
     String[] filenames = {"print", "println", "printChar", "multipleLines",
-        "printInt", "printBool", "printEscChar"};
+      "printInt", "printBool", "printEscChar"};
     String[][] expectedOutput = {{"Hello World!"}, {"Hello World!"},
-        {"A simple character example is f"}, {"Line1", "Line2"},
-        {"An example integer is 189"},
-        {"True is true", "False is false"},
-        {"An escaped character example is \""}};
+      {"A simple character example is f"}, {"Line1", "Line2"},
+      {"An example integer is 189"},
+      {"True is true", "False is false"},
+      {"An escaped character example is \""}};
 
     compileAndCheckExitAndOutput(path, filenames, null, null, expectedOutput);
   }
@@ -129,9 +131,13 @@ public class CodegenTests {
   @Test
   public void PairTest() {
     String path = "src/test/examples/valid/pairs/";
-    String[] filenames = {"createPair", "createPair02", "createPair03"};
+    String[] filenames = {"createPair", "createPair02", "createPair03", "writeFst", "writeSnd",
+      "printNullPair", "printNull", "null", "createRefPair", "nestedPair", "checkRefPair", "free"};//, "linkedList"};
+    String[][] outputs = {{}, {}, {}, {"10", "42"}, {"a",
+      "Z"}, {"(nil)"}, {"(nil)"}, {"(nil)", "(nil)"}, {}, {},
+      {"0x22008", "0x22008", "true", "10", "10", "true", "a", "a"}, {}};//, {"list = {1, 2, 4, 11}"}};
 
-    compileAndCheckExitAndOutput(path, filenames, null, null, null);
+    compileAndCheckExitAndOutput(path, filenames, null, null, outputs);
   }
 
   @Test
@@ -148,7 +154,7 @@ public class CodegenTests {
   public void simpleFunctions() {
     String path = "src/test/examples/valid/function/simple_functions/";
     String[] filenames = {"functionDeclaration", "functionSimple",
-        "sameArgName2"};
+      "sameArgName2"};
     String[][] outputs = {{}, {}, {"99"}};
 
     compileAndCheckExitAndOutput(path, filenames, null, null, outputs);
@@ -158,37 +164,37 @@ public class CodegenTests {
   public void simpleRuntimeErr() {
     String path = "src/test/examples/valid/runtimeErr/integerOverflow/";
     String[] filenames = {"intWayOverflow", "intnegateOverflow4",
-        "intUnderflow", "intJustOverflow", "intmultOverflow",
-        "intnegateOverflow2", "intnegateOverflow3", "intnegateOverflow"};
+      "intUnderflow", "intJustOverflow", "intmultOverflow",
+      "intnegateOverflow2", "intnegateOverflow3", "intnegateOverflow"};
     int[] expectedExitCodes = {255, 255, 255, 255, 255, 255, 255, 255};
     String[][] outputs = {
-        {"2000000000",
+      {"2000000000",
         "OverflowError: the result is too small/large to store in a 4-byte signed-integer."},
-        {"-2000000000",
-            "OverflowError: the result is too small/large to store in a 4-byte signed-integer."},
-        {"-2147483647"
-            , "-2147483648",
-            "OverflowError: the result is too small/large to store in a 4-byte signed-integer."},
-        {"2147483646",
-            "2147483647",
-            "OverflowError: the result is too small/large to store in a 4-byte signed-integer."},
-        {"2147483",
-            "2147483000",
-            "OverflowError: the result is too small/large to store in a 4-byte signed-integer."},
-        {"-2147483648",
-            "OverflowError: the result is too small/large to store in a 4-byte signed-integer."},
-        {"-20000",
-            "OverflowError: the result is too small/large to store in a 4-byte signed-integer."},
-        { "-2147483648",
+      {"-2000000000",
+        "OverflowError: the result is too small/large to store in a 4-byte signed-integer."},
+      {"-2147483647"
+        , "-2147483648",
+        "OverflowError: the result is too small/large to store in a 4-byte signed-integer."},
+      {"2147483646",
+        "2147483647",
+        "OverflowError: the result is too small/large to store in a 4-byte signed-integer."},
+      {"2147483",
+        "2147483000",
+        "OverflowError: the result is too small/large to store in a 4-byte signed-integer."},
+      {"-2147483648",
+        "OverflowError: the result is too small/large to store in a 4-byte signed-integer."},
+      {"-20000",
+        "OverflowError: the result is too small/large to store in a 4-byte signed-integer."},
+      {"-2147483648",
         "OverflowError: the result is too small/large to store in a 4-byte signed-integer."}};
     compileAndCheckExitAndOutput(path, filenames, null, expectedExitCodes,
-        outputs);
+      outputs);
   }
-  
+
   // provide path, filenames, exit codes, and expected output
   public static void compileAndCheckExitAndOutput(String path, String[] filenames,
-      String[] inputs,
-      int[] expectedExitCodes, String[][] expectedOutput) {
+    String[] inputs,
+    int[] expectedExitCodes, String[][] expectedOutput) {
     IntStream.range(0, filenames.length).forEach(i -> {
       String filename = filenames[i];
       AST ast = Main.compileProg(path + filename + ".wacc");
@@ -216,7 +222,7 @@ public class CodegenTests {
     try {
       //Read each line of the output into the sb
       BufferedReader br = new BufferedReader(new InputStreamReader(emulator
-          .getInputStream()));
+        .getInputStream()));
 
       for (String expectedLine : expected) {
         String actualLine = br.readLine();
@@ -232,17 +238,17 @@ public class CodegenTests {
     try {
       // Assembler
       Process assembler = new ProcessBuilder("arm-linux-gnueabi-gcc", "-o",
-          filename, "-mcpu=arm1176jzf-s", "-mtune=arm1176jzf-s",
-          filename + ".s").start();
+        filename, "-mcpu=arm1176jzf-s", "-mtune=arm1176jzf-s",
+        filename + ".s").start();
       assembler.waitFor();
 
       // Emulator
       Process emulator = new ProcessBuilder("qemu-arm", "-L", "/usr"
-          + "/arm-linux-gnueabi/", filename).start();
+        + "/arm-linux-gnueabi/", filename).start();
 
       if (input != null) {
         BufferedWriter writer = new BufferedWriter(
-            new OutputStreamWriter(emulator.getOutputStream()));
+          new OutputStreamWriter(emulator.getOutputStream()));
 
         writer.write(input);
         writer.flush();

@@ -1,21 +1,28 @@
 package compiler.AST.NodeElements.RHS;
 
 import compiler.AST.Types.CharType;
+import compiler.instr.STRING_FIELD;
 import compiler.visitors.ASTVisitor;
 import compiler.visitors.CodeGenData;
 
 public class CharExpr extends Expr {
 
   private String value;
+  private boolean isEscapeChar = false;
 
   public CharExpr(String value) {
     super(CharType.getInstance());
     this.value = value.substring(1, value.length() - 1);
-
+    isEscapeChar = STRING_FIELD.escape.contains(this.value);
   }
 
-  public String getValue() {
-    return value;
+  public String value() {
+    return (isEscapeChar ? String
+      .valueOf((int) STRING_FIELD.escapeChars.get(STRING_FIELD.escape.indexOf(value))) : value);
+  }
+
+  public boolean isEscapeChar() {
+    return isEscapeChar;
   }
 
   @Override

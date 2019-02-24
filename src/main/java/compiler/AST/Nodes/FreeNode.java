@@ -1,6 +1,7 @@
 package compiler.AST.Nodes;
 
 import compiler.AST.NodeElements.RHS.Expr;
+import compiler.visitors.ASTData;
 import compiler.visitors.ASTVisitor;
 import compiler.visitors.CodeGenData;
 
@@ -18,6 +19,10 @@ public class FreeNode extends Node{
 
   @Override
   public CodeGenData accept(ASTVisitor visitor) {
-    return null;
+    return visitor.visitFreeNode(this);
+  }
+
+  public Expr freeExpr() {
+    return freeExpr;
   }
 }

@@ -1,7 +1,6 @@
 package compiler.AST.Nodes;
 
 import compiler.AST.NodeElements.LHS;
-import compiler.AST.NodeElements.NodeElem;
 import compiler.visitors.ASTVisitor;
 import compiler.visitors.CodeGenData;
 
