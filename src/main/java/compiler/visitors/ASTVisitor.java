@@ -733,15 +733,18 @@ public class ASTVisitor {
     instructions.add(new CMP(rd, new Imm_INT(0)));
     instructions.add(new B("L" + branchNb, COND.EQ));
     freeReg(rd);
-    int tempBranchNb = branchNb;
+
+    int scopeBranchNb = branchNb;
     branchNb = branchNb + 2;
+
     currentST = ifElseNode.thenST();
     ifElseNode.thenStat().children().forEach(this::visit);
-    instructions.add(new B("L" + (tempBranchNb + 1)));
-    instructions.add(new LABEL("L" + (tempBranchNb)));
+    instructions.add(new B("L" + (scopeBranchNb + 1)));
+    instructions.add(new LABEL("L" + (scopeBranchNb)));
+
     currentST = ifElseNode.elseST();
     ifElseNode.elseStat().children().forEach(this::visit);
-    instructions.add(new LABEL("L" + (tempBranchNb + 1)));
+    instructions.add(new LABEL("L" + (scopeBranchNb + 1)));
     return null;
   }
 }
