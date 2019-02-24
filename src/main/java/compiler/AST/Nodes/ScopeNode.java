@@ -6,7 +6,8 @@ import compiler.visitors.CodeGenData;
 
 public class ScopeNode extends Node {
 
-  SymbolTable symbolTable;
+  private SymbolTable symbolTable;
+  private ParentNode parentNode;
 
   public ScopeNode(ParentNode parentNode,
       SymbolTable symbolTable, int lineNumber) {
@@ -15,8 +16,6 @@ public class ScopeNode extends Node {
     this.symbolTable = symbolTable;
   }
 
-  private ParentNode parentNode;
-
   @Override
   public String toString() {
     return "NewScopeNode:" + parentNode.toString();
@@ -24,6 +23,14 @@ public class ScopeNode extends Node {
 
   @Override
   public CodeGenData accept(ASTVisitor visitor) {
-    return null;
+    return visitor.visitNewScope(this);
+  }
+
+  public SymbolTable symbolTable() {
+    return symbolTable;
+  }
+
+  public ParentNode parentNode() {
+    return parentNode;
   }
 }
