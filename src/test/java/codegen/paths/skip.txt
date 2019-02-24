@@ -1,0 +1,3 @@
+src/test/examples/valid/basic/skip/comment.wacc
+src/test/examples/valid/basic/skip/commentInLine.wacc
+src/test/examples/valid/basic/skip/skip.wacc

@@ -1,0 +1,12 @@
+src/test/examples/valid/array/arrayBasic.wacc
+src/test/examples/valid/array/arrayEmpty.wacc
+src/test/examples/valid/array/arrayLookup.wacc {43}
+src/test/examples/valid/array/arrayNested.wacc {3,3}
+src/test/examples/valid/array/arraySimple.wacc {42}
+src/test/examples/valid/array/modifyString.wacc {hello world!,Hello world!,Hi!}
+
+src/test/examples/valid/array/arrayLength.wacc {4} unary op
+src/test/examples/valid/array/arrayPrint.wacc {0x22008 = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9}} while
+src/test/examples/valid/array/array.wacc {{0x22008 = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9}}} while
+
+src/test/examples/valid/array/printRef.wacc {Printing an array variable gives an address, such as 0x23010} ok

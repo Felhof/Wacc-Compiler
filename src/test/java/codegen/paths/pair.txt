@@ -1,0 +1,20 @@
+src/test/examples/valid/pairs/createPair.wacc
+src/test/examples/valid/pairs/createPair02.wacc
+src/test/examples/valid/pairs/createPair03.wacc {10,42}
+src/test/examples/valid/pairs/createRefPair.wacc
+src/test/examples/valid/pairs/free.wacc
+src/test/examples/valid/pairs/nestedPair.wacc
+src/test/examples/valid/pairs/null.wacc {(nil),(nil)}
+src/test/examples/valid/pairs/printNull.wacc {(nil)}
+src/test/examples/valid/pairs/printNullPair.wacc {(nil)}
+src/test/examples/valid/pairs/writeFst.wacc {10,42}
+src/test/examples/valid/pairs/writeSnd.wacc {a,Z}
+
+src/test/examples/valid/pairs/linkedList.wacc {list = {1, 2, 4, 11}} implement while
+
+src/test/examples/valid/pairs/printPair.wacc {0x22008 = (10, a)} ok
+src/test/examples/valid/pairs/printPairOfNulls.wacc {0x22008 = ((nil),(nil))} ok
+src/test/examples/valid/pairs/readPair.wacc ok
+src/test/examples/valid/pairs/checkRefPair.wacc {0x22008,0x22008,true,10,10,true,a,a} ok
+
+

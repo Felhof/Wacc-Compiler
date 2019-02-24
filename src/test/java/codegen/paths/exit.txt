@@ -1,0 +1,4 @@
+src/test/examples/valid/basic/exit/exit-1.wacc 255
+src/test/examples/valid/basic/exit/exitBasic.wacc 7
+src/test/examples/valid/basic/exit/exitBasic2.wacc 42
+src/test/examples/valid/basic/exit/exitWrap.wacc

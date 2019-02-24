@@ -24,6 +24,6 @@ public class ArrayLiter extends NodeElem implements ASTData {
 
   @Override
   public CodeGenData accept(ASTVisitor visitor) {
-    return null;
+    return visitor.visitArrayLiter(this);
   }
 }

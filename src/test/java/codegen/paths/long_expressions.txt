@@ -1,0 +1,6 @@
+src/test/examples/valid/expressions/longExpr.wacc 153
+src/test/examples/valid/expressions/longExpr2.wacc 10
+src/test/examples/valid/expressions/longExpr3.wacc 9
+src/test/examples/valid/expressions/longMultExpr.wacc 16
+src/test/examples/valid/expressions/longSplitExpr.wacc 153
+src/test/examples/valid/expressions/longSplitExpr2.wacc 128 {362880,128}

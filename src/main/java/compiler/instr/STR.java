@@ -20,13 +20,18 @@ public class STR extends Instr {
     this.updateRn = updateRn;
   }
 
+  public STR(REG rd, Operand op2, boolean isByteInstr) {
+    this(rd, op2);
+    this.isByteInstr = isByteInstr;
+  }
+
+
+
   @Override
   public String toString() {
-    String strByte = "";
-    if (isByteInstr) {
-      strByte += "B";
-    }
-    return "\tSTR" + strByte + " " + rd.toString() + ", " + op2.toString() + (
+    return "\tSTR" + (isByteInstr ? "B " : " ")
+        + rd.toString() + ", "
+        + op2.toString() + (
         updateRn ? "!" : "");
   }
 }

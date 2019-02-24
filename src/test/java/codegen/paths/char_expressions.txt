@@ -1,0 +1,2 @@
+src/test/examples/valid/expressions/lessCharExpr.wacc {true,false}
+src/test/examples/valid/expressions/charComparisonExpr.wacc {false,true,true,true,false,false}
