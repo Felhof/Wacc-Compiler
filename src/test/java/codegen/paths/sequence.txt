@@ -1,0 +1,8 @@
+src/test/examples/valid/sequence/basicSeq.wacc
+src/test/examples/valid/sequence/basicSeq2.wacc
+src/test/examples/valid/sequence/boolAssignment.wacc
+src/test/examples/valid/sequence/charAssignment.wacc
+src/test/examples/valid/sequence/exitSimple.wacc 42
+src/test/examples/valid/sequence/intAssignment.wacc 20
+src/test/examples/valid/sequence/intLeadingZeros.wacc {42,0}
+src/test/examples/valid/sequence/stringAssignment.wacc

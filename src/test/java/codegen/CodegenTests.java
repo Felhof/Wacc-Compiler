@@ -1,5 +1,7 @@
 package codegen;
 
+import static compiler.Main.extractFileName;
+import static junit.framework.TestCase.fail;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 
@@ -14,210 +16,119 @@ import org.junit.Test;
 
 public class CodegenTests {
 
+  private static final String path = "src/test/java/codegen/paths/";
   private static final String outputFolder = "src/test/java/codegen/output/";
 
   @Test
   public void ExitCodeTest() {
-    String path = "src/test/examples/valid/basic/exit/";
-    String[] filenames = {"exit-1", "exitBasic", "exitBasic2", "exitWrap"};
-    int[] expectedExitCodes = {255, 7, 42, 0};
-
-    compileAndCheckExitAndOutput(path, filenames, null, expectedExitCodes,
-      null);
+    compileAndCheckExitAndOutput(path + "exit.txt");
   }
 
   @Test
   public void SkipTest() {
-    String path = "src/test/examples/valid/basic/skip/";
-    String[] filenames = {"skip", "comment", "commentInLine"};
-
-    compileAndCheckExitAndOutput(path, filenames, null, null, null);
+    compileAndCheckExitAndOutput(path + "skip.txt");
   }
 
   @Test
   public void SequenceTest() {
-    String path = "src/test/examples/valid/sequence/";
-    String[] simpleFilenames = {"basicSeq", "basicSeq2"};
-
-    compileAndCheckExitAndOutput(path, simpleFilenames, null, null, null);
+    compileAndCheckExitAndOutput(path + "sequence.txt");
   }
 
   @Test
-  public void basicVariableTest() {
-    String path = "src/test/examples/valid/variables/";
-    String[] filenames = {"boolDeclaration", "boolDeclaration2",
-      "charDeclaration", "charDeclaration2",
-      "capCharDeclaration", "intDeclaration", "negIntDeclaration",
-      "zeroIntDeclaration", "manyVariables"};// "puncCharDeclaration"};
-
-    compileAndCheckExitAndOutput(path, filenames, null, null, null);
+  public void variablesTest() {
+    compileAndCheckExitAndOutput(path + "variables.txt");
   }
 
   @Test
   public void boolExpressionTest() {
-    String path = "src/test/examples/valid/expressions/";
-    String[] filenames = {"boolCalc", "andExpr", "boolOrExpr",
-      "boolNestedExpr", "boolLongExpr"};
-    String[][] outputs = {{"false"}, {"false", "true", "false"},
-      {"true", "true", "true", "false"}, {"true"}, {"true"}};
-
-    compileAndCheckExitAndOutput(path, filenames, null, null, outputs);
+    compileAndCheckExitAndOutput(path + "bool_expressions.txt");
   }
 
   @Test
   public void integerExpressionTest() {
-    String path = "src/test/examples/valid/expressions/";
-    String[] filenames = {"intCalc", "divExpr", "multExpr", "modExpr", "equalsExpr",
-      "greaterEqExpr", "greaterExpr",
-      "lessEqExpr", "lessExpr", "notequalsExpr"};
-    String[][] outputs = {{"72"}, {"1"}, {"15"}, {"2"}, {"false", "false", "true"},
-      {"false", "true", "true"},
-      {"false", "true"}, {"true", "false", "true"}, {"true", "false"}, {"true", "true", "false"}};
-
-    compileAndCheckExitAndOutput(path, filenames, null, null, outputs);
+    compileAndCheckExitAndOutput(path + "int_expressions.txt");
   }
 
   @Test
   public void charExpressionTest() {
-    String path = "src/test/examples/valid/expressions/";
-    String[] filenames = {"charComparisonExpr"};
-    String[][] outputs = {{"false", "true", "true", "true", "false", "false"}};
-
-    compileAndCheckExitAndOutput(path, filenames, null, null, outputs);
+    compileAndCheckExitAndOutput(path + "char_expressions.txt");
   }
 
   @Test
   public void longExpressionTest() {
-    String path = "src/test/examples/valid/expressions/";
-    String[] filenames = {"longExpr", "longExpr2", "longExpr3", "longMultExpr"};
-    int[] expectedExitCodes = {153, 10, 9, 16};
-
-    compileAndCheckExitAndOutput(path, filenames, null, expectedExitCodes, null);
-  }
-
-  @Test
-  public void varAssignmentTest() {
-    String path = "src/test/examples/valid/variables/";
-    String[] filenames = {"assignBool", "assignChar", "assignInt"};
-    String[][] outputs = {{"true"}, {"a"}, {}};
-
-    compileAndCheckExitAndOutput(path, filenames, null, null, outputs);
-  }
-
-  @Test
-  public void exitWithVar() {
-    String path = "src/test/examples/valid/variables/";
-    String[] filenames = {"longVarNames", "_VarNames"};
-    int[] expectedExitCodes = {5, 19};
-
-    compileAndCheckExitAndOutput(path, filenames, null, expectedExitCodes,
-      null);
+    compileAndCheckExitAndOutput(path + "long_expressions.txt");
   }
 
   @Test
   public void PrintTest() {
-    String path = "src/test/examples/valid/IO/print/";
-    String[] filenames = {"print", "println", "printChar", "multipleLines",
-      "printInt", "printBool", "printEscChar"};
-    String[][] expectedOutput = {{"Hello World!"}, {"Hello World!"},
-      {"A simple character example is f"}, {"Line1", "Line2"},
-      {"An example integer is 189"},
-      {"True is true", "False is false"},
-      {"An escaped character example is \""}};
-
-    compileAndCheckExitAndOutput(path, filenames, null, null, expectedOutput);
+    compileAndCheckExitAndOutput(path + "print.txt");
   }
 
   @Test
   public void PairTest() {
-    String path = "src/test/examples/valid/pairs/";
-    String[] filenames = {"createPair", "createPair02", "createPair03", "writeFst", "writeSnd",
-      "printNullPair", "printNull", "null", "createRefPair", "nestedPair",
-        /*"checkRefPair",*/ "free"};//, "linkedList"};
-    String[][] outputs = {{}, {}, {}, {"10", "42"}, {"a",
-      "Z"}, {"(nil)"}, {"(nil)"}, {"(nil)", "(nil)"}, {}, {},
-      /*{"0x22008", "0x22008", "true", "10", "10", "true", "a", "a"},*/ {}};//,
-    // {"list = {1, 2, 4, 11}"}};
-
-    compileAndCheckExitAndOutput(path, filenames, null, null, outputs);
+    compileAndCheckExitAndOutput(path + "print.txt");
   }
 
   @Test
   public void readTest() {
-    String path = "src/test/examples/valid/IO/read/";
-    String[] filenames = {"readAndPrint"};
-    String[] inputs = {"c"};
-    String[][] outputs = {{"input a character to continue...", "c"}};
-
-    compileAndCheckExitAndOutput(path, filenames, inputs, null, outputs);
+    compileAndCheckExitAndOutput(path + "read.txt");
   }
 
   @Test
   public void simpleFunctions() {
-    String path = "src/test/examples/valid/function/simple_functions/";
-    String[] filenames = {"functionDeclaration", "functionSimple",
-      "sameArgName2"};
-    String[][] outputs = {{}, {}, {"99"}};
-
-    compileAndCheckExitAndOutput(path, filenames, null, null, outputs);
+    compileAndCheckExitAndOutput(path + "simple_functions.txt");
   }
 
   @Test
   public void simpleRuntimeErr() {
-    String path = "src/test/examples/valid/runtimeErr/integerOverflow/";
-    String[] filenames = {"intWayOverflow", "intnegateOverflow4",
-      "intUnderflow", "intJustOverflow", "intmultOverflow",
-      "intnegateOverflow2", "intnegateOverflow3", "intnegateOverflow"};
-    int[] expectedExitCodes = {255, 255, 255, 255, 255, 255, 255, 255};
-    String[][] outputs = {
-      {"2000000000",
-        "OverflowError: the result is too small/large to store in a 4-byte signed-integer."},
-      {"-2000000000",
-        "OverflowError: the result is too small/large to store in a 4-byte signed-integer."},
-      {"-2147483647"
-        , "-2147483648",
-        "OverflowError: the result is too small/large to store in a 4-byte signed-integer."},
-      {"2147483646",
-        "2147483647",
-        "OverflowError: the result is too small/large to store in a 4-byte signed-integer."},
-      {"2147483",
-        "2147483000",
-        "OverflowError: the result is too small/large to store in a 4-byte signed-integer."},
-      {"-2147483648",
-        "OverflowError: the result is too small/large to store in a 4-byte signed-integer."},
-      {"-20000",
-        "OverflowError: the result is too small/large to store in a 4-byte signed-integer."},
-      {"-2147483648",
-        "OverflowError: the result is too small/large to store in a 4-byte signed-integer."}};
-    compileAndCheckExitAndOutput(path, filenames, null, expectedExitCodes,
-      outputs);
+    compileAndCheckExitAndOutput(path + "runtime_errors.txt");
+
   }
 
-  // provide path, filenames, exit codes, and expected output
-  public static void compileAndCheckExitAndOutput(String path, String[] filenames,
-    String[] inputs,
-    int[] expectedExitCodes, String[][] expectedOutput) {
-    IntStream.range(0, filenames.length).forEach(i -> {
-      String filename = filenames[i];
-      AST ast = Main.compileProg(path + filename + ".wacc");
-      Main.generateCode(ast, outputFolder + filename);
+  public static void compileAndCheckExitAndOutput(String testDataFile) {
+    try(BufferedReader br = new BufferedReader(new FileReader(testDataFile))) {
+      for(String line; (line = br.readLine()) != null && !line.equals(""); ) {
 
-      Process emulator;
-      if (inputs != null) {
-        emulator = assembleAndEmulate(outputFolder + filename, inputs[i]);
-      } else {
-        emulator = assembleAndEmulate(outputFolder + filename, null);
-      }
+        String filename;
+        String[] expectedOutput = null;
+        int expectedExitCode = 0;
+        String input = null;
 
-      if (expectedExitCodes == null) {
-        assertThat(emulator.exitValue(), is(0));
-      } else {
-        assertThat(emulator.exitValue(), is(expectedExitCodes[i]));
+        int expOutputBegin = line.lastIndexOf('{');
+        int expOutputEnd = line.lastIndexOf('}');
+        if (expOutputBegin > 0) {
+          expectedOutput = line.substring(expOutputBegin + 1, expOutputEnd)
+              .split(",");
+          line = line.replace( line.substring(expOutputBegin - 1,
+              expOutputEnd + 1),
+              "");
+        }
+
+        String[] testData = line.split(" ");
+        filename = extractFileName(testData[0]);
+
+        if (testData.length > 1) {
+          expectedExitCode = testData[1].equals("_") ? 0 :
+              Integer.parseInt(testData[1]);
+        }
+        if (testData.length == 3) {
+          input = testData[2];
+        }
+
+        System.out.println("Compiling.. " + filename + ".wacc");
+        AST ast = Main.compileProg(testData[0]);
+        Main.generateCode(ast, outputFolder + filename);
+
+        System.out.println("Assembling.. " + filename + ".s");
+        Process emulator = assembleAndEmulate(outputFolder + filename, input);
+
+        System.out.println("Testing.. " + filename + "\n");
+        assertThat(emulator.exitValue(), is(expectedExitCode));
+        checkPrintsAreCorrect(emulator, expectedOutput);
       }
-      if (expectedOutput != null) {
-        checkPrintsAreCorrect(emulator, expectedOutput[i]);
-      }
-    });
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
   }
 
   public static void checkPrintsAreCorrect(Process emulator, String[] expected) {
@@ -226,10 +137,17 @@ public class CodegenTests {
       BufferedReader br = new BufferedReader(new InputStreamReader(emulator
         .getInputStream()));
 
-      for (String expectedLine : expected) {
-        String actualLine = br.readLine();
-        assertThat(actualLine, is(expectedLine));
+      int i = 0;
+      for(String actualLine; (actualLine = br.readLine()) != null; ) {
+        if (expected == null || i >= expected.length) {
+          fail("Expected output was \"" + actualLine + "\" but actual was "
+              + "empty");
+        } else {
+          assertThat(actualLine, is(expected[i]));
+          i++;
+        }
       }
+
     } catch (IOException e) {
       e.printStackTrace();
     }

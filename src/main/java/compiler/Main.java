@@ -22,7 +22,7 @@ public class Main {
 
   public static void main(String[] args) {
     //String path = args[0]; // uncomment for labTS test
-    String path = "src/test/examples/valid/array/modifyString.wacc";
+    String path = "src/test/examples/valid/expressions/lessCharExpr.wacc";
     AST ast = compileProg(path);
     generateCode(ast, extractFileName(path));
     System.exit(0);
@@ -87,7 +87,7 @@ public class Main {
     }
   }
 
-  private static String extractFileName(String path) {
+  public static String extractFileName(String path) {
     int slash = path.lastIndexOf('/');
     int point = path.lastIndexOf('.');
     return path.substring((slash == -1) ? 0 : slash + 1, (point == -1) ?

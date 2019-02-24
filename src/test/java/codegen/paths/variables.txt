@@ -1,0 +1,17 @@
+src/test/examples/valid/variables/_VarNames.wacc 19
+src/test/examples/valid/variables/assignBool.wacc {true}
+src/test/examples/valid/variables/assignChar.wacc {a}
+src/test/examples/valid/variables/assignInt.wacc
+src/test/examples/valid/variables/boolDeclaration.wacc
+src/test/examples/valid/variables/boolDeclaration2.wacc
+src/test/examples/valid/variables/capCharDeclaration.wacc
+src/test/examples/valid/variables/charDeclaration.wacc
+src/test/examples/valid/variables/charDeclaration2.wacc
+src/test/examples/valid/variables/emptyStringDeclaration.wacc
+src/test/examples/valid/variables/intDeclaration.wacc
+src/test/examples/valid/variables/longVarNames.wacc 5
+src/test/examples/valid/variables/manyVariables.wacc
+src/test/examples/valid/variables/negIntDeclaration.wacc
+src/test/examples/valid/variables/puncCharDeclaration.wacc
+src/test/examples/valid/variables/stringDeclaration.wacc
+src/test/examples/valid/variables/zeroIntDeclaration.wacc

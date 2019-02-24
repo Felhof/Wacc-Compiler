@@ -1,0 +1,22 @@
+src/test/examples/valid/expressions/divExpr.wacc {1}
+src/test/examples/valid/expressions/equalsExpr.wacc {false,false,true}
+src/test/examples/valid/expressions/greaterEqExpr.wacc {false,true,true}
+src/test/examples/valid/expressions/greaterExpr.wacc {false,true}
+src/test/examples/valid/expressions/intCalc.wacc {72}
+src/test/examples/valid/expressions/intExpr1.wacc
+src/test/examples/valid/expressions/lessEqExpr.wacc {true,false,true}
+src/test/examples/valid/expressions/lessExpr.wacc {true,false}
+src/test/examples/valid/expressions/minusExpr.wacc {5}
+src/test/examples/valid/expressions/minusMinusExpr.wacc {3}
+src/test/examples/valid/expressions/minusNoWhitespaceExpr.wacc {-1}
+src/test/examples/valid/expressions/modExpr.wacc {2}
+src/test/examples/valid/expressions/multExpr.wacc {15}
+src/test/examples/valid/expressions/multNoWhitespaceExpr.wacc {2}
+src/test/examples/valid/expressions/notequalsExpr.wacc {true,true,false}
+src/test/examples/valid/expressions/plusExpr.wacc {35}
+src/test/examples/valid/expressions/plusMinusExpr.wacc {-1}
+src/test/examples/valid/expressions/plusNoWhitespaceExpr.wacc {3}
+src/test/examples/valid/expressions/sequentialCount.wacc {Can you count to 10?,1,2,3,4,5,6,7,8,9,10}
+
+src/test/examples/valid/expressions/plusPlusExpr.wacc {3}
+src/test/examples/valid/expressions/minusPlusExpr.wacc {-1}

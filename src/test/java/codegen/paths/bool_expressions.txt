@@ -1,0 +1,7 @@
+src/test/examples/valid/expressions/andExpr.wacc {false,true,false}
+src/test/examples/valid/expressions/boolCalc.wacc {false}
+src/test/examples/valid/expressions/boolLongExpr.wacc {true}
+src/test/examples/valid/expressions/boolNestedExpr.wacc {true}
+src/test/examples/valid/expressions/boolOrExpr.wacc {true,true,true,false}
+
+src/test/examples/valid/expressions/boolExpr1.wacc Correct

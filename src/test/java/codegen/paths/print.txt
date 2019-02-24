@@ -1,0 +1,12 @@
+src/test/examples/valid/IO/print/assignAndPrint.wacc {1}
+src/test/examples/valid/IO/print/hashInProgram.wacc {We can print the hash character: #,We can also print # when its in a string.}
+src/test/examples/valid/IO/print/multipleLines.wacc {Line1,Line2}
+src/test/examples/valid/IO/print/stringAssignmentWithPrint.wacc {foo,bar}
+src/test/examples/valid/IO/print/print.wacc {Hello World!}
+src/test/examples/valid/IO/print/printBool.wacc {True is true,False is false}
+src/test/examples/valid/IO/print/printChar.wacc {A simple character example is f}
+src/test/examples/valid/IO/print/printEscChar.wacc {An escaped character example is "}
+src/test/examples/valid/IO/print/printInt.wacc {An example integer is 189}
+src/test/examples/valid/IO/print/println.wacc {Hello World!}
+
+src/test/examples/valid/IO/print/multipleStringsAssignment.wacc {s1 is Hi,s2 is Hi,They are not the same.,Now modify s1[0] = 'h',s1 is hi,s2 is Hi,They are not the same.}
