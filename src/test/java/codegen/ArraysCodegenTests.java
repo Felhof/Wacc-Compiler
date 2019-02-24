@@ -22,17 +22,17 @@ public class ArraysCodegenTests {
     String[][] outputs = {{"3", "3"}};
     compileAndCheckExitAndOutput(path, filenames, null, null, outputs);
   }
-/*
+
   @Test
   public void stringAsArray() {
     // todo implement string as array behaviour
     String path = "src/test/examples/valid/array/";
     String[] filenames = {"modifyString"};
     String[][] outputs =
-        {{"hello world!\nHello world!\nHi!"}};
+        {{"hello world!", "Hello world!", "Hi!"}};
     compileAndCheckExitAndOutput(path, filenames, null, null, outputs);
   }
-
+/*
   @Test
   public void arrayLength() {
     // todo implement unary op 'len'

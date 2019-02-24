@@ -506,8 +506,11 @@ public class ASTVisitor {
 
   public CodeGenData visitArrayAssign(VarAssignNode varAssignNode) {
     REG rd = (REG) visit(varAssignNode.rhs());  // get new value
-    REG rn = (REG) visit(varAssignNode.lhs());  // get array data
-    instructions.add(new STR(rd, new Addr(rn)));
+    REG rn = (REG) visit(varAssignNode.lhs());  // get array elem address
+
+    instructions.add(new STR(rd, new Addr(rn),
+        isByteSize(varAssignNode.rhs().type())));
+
     freeReg(rn);
     freeReg(rd);
     return null;
@@ -515,17 +518,27 @@ public class ASTVisitor {
 
   public CodeGenData visitArrayElem(ArrayElem arrayElem) {
     REG arrAddress = loadFromStack(arrayElem.varName());
-    for(Expr indexExpr : arrayElem.indexes()) {
-      REG index = (REG) visit(indexExpr); // simple array case
+    REG index;
+
+    for (Expr indexExpr : arrayElem.indexes()) {
+      index = (REG) visit(indexExpr); // simple array case
       instructions.add(new LDR(arrAddress, new Addr(arrAddress)));
       setArgs(new REG[]{index, arrAddress});
       specialLabels.addAll(Arrays.asList(
           "p_check_array_bounds", "p_throw_runtime_error", "p_print_string"));
-      instructions.addAll(Arrays.asList(
-          new BL("p_check_array_bounds"),
-          new ADD(arrAddress, arrAddress, new Imm_INT(WORD_SIZE)),
-          new ADD(arrAddress, arrAddress, new Reg_Shift(index,
-              new Shift(LSL, SHIFT_TIMES_4)))));
+      instructions.add(new BL("p_check_array_bounds"));
+      instructions.add(new ADD(arrAddress, arrAddress, new Imm_INT(WORD_SIZE)));
+
+
+      if (isByteSize(arrayElem.type())) {
+        instructions.add(new ADD(arrAddress, arrAddress, index));
+      }
+      else {
+        instructions.add(new ADD(arrAddress, arrAddress, new Reg_Shift(index,
+            new Shift(LSL, SHIFT_TIMES_4))));
+      }
+
+
       freeReg(index);
     }
     return arrAddress;
