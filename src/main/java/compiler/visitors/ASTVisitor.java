@@ -82,7 +82,7 @@ public class ASTVisitor {
 
   private static final int WORD_SIZE = 4;
   private static final int SHIFT_TIMES_4 = 2;
-  private static final int BYTE = 1;
+  private static final int BYTE_SIZE = 1;
 
 
   private static List<Instr> instructions;
@@ -429,28 +429,14 @@ public class ASTVisitor {
     return rd;
   }
 
-  // Refactor possibly using overloading in accept of VarDeclareNode
-  // For now its ok.
   public CodeGenData visitVarDeclareNode(VarDeclareNode varDeclareNode) {
-    Type type = varDeclareNode.varType();
-    if (type instanceof ArrType) {
-      visitArrayDeclare(varDeclareNode);
-    } else if (type instanceof PairType) {
-      visitPairDeclare(varDeclareNode);
-    } else {
-      visitBasicTypeDeclare(varDeclareNode, (type instanceof IntType ? 4 : 1));
-    }
-    return null;
-  }
-
-  private CodeGenData visitBasicTypeDeclare(VarDeclareNode varDeclareNode,
-    int offset) {
     REG rd = (REG) visit(varDeclareNode.rhs());
-    nextPosInStack -= offset;
-    currentST.lookUpAllVar(varDeclareNode.varName())
-      .setStackOffset(nextPosInStack);
-    saveVarData(varDeclareNode.varType(), rd, SP, nextPosInStack,
-      false);
+    nextPosInStack -= isByteSize(varDeclareNode.varType()) ? BYTE_SIZE : WORD_SIZE;
+
+    // store variable in the stack and save offset in symbol table
+    currentST.lookUpAllVar(varDeclareNode.varName()).setStackOffset(nextPosInStack);
+    saveVarData(varDeclareNode.varType(), rd, SP, nextPosInStack, false);
+
     freeReg(rd);
     return null;
   }
@@ -488,45 +474,28 @@ public class ASTVisitor {
     return null;
   }
 
-  private CodeGenData saveVarData(Type varType, REG rd, REG rn, int offset,
-    boolean update) {
-    boolean isByteInstr =
-      varType.equals(BoolType.getInstance()) || varType
-        .equals(CharType.getInstance());
-    instructions
-      .add(new STR(rd, new Addr(rn, true, new Imm_INT(offset)), isByteInstr,
-        update));
-    return null;
-  }
-
-  private CodeGenData visitArrayDeclare(VarDeclareNode varDeclareNode) {
-    Expr[] array = ((ArrayLiter) varDeclareNode.rhs()).elems();
+  public CodeGenData visitArrayLiter(ArrayLiter arrayLiter) {
+    REG arrAddress = useAvailableReg();
+    REG sizeReg = useAvailableReg();
+    Expr[] array = arrayLiter.elems();
     int size = array.length;
-    // malloc the number of elems plus one
-    // to hold the size of the array for runtime errors
+
+    // malloc the number of elements plus one for to hold the size
     setArg(new Imm_INT_MEM((size + 1) * WORD_SIZE));
     instructions.add(new BL("malloc"));
-    REG arrAddress = useAvailableReg();
     instructions.add(new MOV(arrAddress, R0));
-    for (int i = 0; i < size; i++) { // store array elements
+
+    // store array elements in the heap
+    for (int i = 0; i < size; i++) {
       storeArrayElem(array[i], arrAddress, (i + 1) * WORD_SIZE);
     }
-    // store size of the array
-    REG sizeReg = useAvailableReg();
-    instructions.add(new LDR(sizeReg, new Imm_INT_MEM(size), false));
-    instructions
-      .add(new STR(sizeReg, new Addr(arrAddress, true, null), false, false));
 
-    // set sp at the array's address
-    nextPosInStack -= 4;
-    instructions
-        .add(new STR(arrAddress, new Addr(SP, true, new Imm_INT(nextPosInStack)), false,
-            false));
-    currentST.lookUpAllVar(varDeclareNode.varName())
-      .setStackOffset(nextPosInStack);
+    // store size of the array in the heap
+    instructions.add(new LDR(sizeReg, new Imm_INT_MEM(size)));
+    instructions.add(new STR(sizeReg, new Addr(arrAddress)));
+
     freeReg(sizeReg);
-    freeReg(arrAddress);
-    return null;
+    return arrAddress;
   }
 
   private void storeArrayElem(Expr expr, REG objectAddr, int offset) {
@@ -560,16 +529,6 @@ public class ASTVisitor {
       freeReg(index);
     }
     return arrAddress;
-  }
-
-  private CodeGenData visitPairDeclare(VarDeclareNode varDeclareNode) {
-    REG rd = (REG) visit(varDeclareNode.rhs());
-    nextPosInStack -= WORD_SIZE;
-    currentST.lookUpAllVar(varDeclareNode.varName()).setStackOffset(nextPosInStack);
-    saveVarData(varDeclareNode.varType(), rd, SP, nextPosInStack,
-      false);
-    freeReg(rd);
-    return null;
   }
 
   public CodeGenData visitPair(Pair pair) {
@@ -689,7 +648,7 @@ public class ASTVisitor {
       REG rd = (REG) visit(e);
       int offsetFromBase =
         (!(e.type() instanceof CharType) && !(e.type() instanceof BoolType))
-          ? -WORD_SIZE : -BYTE;
+          ? -WORD_SIZE : -BYTE_SIZE;
       offsetFromInitialSP += offsetFromBase;
       saveVarData(e.type(), rd, SP, offsetFromBase,
         true);
@@ -724,5 +683,17 @@ public class ASTVisitor {
     instructions.add(new BL("p_free_pair"));
     freeReg(rd);
     return null;
+  }
+
+  private CodeGenData saveVarData(Type varType, REG rd, REG rn, int offset,
+      boolean update) {
+    instructions.add(new STR(rd, new Addr(rn, true, new Imm_INT(offset)),
+        isByteSize(varType), update));
+    return null;
+  }
+
+  private boolean isByteSize(Type type) {
+    return type.equals(CharType.getInstance())
+        || type.equals(BoolType.getInstance());
   }
 }
