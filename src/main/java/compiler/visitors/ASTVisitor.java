@@ -679,8 +679,7 @@ public class ASTVisitor {
       visit(funcNode.paramList());
     }
     funcNode.getParentNode().children().forEach(this::visit);
-    configureStack("add");
-    instructions.addAll(Arrays.asList(new POP(PC), new POP(PC)));
+    instructions.add(new POP(PC));
     instructions.add(new SECTION("ltorg"));
     exitScope(currentST.getEncSymTable());
     return null;
@@ -689,6 +688,8 @@ public class ASTVisitor {
   public CodeGenData visitReturn(ReturnNode returnNode) {
     REG rd = (REG) visit(returnNode.expr());
     instructions.add(new MOV(R0, rd));
+    configureStack("add");
+    instructions.add(new POP(PC));
     freeReg(rd);
     return null;
   }
