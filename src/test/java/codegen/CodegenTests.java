@@ -9,7 +9,6 @@ import compiler.Main;
 import java.io.*;
 import java.util.stream.IntStream;
 
-import compiler.instr.STR;
 import org.junit.Test;
 
 public class CodegenTests {
@@ -126,20 +125,6 @@ public class CodegenTests {
       {"An escaped character example is \""}};
 
     compileAndCheckExitAndOutput(path, filenames, null, null, expectedOutput);
-  }
-
-  @Test
-  public void PairTest() {
-    String path = "src/test/examples/valid/pairs/";
-    String[] filenames = {"createPair", "createPair02", "createPair03", "writeFst", "writeSnd",
-      "printNullPair", "printNull", "null", "createRefPair", "nestedPair",
-        /*"checkRefPair",*/ "free"};//, "linkedList"};
-    String[][] outputs = {{}, {}, {}, {"10", "42"}, {"a",
-      "Z"}, {"(nil)"}, {"(nil)"}, {"(nil)", "(nil)"}, {}, {},
-      /*{"0x22008", "0x22008", "true", "10", "10", "true", "a", "a"},*/ {}};//,
-    // {"list = {1, 2, 4, 11}"}};
-
-    compileAndCheckExitAndOutput(path, filenames, null, null, outputs);
   }
 
   @Test

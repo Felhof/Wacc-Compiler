@@ -10,7 +10,7 @@ import static compiler.visitors.ASTVisitor.addStringField;
 import static compiler.visitors.ASTVisitor.toInt;
 
 import compiler.instr.ADD;
-import compiler.instr.BL;
+import compiler.instr.B;
 import compiler.instr.CMP;
 import compiler.instr.Instr;
 import compiler.instr.LABEL;
@@ -89,9 +89,9 @@ public class SubRoutines {
       new ADD(R2, R0, new Imm_INT(toInt("4")), false),
       new LDR(R0, new Imm_STRING_MEM(labelName), false),
       new ADD(R0, R0, new Imm_INT(toInt("4")), false),
-      new BL("printf"),
+      new B("printf", true),
       new MOV(R0, new Imm_INT(toInt("0"))),
-      new BL("fflush"),
+      new B("fflush", true),
       new POP(PC)));
   }
 
@@ -104,9 +104,9 @@ public class SubRoutines {
       new MOV(R1, R0),
       new LDR(R0, new Imm_STRING_MEM(labelName), false),
       new ADD(R0, R0, new Imm_INT(toInt("4")), false),
-      new BL("printf"),
+      new B("printf", true),
       new MOV(R0, new Imm_INT(toInt("0"))),
-      new BL("fflush"),
+      new B("fflush", true),
       new POP(PC)));
   }
 
@@ -120,11 +120,11 @@ public class SubRoutines {
       new LDR(R0, new Imm_STRING_MEM(labelName), false),
       new ADD(R0, R0, new Imm_INT(4), false)));
 
-    instructions.add(new BL("printf"));
+    instructions.add(new B("printf", true));
 
     instructions.addAll(Arrays.asList(
       new MOV(R0, new Imm_INT(toInt("0"))),
-      new BL("fflush"),
+      new B("fflush", true),
       new POP(PC)));
 
   }
@@ -137,9 +137,9 @@ public class SubRoutines {
       new PUSH(LR),
       new LDR(R0, new Imm_STRING_MEM(labelName), false),
       new ADD(R0, R0, new Imm_INT(toInt("4")), false),
-      new BL("puts"),
+      new B("puts", true),
       new MOV(R0, new Imm_INT(toInt("0"))),
-      new BL("fflush"),
+      new B("fflush", true),
       new POP(PC)));
   }
 
@@ -155,11 +155,11 @@ public class SubRoutines {
       new LDR(R0, new Imm_STRING_MEM(falseLabel), COND.EQ),
       new ADD(R0, R0, new Imm_INT(4), false)));
 
-    instructions.add(new BL("printf"));
+    instructions.add(new B("printf", true));
 
     instructions.addAll(Arrays.asList(
       new MOV(R0, new Imm_INT(0)),
-      new BL("fflush"),
+      new B("fflush", true),
       new POP(PC)
     ));
   }
@@ -173,7 +173,7 @@ public class SubRoutines {
       new MOV(R1, R0),
       new LDR(R0, new Imm_STRING_MEM(labelName), false),
       new ADD(R0, R0, new Imm_INT(4), false),
-      new BL("scanf"),
+      new B("scanf", true),
       new POP(PC)
     ));
   }
@@ -187,7 +187,7 @@ public class SubRoutines {
       new MOV(R1, R0),
       new LDR(R0, new Imm_STRING_MEM(labelName), false),
       new ADD(R0, R0, new Imm_INT(4), false),
-      new BL("scanf"),
+      new B("scanf", true),
       new POP(PC)
     ));
   }
@@ -201,7 +201,7 @@ public class SubRoutines {
       .asList(
         new LABEL("p_throw_overflow_error"),
         new LDR(R0, new Imm_STRING_MEM(labelName), false),
-        new BL("p_throw_runtime_error")));
+        new B("p_throw_runtime_error", true)));
 
   }
 
@@ -210,9 +210,9 @@ public class SubRoutines {
     instructions.addAll(
       Arrays.asList(
         new LABEL("p_throw_runtime_error"),
-        new BL("p_print_string"),
+        new B("p_print_string", true),
         new MOV(R0, new Imm_INT(-1)),
-        new BL("exit")));
+        new B("exit", true)));
   }
 
   private static void addCheckDivideByZero() {
@@ -226,7 +226,7 @@ public class SubRoutines {
         new PUSH(LR),
         new CMP(R1, new Imm_INT(0)),
         new LDR(R0, new Imm_STRING_MEM(labelName), COND.EQ),
-        new BL("p_throw_runtime_error", COND.EQ),
+        new B("p_throw_runtime_error", true, COND.EQ),
         new POP(PC)));
   }
 
@@ -243,11 +243,11 @@ public class SubRoutines {
       new PUSH(LR),
       new CMP(R0, new Imm_INT(0)),
       new LDR(R0, new Imm_STRING_MEM(msg0), COND.LT),
-      new BL("p_throw_runtime_error", COND.LT),
+      new B("p_throw_runtime_error", true, COND.LT),
       new LDR(R1, new Addr(R1), false),
       new CMP(R0, R1),
       new LDR(R0, new Imm_STRING_MEM(msg1), COND.CS),
-      new BL("p_throw_runtime_error", COND.CS),
+      new B("p_throw_runtime_error", true, COND.CS),
       new POP(PC)));
   }
 
@@ -259,7 +259,7 @@ public class SubRoutines {
       .addAll(Arrays.asList(new LABEL("p_check_null_pointer"), new PUSH(LR),
         new CMP(R0, new Imm_INT(0)),
         new LDR(R0, new Imm_STRING_MEM(labelName), COND.EQ),
-        new BL("p_throw_runtime_error", COND.EQ), new POP(PC)));
+        new B("p_throw_runtime_error", true, COND.EQ), new POP(PC)));
   }
 
   private static void addFreePairCheck() {
@@ -270,10 +270,14 @@ public class SubRoutines {
       .addAll(Arrays.asList(new LABEL("p_free_pair"), new PUSH(LR),
         new CMP(R0, new Imm_INT(0)),
         new LDR(R0, new Imm_STRING_MEM(labelName), COND.EQ),
-        new BL("p_throw_runtime_error", COND.EQ), new PUSH(R0),
+        new B("p_throw_runtime_error", true, COND.EQ), new PUSH(R0),
         new LDR(R0, new Addr(R0), false),
-        new BL("free"), new LDR(R0, new Addr(SP), false),
+        new B("free", true), new LDR(R0, new Addr(SP), false),
         new LDR(R0, new Addr(R0, true, new Imm_INT(4)), false),
-        new BL("free"), new POP(R0), new BL("free"), new POP(PC)));
+        new B("free", true), new POP(R0), new B("free", true), new POP(PC)));
+  }
+
+  private static void addNewBranch() {
+
   }
 }
