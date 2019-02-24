@@ -11,7 +11,6 @@ import static compiler.instr.REG.allUsableRegs;
 import static compiler.instr.Shift.SHIFT_TYPE.ASR;
 import static compiler.instr.Shift.SHIFT_TYPE.LSL;
 
-import com.sun.org.apache.regexp.internal.RE;
 import compiler.AST.NodeElements.ArrayElem;
 import compiler.AST.NodeElements.Ident;
 import compiler.AST.NodeElements.LHS;
