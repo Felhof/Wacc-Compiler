@@ -70,6 +70,11 @@ public class CodegenTests {
   }
 
   @Test
+  public void ArrayTest() {
+    compileAndCheckExitAndOutput(path + "arrays.txt");
+  }
+
+  @Test
   public void readTest() {
     compileAndCheckExitAndOutput(path + "read.txt");
   }
