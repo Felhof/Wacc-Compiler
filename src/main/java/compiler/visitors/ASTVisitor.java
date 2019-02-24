@@ -496,7 +496,7 @@ public class ASTVisitor {
 
     // malloc the number of elements plus one for to hold the size
     setArg(new Imm_INT_MEM((size + 1) * WORD_SIZE));
-    instructions.add(new BL("malloc"));
+    instructions.add(new B("malloc", true));
     instructions.add(new MOV(arrAddress, R0));
 
     // store array elements in the heap
@@ -551,7 +551,7 @@ public class ASTVisitor {
       setArgs(new REG[]{index, arrAddress});
       specialLabels.addAll(Arrays.asList(
           "p_check_array_bounds", "p_throw_runtime_error", "p_print_string"));
-      instructions.add(new B("p_check_array_bounds"));
+      instructions.add(new B("p_check_array_bounds", true));
       instructions.add(new ADD(arrAddress, arrAddress, new Imm_INT(WORD_SIZE)));
 
 
@@ -562,7 +562,6 @@ public class ASTVisitor {
         instructions.add(new ADD(arrAddress, arrAddress, new Reg_Shift(index,
             new Shift(LSL, SHIFT_TIMES_4))));
       }
-
 
       freeReg(index);
     }

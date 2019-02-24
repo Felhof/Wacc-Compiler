@@ -7,11 +7,13 @@ import static org.hamcrest.core.Is.is;
 
 import compiler.AST.Nodes.AST;
 import compiler.Main;
-
-import java.io.*;
-import java.util.stream.IntStream;
-
-import compiler.instr.STR;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import org.junit.Test;
 
 public class CodegenTests {
@@ -87,18 +89,21 @@ public class CodegenTests {
   @Test
   public void simpleRuntimeErr() {
     compileAndCheckExitAndOutput(path + "runtime_errors.txt");
-
   }
 
   @Test
   public void scopeTest() {
     compileAndCheckExitAndOutput(path + "scope.txt");
+  }
 
+  @Test
+  public void IfSimpleTest() {
+    compileAndCheckExitAndOutput(path + "if.txt");
   }
 
   public static void compileAndCheckExitAndOutput(String testDataFile) {
-    try(BufferedReader br = new BufferedReader(new FileReader(testDataFile))) {
-      for(String line; (line = br.readLine()) != null && !line.equals(""); ) {
+    try (BufferedReader br = new BufferedReader(new FileReader(testDataFile))) {
+      for (String line; (line = br.readLine()) != null && !line.equals(""); ) {
 
         String filename;
         String[] expectedOutput = null;
@@ -110,7 +115,7 @@ public class CodegenTests {
         if (expOutputBegin > 0) {
           expectedOutput = line.substring(expOutputBegin + 1, expOutputEnd)
               .split(",");
-          line = line.replace( line.substring(expOutputBegin - 1,
+          line = line.replace(line.substring(expOutputBegin - 1,
               expOutputEnd + 1),
               "");
         }
@@ -142,14 +147,15 @@ public class CodegenTests {
     }
   }
 
-  public static void checkPrintsAreCorrect(Process emulator, String[] expected) {
+  public static void checkPrintsAreCorrect(Process emulator,
+      String[] expected) {
     try {
       //Read each line of the output into the sb
       BufferedReader br = new BufferedReader(new InputStreamReader(emulator
-        .getInputStream()));
+          .getInputStream()));
 
       int i = 0;
-      for(String actualLine; (actualLine = br.readLine()) != null; ) {
+      for (String actualLine; (actualLine = br.readLine()) != null; ) {
         if (expected == null || i >= expected.length) {
           fail("Expected output was \"" + actualLine + "\" but actual was "
               + "empty");
@@ -169,17 +175,17 @@ public class CodegenTests {
     try {
       // Assembler
       Process assembler = new ProcessBuilder("arm-linux-gnueabi-gcc", "-o",
-        filename, "-mcpu=arm1176jzf-s", "-mtune=arm1176jzf-s",
-        filename + ".s").start();
+          filename, "-mcpu=arm1176jzf-s", "-mtune=arm1176jzf-s",
+          filename + ".s").start();
       assembler.waitFor();
 
       // Emulator
       Process emulator = new ProcessBuilder("qemu-arm", "-L", "/usr"
-        + "/arm-linux-gnueabi/", filename).start();
+          + "/arm-linux-gnueabi/", filename).start();
 
       if (input != null) {
         BufferedWriter writer = new BufferedWriter(
-          new OutputStreamWriter(emulator.getOutputStream()));
+            new OutputStreamWriter(emulator.getOutputStream()));
 
         writer.write(input);
         writer.flush();

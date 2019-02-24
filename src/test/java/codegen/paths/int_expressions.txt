@@ -3,7 +3,7 @@ src/test/examples/valid/expressions/equalsExpr.wacc {false,false,true}
 src/test/examples/valid/expressions/greaterEqExpr.wacc {false,true,true}
 src/test/examples/valid/expressions/greaterExpr.wacc {false,true}
 src/test/examples/valid/expressions/intCalc.wacc {72}
-src/test/examples/valid/expressions/intExpr1.wacc
+src/test/examples/valid/expressions/intExpr1.wacc {Correct}
 src/test/examples/valid/expressions/lessEqExpr.wacc {true,false,true}
 src/test/examples/valid/expressions/lessExpr.wacc {true,false}
 src/test/examples/valid/expressions/minusExpr.wacc {5}

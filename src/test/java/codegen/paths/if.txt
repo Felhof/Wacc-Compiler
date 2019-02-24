@@ -1,0 +1,10 @@
+src/test/examples/valid/if/if1.wacc {correct}
+src/test/examples/valid/if/if2.wacc {correct}
+src/test/examples/valid/if/if3.wacc {correct}
+src/test/examples/valid/if/if4.wacc {correct}
+src/test/examples/valid/if/if5.wacc {correct}
+src/test/examples/valid/if/if6.wacc {correct}
+src/test/examples/valid/if/ifBasic.wacc {here}
+src/test/examples/valid/if/ifFalse.wacc {here}
+src/test/examples/valid/if/ifTrue.wacc {here}
+src/test/examples/valid/if/whitespace.wacc {1}
