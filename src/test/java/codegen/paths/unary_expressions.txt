@@ -1,1 +1,3 @@
+src/test/examples/valid/expressions/negExpr.wacc {-42}
+src/test/examples/valid/expressions/notExpr.wacc {false,true}
 src/test/examples/valid/expressions/ordAndchrExpr.wacc {a is 97,99 is c}
