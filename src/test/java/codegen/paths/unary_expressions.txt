@@ -1,0 +1,11 @@
+src/test/examples/valid/expressions/negExpr.wacc {-42}
+src/test/examples/valid/expressions/notExpr.wacc {false,true}
+src/test/examples/valid/expressions/explicitPositive.wacc {1}
+src/test/examples/valid/expressions/ordAndchrExpr.wacc {a is 97,99 is c}
+src/test/examples/valid/expressions/negBothDiv.wacc {2}
+src/test/examples/valid/expressions/negBothMod.wacc {-2}
+src/test/examples/valid/expressions/negDividendDiv.wacc {-2}
+src/test/examples/valid/expressions/negDividendMod.wacc {-2}
+src/test/examples/valid/expressions/negDivisorDiv.wacc {-2}
+src/test/examples/valid/expressions/negDivisorMod.wacc {2}
+src/test/examples/valid/expressions/notequalsExpr.wacc {true,true,false}

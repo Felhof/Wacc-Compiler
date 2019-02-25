@@ -1,9 +1,9 @@
+src/test/examples/valid/IO/read/echoInt.wacc _ 1 {enter an integer to echo,1}
 src/test/examples/valid/IO/read/readAndPrint.wacc _ c {input a character to continue...,c}
 
 src/test/examples/valid/IO/read/echoBigInt.wacc
 src/test/examples/valid/IO/read/echoBigNegInt.wacc
 src/test/examples/valid/IO/read/echoChar.wacc
-src/test/examples/valid/IO/read/echoInt.wacc
 src/test/examples/valid/IO/read/echoNegInt.wacc
 src/test/examples/valid/IO/read/echoPuncChar.wacc
 src/test/examples/valid/IO/read/read.wacc

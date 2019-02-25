@@ -22,7 +22,7 @@ public class Main {
 
   public static void main(String[] args) {
     String path = args[0]; // uncomment for labTS test
-    //String path = "src/test/examples/valid/while/whileBoolFlip.wacc";
+    //String path = "src/test/examples/valid/IO/print/multipleStringsAssignment.wacc";
     AST ast = compileProg(path);
     generateCode(ast, extractFileName(path));
     System.exit(0);

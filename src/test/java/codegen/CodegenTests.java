@@ -111,6 +111,11 @@ public class CodegenTests {
     compileAndCheckExitAndOutput(path + "nested_functions.txt");
   }
 
+  @Test
+  public void unaryExprTest() {
+    compileAndCheckExitAndOutput(path + "unary_expressions.txt");
+  }
+
   public static void compileAndCheckExitAndOutput(String testDataFile) {
     try (BufferedReader br = new BufferedReader(new FileReader(testDataFile))) {
       for (String line; (line = br.readLine()) != null && !line.equals(""); ) {
@@ -197,7 +202,12 @@ public class CodegenTests {
         BufferedWriter writer = new BufferedWriter(
             new OutputStreamWriter(emulator.getOutputStream()));
 
-        writer.write(input);
+        try {
+          int inputInt = Integer.parseInt(input);
+          writer.write(inputInt);
+        } catch (NumberFormatException e) {
+          writer.write(input);
+        }
         writer.flush();
       }
 
