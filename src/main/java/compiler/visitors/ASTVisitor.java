@@ -251,6 +251,8 @@ public class ASTVisitor {
                 new Imm_INT(currentST.lookUpAllVar(((Ident)expr.insideExpr()).varName()).getStackOffset())))); //load address of array into rd
         instructions.add(new LDR(rd, new Addr(rd))); //load first element at this address, which is the size
         return rd;
+      case PLUS:
+        return rd;
       default:
         return null;
     }
