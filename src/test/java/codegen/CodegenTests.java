@@ -107,8 +107,8 @@ public class CodegenTests {
   }
 
   @Test
-  public void functionsTest() {
-    //compileAndCheckExitAndOutput(path + "functions.txt");
+  public void nestedFunctions() {
+    compileAndCheckExitAndOutput(path + "nested_functions.txt");
   }
 
   @Test

@@ -5,6 +5,7 @@ import java.util.HashMap;
 
 public class SymbolTable {
 
+  private int stackOffset;
   private boolean functionScope;
   private SymbolTable encSymTable;
   private HashMap<String, VarInfo> varDict;
@@ -35,6 +36,7 @@ public class SymbolTable {
 
   public ASTData genericLookUpAll(String name, String type) {
     SymbolTable currST = this;
+    int offsetToVar = 0;
     while (currST != null) {
       ASTData identifier;
       if (type.equals("var")) {
@@ -43,9 +45,14 @@ public class SymbolTable {
         identifier = currST.lookUpFuncScope(name);
       }
       if (identifier != null) {
+        if (identifier instanceof VarInfo) {
+          ((VarInfo) identifier).setProgOffset(offsetToVar);
+        }
         return identifier;
       }
+      offsetToVar += currST.getStackOffset();
       currST = currST.getEncSymTable();
+
     }
     return null;
   }
@@ -68,5 +75,25 @@ public class SymbolTable {
 
   public void setFunctionScope(boolean functionScope) {
     this.functionScope = functionScope;
+  }
+
+  public void setScopeStackOffset(int scopeStackOffset) {
+    this.stackOffset = scopeStackOffset;
+  }
+
+  public int getStackOffset() {
+    return stackOffset;
+  }
+
+  public void incrementStackOffset(int i) {
+    for (VarInfo v : varDict.values()) {
+      if (v.getLocalOffset() != null) {
+        v.setLocalOffset(v.getLocalOffset() + i);
+      }
+    }
+  }
+
+  public void decrementStackOffset(int i) {
+    incrementStackOffset(-i);
   }
 }
