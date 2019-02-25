@@ -4,15 +4,13 @@ src/test/examples/valid/while/whileFalse.wacc {end of loop}
 src/test/examples/valid/while/max.wacc {max value = 17}
 src/test/examples/valid/while/min.wacc {min value = 10}
 src/test/examples/valid/while/rmStyleAdd.wacc {initial value of x: 3,(+)(+)(+)(+)(+)(+)(+),final value of x: 10}
+src/test/examples/valid/while/whileBoolFlip.wacc {flip b!,end of loop}
+src/test/examples/valid/while/loopCharCondition.wacc {Change c,Should print "Change c" once before.}
+src/test/examples/valid/while/loopIntCondition.wacc {Change n,Should print "Change n" once before.}
 
-src/test/examples/valid/while/whileBoolFlip.wacc {flip b!,end of loop} todo unary op
-
-todo fix tests
-src/test/examples/valid/while/loopCharCondition.wacc {Change c,Should print "Change c" once before.} todo special char at the end (?)
-src/test/examples/valid/while/loopIntCondition.wacc {Change c,Should print"Change c" once before.} todo special char at the end (?)
-  todo enable multiple inputs
+  todo fix test enable multiple inputs
 src/test/examples/valid/while/rmStyleAddIO.wacc {Enter the first number: Enter the second number: Initial value of x: 0,,final value of x: 0} 0,-1
 src/test/examples/valid/while/fibonacciFullIt.wacc {This program calculates the nth fibonacci number iteratively.,Please enter n  (should not be too large): The input n is 0,The nth fibonacci number is 0}
-  todo enable commas in ouptut
+  todo fix test enable commas in ouptut
 src/test/examples/valid/while/fibonacciIterative.wacc {The first 20 fibonacci numbers are:, 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987, 1597, 2584, 4181, ...}
 
