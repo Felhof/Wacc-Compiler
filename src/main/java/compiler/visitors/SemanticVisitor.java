@@ -89,6 +89,7 @@ import compiler.AST.NodeElements.RHS.IntExpr;
 import compiler.AST.NodeElements.RHS.StringExpr;
 import compiler.AST.Nodes.WhileNode;
 import compiler.AST.Nodes.ReadNode;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -135,13 +136,16 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
 
   @Override
   public ASTData visitFunc(FuncContext ctx) {
+    stackPointerOffset = 0;
     Type funcReturnType = (Type) visit(ctx.type());
     ScopeData funcStat = visitFuncStatInNewScope(ctx.IDENT().getText(),
         ctx.stat(), ctx.param_list(), funcReturnType);
+    int tempStackOffset = stackPointerOffset;
+    stackPointerOffset = 0;
     return new FuncNode(funcReturnType,
         ctx.IDENT().getText(),
         funcStat.paramList(), funcStat.astNode(),
-        funcStat.symbolTable(), ctx.start.getLine());
+        funcStat.symbolTable(), ctx.start.getLine(), tempStackOffset);
   }
 
   @Override
@@ -256,12 +260,12 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
   }
 
   private void incrementStackOffset(Type varType) {
-    if (varType.equals(CharType.getInstance()) || varType
-        .equals(BoolType.getInstance())) {
-      stackPointerOffset++;
-    } else {
-      stackPointerOffset += 4;
-    }
+      if (varType.equals(CharType.getInstance()) || varType
+          .equals(BoolType.getInstance())) {
+        stackPointerOffset++;
+      } else {
+        stackPointerOffset += 4;
+      }
   }
 
   @Override

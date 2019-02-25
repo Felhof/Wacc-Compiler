@@ -45,6 +45,7 @@ import compiler.AST.Types.ArrType;
 import compiler.AST.Types.BoolType;
 import compiler.AST.Types.CharType;
 import compiler.AST.Types.IntType;
+import compiler.AST.Types.PairType;
 import compiler.AST.Types.Type;
 import compiler.SubRoutines;
 import compiler.instr.ADD;
@@ -74,6 +75,7 @@ import compiler.instr.STR;
 import compiler.instr.STRING_FIELD;
 import compiler.instr.SUB;
 import compiler.instr.Shift;
+import compiler.instr.EOR;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -95,7 +97,7 @@ public class ASTVisitor {
   private SymbolTable currentST;
   private int totalStackOffset;
   private int nextPosInStack;
-  private int offsetFromInitialSP;
+  private int offsetToStoredVariablesInTheStack;
   private int branchNb = 0;
 
   public ASTVisitor() {
@@ -103,7 +105,7 @@ public class ASTVisitor {
     data = new ArrayList<>();
     this.specialLabels = new LinkedHashSet<>();
     availableRegs = new ArrayList<>(allUsableRegs);
-    offsetFromInitialSP = 0;
+    offsetToStoredVariablesInTheStack = 0;
     new SubRoutines(instructions);
   }
 
@@ -138,8 +140,6 @@ public class ASTVisitor {
   }
 
   public List<Instr> generate(AST root) {
-    totalStackOffset = Integer.parseInt(root.stackOffset());
-    nextPosInStack = totalStackOffset;
     constructStartProgram();
     visitFuncsAndChildren(root);
     constructEndProgram();
@@ -152,8 +152,13 @@ public class ASTVisitor {
 
   private void visitFuncsAndChildren(AST root) {
     root.root().children().stream().filter(node -> node instanceof FuncNode)
-        .forEach(
-            this::visit);
+        .forEach(f -> {
+          totalStackOffset = ((FuncNode) f).funcStackOffset();
+          nextPosInStack = totalStackOffset;
+          visit(f);
+        });
+    totalStackOffset = Integer.parseInt(root.stackOffset());
+    nextPosInStack = totalStackOffset;
     enterScope(root.symbolTable());
     instructions.add(new LABEL("main"));
     instructions.add(new PUSH(LR));
@@ -184,7 +189,7 @@ public class ASTVisitor {
 
   private Instr buildInstr(String type, REG rd, REG rn, Operand op2) {
     switch (type) {
-      case "addExpr":
+      case "add":
         return new ADD(rd, rn, op2);
       case "sub":
         return new SUB(rd, rn, op2);
@@ -194,7 +199,7 @@ public class ASTVisitor {
   }
 
   private void constructEndProgram() {
-    configureStack("addExpr");
+    configureStack("add");
     setArg(new Imm_INT_MEM(toInt("0")));
     instructions.add(new POP(PC));
     instructions.add(new SECTION("ltorg"));
@@ -223,20 +228,23 @@ public class ASTVisitor {
         && expr.operator() == UNOP.MINUS) {
       ((IntExpr) expr.insideExpr()).setNegative();
       return visit(expr.insideExpr());
-    } else if (expr.insideExpr() instanceof Ident
-        && expr.operator() == UNOP.MINUS) {
-      REG rd = (REG) visit(expr.insideExpr());
-      specialLabels.addAll(
-          Arrays.asList("p_throw_overflow_error", "p_throw_runtime_error",
-              "p_print_string"));
-      instructions.add(new RS(rd, rd, new Imm_INT(0), "BS"));
-      instructions.add(new B("p_throw_overflow_error", true, COND.VS));
-      return rd;
     }
 
-    //TODO: handle other types
-    return null;
-  }
+    REG rd = (REG) visit(expr.insideExpr());
+    switch (expr.operator()) {
+      case MINUS:
+        specialLabels.addAll(
+            Arrays.asList("p_throw_overflow_error", "p_throw_runtime_error",
+                "p_print_string"));
+        instructions.add(new RS(rd, rd, new Imm_INT(0), "BS"));
+        instructions.add(new B("p_throw_overflow_error", true, COND.VS));
+        return rd;
+      case NEG:
+        instructions.add(new EOR(rd, rd, new Imm_INT(1)));
+        return rd;
+      default:
+        return null;
+    }
 
   public CodeGenData visitIntExpr(IntExpr expr) {
     REG rd = useAvailableReg();
@@ -396,7 +404,7 @@ public class ASTVisitor {
     REG rd = useAvailableReg();
     instructions.add(new ADD(rd, SP, new Imm_INT(
         currentST.lookUpAllVar(readNode.lhs().varName()).getStackOffset()
-            - offsetFromInitialSP),
+            + offsetToStoredVariablesInTheStack),
         false));
 
     instructions.add(new MOV(R0, rd));
@@ -479,10 +487,10 @@ public class ASTVisitor {
     if (varInScope != null && !varInScope.getType()
         .equals(varAssignNode.lhs().type())) {
       offset = currentST.getEncSymTable().lookUpAllVar(varName).getStackOffset()
-          - offsetFromInitialSP;
+          + offsetToStoredVariablesInTheStack;
     } else {
       offset = currentST.lookUpAllVar(varName)
-          .getStackOffset() - offsetFromInitialSP;
+          .getStackOffset() + offsetToStoredVariablesInTheStack;
     }
     saveVarData(varAssignNode.rhs().type(), rd, SP, offset, false);
     freeReg(rd);
@@ -622,7 +630,7 @@ public class ASTVisitor {
   private REG loadVar(String varName, boolean isByteInstr) {
     REG rd = useAvailableReg();
     int offset = currentST.lookUpAllVar(varName).getStackOffset()
-        - offsetFromInitialSP;
+        + offsetToStoredVariablesInTheStack;
     instructions.add(new LDR(rd,
         new Addr(SP, true, new Imm_INT(offset)), isByteInstr));
     return rd;
@@ -631,7 +639,7 @@ public class ASTVisitor {
   private REG loadFromStack(String varName) {
     REG rd = useAvailableReg();
     int offset = currentST.lookUpAllVar(varName).getStackOffset()
-        - offsetFromInitialSP;
+        + offsetToStoredVariablesInTheStack;
     instructions.add(new ADD(rd, SP, new Imm_INT(offset)));
     return rd;
   }
@@ -640,11 +648,12 @@ public class ASTVisitor {
     enterScope(funcNode.symbolTable());
     instructions.add(new LABEL("f_" + funcNode.name()));
     instructions.add(new PUSH(LR));
+    configureStack("sub");
     if (!funcNode.paramList().exprList().isEmpty()) {
       visit(funcNode.paramList());
     }
     funcNode.getParentNode().children().forEach(this::visit);
-    instructions.addAll(Arrays.asList(new POP(PC), new POP(PC)));
+    instructions.add(new POP(PC));
     instructions.add(new SECTION("ltorg"));
     exitScope(currentST.getEncSymTable());
     return null;
@@ -653,6 +662,8 @@ public class ASTVisitor {
   public CodeGenData visitReturn(ReturnNode returnNode) {
     REG rd = (REG) visit(returnNode.expr());
     instructions.add(new MOV(R0, rd));
+    configureStack("add");
+    instructions.add(new POP(PC));
     freeReg(rd);
     return null;
   }
@@ -660,7 +671,7 @@ public class ASTVisitor {
   public CodeGenData visitFuncCall(FuncCall funcCall) {
     visit(funcCall.argsList());
     instructions.add(new B("f_" + funcCall.funcName(), true));
-    offsetFromInitialSP = 0;
+    offsetToStoredVariablesInTheStack = 0;
     instructions.add(
         new ADD(SP, SP, new Imm_INT(funcCall.argsList().bytesPushed()), false));
     REG rd = useAvailableReg();
@@ -671,11 +682,12 @@ public class ASTVisitor {
   public CodeGenData visitParams(ListExpr listExpr) {
     List<String> paramNames = listExpr.paramNames();
     List<Expr> exprList = listExpr.exprList();
-    int offset =
-        listExpr.bytesPushed() + exprList.get(exprList.size() - 1).sizeOf();
-    for (int i = exprList.size() - 1; i >= 0; i--) {
-      offset -= exprList.get(i).sizeOf();
-      currentST.lookUpAllVar(paramNames.get(i)).setStackOffset(offset);
+    // LR has been pushed and we have some space for the variable declaration
+    // the arguments reside at this offset from the current stack pointer
+    int offset = WORD_SIZE + totalStackOffset;
+    for (int i = 0; i < exprList.size(); i++) {
+      currentST.lookUpVarScope(paramNames.get(i)).setStackOffset(offset);
+      offset += exprList.get(i).sizeOf();
     }
     return null;
   }
@@ -686,9 +698,9 @@ public class ASTVisitor {
     for (Expr e : reverseArgs) {
       REG rd = (REG) visit(e);
       int offsetFromBase =
-        (!(e.type() instanceof CharType) && !(e.type() instanceof BoolType))
-          ? -WORD_SIZE : -BYTE_SIZE;
-      offsetFromInitialSP += offsetFromBase;
+          (!(e.type() instanceof CharType) && !(e.type() instanceof BoolType))
+              ? -WORD_SIZE : -BYTE_SIZE;
+      offsetToStoredVariablesInTheStack -= offsetFromBase;
       saveVarData(e.type(), rd, SP, offsetFromBase,
           true);
       freeReg(rd);
