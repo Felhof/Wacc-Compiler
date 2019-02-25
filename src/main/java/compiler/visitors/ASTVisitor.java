@@ -89,7 +89,6 @@ public class ASTVisitor {
   private static final int SHIFT_TIMES_4 = 2;
   private static final int BYTE_SIZE = 1;
 
-
   private static List<Instr> instructions;
   private static List<Instr> data;
   private static List<REG> availableRegs;
@@ -741,6 +740,8 @@ public class ASTVisitor {
   }
 
   public CodeGenData visitIfElseNode(IfElseNode ifElseNode) {
+    int tempStackOffset = totalStackOffset;
+    int tempNextPosInStack = nextPosInStack;
     REG rd = (REG) visit(ifElseNode.cond());
     instructions.add(new CMP(rd, new Imm_INT(0)));
     instructions.add(new B("L" + branchNb, COND.EQ));
@@ -749,16 +750,32 @@ public class ASTVisitor {
     int scopeBranchNb = branchNb;
     branchNb += 2;
 
-    enterScope(ifElseNode.thenST());
-    visit(ifElseNode.thenStat());
+    visitIfChild(ifElseNode, "then");
     instructions.add(new B("L" + (scopeBranchNb + 1)));
     instructions.add(new LABEL("L" + (scopeBranchNb)));
-
-    enterScope(ifElseNode.elseST());
-    visit(ifElseNode.elseStat());
+    visitIfChild(ifElseNode, "else");
     instructions.add(new LABEL("L" + (scopeBranchNb + 1)));
+
     exitScope(currentST.getEncSymTable());
+    totalStackOffset = tempStackOffset;
+    nextPosInStack = tempNextPosInStack;
     return null;
+  }
+
+  private void visitIfChild(IfElseNode ifElseNode, String childName) {
+    totalStackOffset = ifElseNode.elseStatOffset();
+    SymbolTable st = ifElseNode.elseST();;
+    ParentNode child = ifElseNode.elseStat();
+    if (childName.equals("then")) {
+      totalStackOffset = ifElseNode.thenStackOffset();
+      st = ifElseNode.thenST();
+      child = ifElseNode.thenStat();
+    }
+    nextPosInStack = totalStackOffset;
+    enterScope(st);
+    configureStack("sub");
+    visit(child);
+    configureStack("add");
   }
 
   public CodeGenData visitWhileNode(WhileNode whileNode) {
