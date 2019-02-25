@@ -1,6 +1,4 @@
 src/test/examples/valid/scope/scopeRedefine.wacc {true,2}
-
-
 src/test/examples/valid/scope/ifNested1.wacc {correct}
 src/test/examples/valid/scope/ifNested2.wacc {correct}
 src/test/examples/valid/scope/indentationNotImportant.wacc
@@ -10,4 +8,5 @@ src/test/examples/valid/scope/scopeBasic.wacc
 src/test/examples/valid/scope/scopeVars.wacc {2,4,2}
 src/test/examples/valid/scope/scopeSimpleRedefine.wacc {true,12}
 
-src/test/examples/valid/scope/printAllTypes.wacc failing
+src/test/examples/valid/scope/printAllTypes.wacc {}
+

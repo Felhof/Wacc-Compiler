@@ -509,13 +509,15 @@ public class ASTVisitor {
     REG sizeReg = useAvailableReg();
     Expr[] array = arrayLiter.elems();
     int size = array.length;
+//    int elemSize = isByteSize(((ArrType) arrayLiter.type()).elemType()) ?
+//        BYTE_SIZE : WORD_SIZE;
 
     // malloc the number of elements plus one for to hold the size
     setArg(new Imm_INT_MEM((size + 1) * WORD_SIZE));
     instructions.add(new B("malloc", true));
     instructions.add(new MOV(arrAddress, R0));
 
-    // store array elements in the heap
+    // store array address elements in the heap
     for (int i = 0; i < size; i++) {
       storeArrayElem(array[i], arrAddress, (i + 1) * WORD_SIZE);
     }
@@ -834,7 +836,7 @@ public class ASTVisitor {
     currentST = encSymTable;
   }
 
-  private boolean isByteSize(Type type) {
+  public static boolean isByteSize(Type type) {
     return type.equals(CharType.getInstance())
         || type.equals(BoolType.getInstance());
   }
