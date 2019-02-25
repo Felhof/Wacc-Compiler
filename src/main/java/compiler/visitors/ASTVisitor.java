@@ -243,7 +243,7 @@ public class ASTVisitor {
         break;
       case LEN:
         int offset =
-            currentST.lookUpAllVar(((Ident)expr.insideExpr()).varName()).getStackOffset();
+            currentST.lookUpAllVar(((Ident)expr.insideExpr()).varName()).getTotalOffset();
         instructions.add(new LDR(rd, new Addr(SP, true,
             new Imm_INT(offset))));  //load address of array into rd
         instructions.add(new LDR(rd, new Addr(rd))); //load first element at this address, which is the size
