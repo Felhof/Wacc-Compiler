@@ -96,7 +96,6 @@ public class ASTVisitor {
   private int totalStackOffset;
   private int scopeStackOffset;
   private int nextPosInStack;
-  private int offsetToStoredVariablesInTheStack;
   private int branchNb = 0;
 
   public ASTVisitor() {
@@ -104,7 +103,6 @@ public class ASTVisitor {
     data = new ArrayList<>();
     this.specialLabels = new LinkedHashSet<>();
     availableRegs = new ArrayList<>(allUsableRegs);
-    offsetToStoredVariablesInTheStack = 0;
     new SubRoutines(instructions);
   }
 
@@ -404,9 +402,9 @@ public class ASTVisitor {
 
     //In this case we don't visit the Node because we don't want to store the value but the address
     REG rd = useAvailableReg();
+    VarInfo varInfo = currentST.lookUpAllVar(readNode.lhs().varName());
     instructions.add(new ADD(rd, SP, new Imm_INT(
-        currentST.lookUpAllVar(readNode.lhs().varName()).getStackOffset()
-            + offsetToStoredVariablesInTheStack),
+        varInfo.getTotalOffset()),
         false));
 
     instructions.add(new MOV(R0, rd));
@@ -450,7 +448,7 @@ public class ASTVisitor {
     nextPosInStack -= isByteSize(varDeclareNode.varType()) ? BYTE_SIZE : WORD_SIZE;
 
     // store variable in the stack and save offset in symbol table
-    currentST.lookUpAllVar(varDeclareNode.varName()).setStackOffset(nextPosInStack);
+    currentST.lookUpAllVar(varDeclareNode.varName()).setLocalOffset(nextPosInStack);
     saveVarData(varDeclareNode.varType(), rd, SP, nextPosInStack, false);
 
     freeReg(rd);
@@ -473,7 +471,7 @@ public class ASTVisitor {
 
   private CodeGenData visitPairAssign(VarAssignNode varAssignNode) {
     REG rd = (REG) visit(varAssignNode.rhs());
-    REG rn = (REG) visitHeapPairAddr((PairElem) varAssignNode.lhs());
+    REG rn =  visitHeapPairAddr((PairElem) varAssignNode.lhs());
     saveVarData(varAssignNode.lhs().type(), rd, rn, 0, false);
     freeReg(rd);
     freeReg(rn);
@@ -488,11 +486,11 @@ public class ASTVisitor {
     VarInfo varInScope = currentST.lookUpVarScope(varName);
     if (varInScope != null && !varInScope.getType()
         .equals(varAssignNode.lhs().type())) {
-      offset = currentST.getEncSymTable().lookUpAllVar(varName).getStackOffset()
-          + offsetToStoredVariablesInTheStack;
+      VarInfo varInfo = currentST.getEncSymTable().lookUpAllVar(varName);
+      offset = varInfo.getTotalOffset() + currentST.getStackOffset();
     } else {
       offset = currentST.lookUpAllVar(varName)
-          .getStackOffset() + offsetToStoredVariablesInTheStack;
+          .getTotalOffset();
     }
     saveVarData(varAssignNode.rhs().type(), rd, SP, offset, false);
     freeReg(rd);
@@ -631,8 +629,7 @@ public class ASTVisitor {
 
   private REG loadVar(String varName, boolean isByteInstr) {
     REG rd = useAvailableReg();
-    int offset = currentST.lookUpAllVar(varName).getStackOffset()
-        + offsetToStoredVariablesInTheStack;
+    int offset = currentST.lookUpAllVar(varName).getTotalOffset();
     instructions.add(new LDR(rd,
         new Addr(SP, true, new Imm_INT(offset)), isByteInstr));
     return rd;
@@ -640,8 +637,7 @@ public class ASTVisitor {
 
   private REG loadFromStack(String varName) {
     REG rd = useAvailableReg();
-    int offset = currentST.lookUpAllVar(varName).getStackOffset()
-        + offsetToStoredVariablesInTheStack;
+    int offset = currentST.lookUpAllVar(varName).getTotalOffset();
     instructions.add(new ADD(rd, SP, new Imm_INT(offset)));
     return rd;
   }
@@ -673,9 +669,9 @@ public class ASTVisitor {
   public CodeGenData visitFuncCall(FuncCall funcCall) {
     visit(funcCall.argsList());
     instructions.add(new B("f_" + funcCall.funcName(), true));
-    offsetToStoredVariablesInTheStack = 0;
     instructions.add(
         new ADD(SP, SP, new Imm_INT(funcCall.argsList().bytesPushed()), false));
+    currentST.decrementStackOffset(funcCall.argsList().bytesPushed());
     REG rd = useAvailableReg();
     instructions.add(new MOV(rd, R0));
     return rd;
@@ -688,7 +684,7 @@ public class ASTVisitor {
     // the arguments reside at this offset from the current stack pointer
     int offset = WORD_SIZE + scopeStackOffset;
     for (int i = 0; i < exprList.size(); i++) {
-      currentST.lookUpVarScope(paramNames.get(i)).setStackOffset(offset);
+      currentST.lookUpVarScope(paramNames.get(i)).setLocalOffset(offset);
       offset += exprList.get(i).sizeOf();
     }
     return null;
@@ -702,7 +698,7 @@ public class ASTVisitor {
       int offsetFromBase =
           (!(e.type() instanceof CharType) && !(e.type() instanceof BoolType))
               ? -WORD_SIZE : -BYTE_SIZE;
-      offsetToStoredVariablesInTheStack -= offsetFromBase;
+      currentST.incrementStackOffset(-offsetFromBase);
       saveVarData(e.type(), rd, SP, offsetFromBase,
           true);
       freeReg(rd);
@@ -745,7 +741,6 @@ public class ASTVisitor {
     int tempTotalStack = totalStackOffset;
     int tempStackOffset = scopeStackOffset;
     int tempNextPosInStack = nextPosInStack;
-    int tempOffsetToVar = offsetToStoredVariablesInTheStack;
     REG rd = (REG) visit(ifElseNode.cond());
     instructions.add(new CMP(rd, new Imm_INT(0)));
     instructions.add(new B("L" + branchNb, COND.EQ));
@@ -761,10 +756,9 @@ public class ASTVisitor {
     visitIfChild(ifElseNode, "else");
     instructions.add(new LABEL("L" + (scopeBranchNb + 1)));
     exitScope(currentST.getEncSymTable());
-    totalStackOffset = tempStackOffset;
+    totalStackOffset = tempTotalStack;
     scopeStackOffset = tempStackOffset;
     nextPosInStack = tempNextPosInStack;
-    offsetToStoredVariablesInTheStack = tempOffsetToVar;
     return null;
   }
 
@@ -782,7 +776,6 @@ public class ASTVisitor {
       child = ifElseNode.thenStat();
     }
     nextPosInStack = scopeStackOffset;
-    offsetToStoredVariablesInTheStack = scopeStackOffset;
     enterScope(st);
     configureStack("sub");
     visit(child);
@@ -811,8 +804,16 @@ public class ASTVisitor {
   }
 
   public CodeGenData visitNewScope(ScopeNode scopeNode) {
+    int tempScopeStackOffset = scopeStackOffset;
+    int tempNextPosInStack = nextPosInStack;
+    scopeStackOffset = scopeNode.stackOffset();
+    nextPosInStack = scopeStackOffset;
     enterScope(scopeNode.symbolTable());
+    configureStack("sub");
     scopeNode.parentNode().children().forEach(this::visit);
+    configureStack("add");
+    scopeStackOffset = tempScopeStackOffset;
+    nextPosInStack = tempNextPosInStack;
     exitScope(currentST.getEncSymTable());
     return null;
 

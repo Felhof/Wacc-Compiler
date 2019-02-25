@@ -89,7 +89,6 @@ import compiler.AST.NodeElements.RHS.IntExpr;
 import compiler.AST.NodeElements.RHS.StringExpr;
 import compiler.AST.Nodes.WhileNode;
 import compiler.AST.Nodes.ReadNode;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -141,6 +140,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
     ScopeData funcStat = visitFuncStatInNewScope(ctx.IDENT().getText(),
         ctx.stat(), ctx.param_list(), funcReturnType);
     int tempStackOffset = stackPointerOffset;
+    funcStat.symbolTable().setScopeStackOffset(stackPointerOffset);
     stackPointerOffset = 0;
     return new FuncNode(funcReturnType,
         ctx.IDENT().getText(),
@@ -214,6 +214,10 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
     stackPointerOffset = 0;
     ScopeData elseStat = visitStatInNewScope(ctx.stat(1));
     int elseStackOffset = stackPointerOffset;
+
+    thenStat.symbolTable.setScopeStackOffset(thenStackOffset);
+    elseStat.symbolTable.setScopeStackOffset(elseStackOffset);
+
     currentParentNode.add(new IfElseNode(condition, thenStat.astNode(),
         thenStat.symbolTable(), elseStat.astNode(), elseStat.symbolTable(),
         ctx.start.getLine(), thenStackOffset, elseStackOffset));
@@ -564,9 +568,13 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
 
   @Override
   public ASTData visitNewScopeStat(NewScopeStatContext ctx) {
+    int temp = stackPointerOffset;
+    stackPointerOffset = 0;
     ScopeData stat = visitStatInNewScope(ctx.stat());
+    stat.symbolTable.setScopeStackOffset(stackPointerOffset);
     currentParentNode.add(
-        new ScopeNode(stat.astNode(), stat.symbolTable(), ctx.start.getLine()));
+        new ScopeNode(stat.astNode(), stat.symbolTable(), ctx.start.getLine(), stackPointerOffset));
+    stackPointerOffset = temp;
     return null;
   }
 
