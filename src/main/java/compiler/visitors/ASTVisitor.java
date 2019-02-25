@@ -242,6 +242,17 @@ public class ASTVisitor {
       case NEG:
         instructions.add(new EOR(rd, rd, new Imm_INT(1)));
         return rd;
+      case ORD:
+        return rd;
+      case CHR:
+        return rd;
+      case LEN:
+        instructions.add(new LDR(rd, new Addr(SP, true,
+                new Imm_INT(currentST.lookUpAllVar(((Ident)expr.insideExpr()).varName()).getStackOffset())))); //load address of array into rd
+        instructions.add(new LDR(rd, new Addr(rd))); //load first element at this address, which is the size
+        return rd;
+      case PLUS:
+        return rd;
       default:
         return null;
     }

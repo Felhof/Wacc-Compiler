@@ -111,6 +111,11 @@ public class CodegenTests {
     //compileAndCheckExitAndOutput(path + "functions.txt");
   }
 
+  @Test
+  public void unaryExprTest() {
+    compileAndCheckExitAndOutput(path + "unary_expressions.txt");
+  }
+
   public static void compileAndCheckExitAndOutput(String testDataFile) {
     try (BufferedReader br = new BufferedReader(new FileReader(testDataFile))) {
       for (String line; (line = br.readLine()) != null && !line.equals(""); ) {
