@@ -242,6 +242,10 @@ public class ASTVisitor {
       case NEG:
         instructions.add(new EOR(rd, rd, new Imm_INT(1)));
         return rd;
+      case ORD:
+        return rd;
+      case CHR:
+        return rd;
       default:
         return null;
     }

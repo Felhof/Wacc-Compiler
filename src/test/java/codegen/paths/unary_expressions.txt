@@ -1,0 +1,1 @@
+src/test/examples/valid/expressions/ordAndchrExpr.wacc {a is 97,99 is c}
