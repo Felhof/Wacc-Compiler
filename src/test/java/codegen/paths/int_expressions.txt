@@ -17,6 +17,5 @@ src/test/examples/valid/expressions/plusExpr.wacc {35}
 src/test/examples/valid/expressions/plusMinusExpr.wacc {-1}
 src/test/examples/valid/expressions/plusNoWhitespaceExpr.wacc {3}
 src/test/examples/valid/expressions/sequentialCount.wacc {Can you count to 10?,1,2,3,4,5,6,7,8,9,10}
-
 src/test/examples/valid/expressions/plusPlusExpr.wacc {3}
 src/test/examples/valid/expressions/minusPlusExpr.wacc {-1}

@@ -238,24 +238,21 @@ public class ASTVisitor {
             "p_print_string"));
         instructions.add(new RS(rd, rd, new Imm_INT(0), "BS"));
         instructions.add(new B("p_throw_overflow_error", true, COND.VS));
-        return rd;
+        break;
       case NEG:
         instructions.add(new EOR(rd, rd, new Imm_INT(1)));
-        return rd;
-      case ORD:
-        return rd;
-      case CHR:
-        return rd;
+        break;
       case LEN:
+        int offset =
+            currentST.lookUpAllVar(((Ident)expr.insideExpr()).varName()).getStackOffset();
         instructions.add(new LDR(rd, new Addr(SP, true,
-                new Imm_INT(currentST.lookUpAllVar(((Ident)expr.insideExpr()).varName()).getStackOffset())))); //load address of array into rd
+            new Imm_INT(offset))));  //load address of array into rd
         instructions.add(new LDR(rd, new Addr(rd))); //load first element at this address, which is the size
-        return rd;
-      case PLUS:
-        return rd;
+        break;
       default:
-        return null;
+        break;
     }
+    return rd;
   }
 
   public CodeGenData visitIntExpr(IntExpr expr) {
@@ -410,17 +407,15 @@ public class ASTVisitor {
   }
 
   public CodeGenData visitReadExpr(ReadNode readNode) {
-    //REG rd = (REG) visit((ASTData) readNode.lhs());
+//    REG rd = (REG) visit((ASTData) readNode.lhs()); todo fix ?
 
     //In this case we don't visit the Node because we don't want to store the value but the address
     REG rd = useAvailableReg();
-    instructions.add(new ADD(rd, SP, new Imm_INT(
-        currentST.lookUpAllVar(readNode.lhs().varName()).getStackOffset()
-            + offsetToStoredVariablesInTheStack),
-        false));
+    int offset = currentST.lookUpAllVar(readNode.lhs().varName()).getStackOffset()
+        + offsetToStoredVariablesInTheStack;
+    instructions.add(new ADD(rd, SP, new Imm_INT(offset)));
 
     instructions.add(new MOV(R0, rd));
-
     if ((readNode.lhs()).type().equals(IntType.getInstance())) {
       instructions.add(new B("p_read_int", true));
       specialLabels.add("p_read_int");
