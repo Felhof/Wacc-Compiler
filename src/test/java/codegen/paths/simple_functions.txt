@@ -1,11 +1,12 @@
-src/test/examples/valid/function/simple_functions/functionDeclaration.wacc
-src/test/examples/valid/function/simple_functions/functionSimple.wacc
+src/test/examples/valid/function/simple_functions/functionDeclaration.wacc {}
+src/test/examples/valid/function/simple_functions/functionSimple.wacc {}
+src/test/examples/valid/function/simple_functions/sameArgName.wacc {99}
 src/test/examples/valid/function/simple_functions/sameArgName2.wacc {99}
+src/test/examples/valid/function/simple_functions/functionReturnPair.wacc {10}
+src/test/examples/valid/function/simple_functions/functionUpdateParameter.wacc {y is 1,x is 1,x is now 5,y is still 1}
+src/test/examples/valid/function/simple_functions/incFunction.wacc {1,4}
+src/test/examples/valid/function/simple_functions/negFunction.wacc {true,false,true}
 
 src/test/examples/valid/function/simple_functions/asciiTable.wacc
 src/test/examples/valid/function/simple_functions/functionManyArguments.wacc
-src/test/examples/valid/function/simple_functions/functionReturnPair.wacc
-src/test/examples/valid/function/simple_functions/functionUpdateParameter.wacc
-src/test/examples/valid/function/simple_functions/incFunction.wacc
-src/test/examples/valid/function/simple_functions/negFunction.wacc
-src/test/examples/valid/function/simple_functions/sameArgName.wacc
+

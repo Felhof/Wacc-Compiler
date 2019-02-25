@@ -45,7 +45,6 @@ import compiler.AST.Types.ArrType;
 import compiler.AST.Types.BoolType;
 import compiler.AST.Types.CharType;
 import compiler.AST.Types.IntType;
-import compiler.AST.Types.PairType;
 import compiler.AST.Types.Type;
 import compiler.SubRoutines;
 import compiler.instr.ADD;
@@ -95,6 +94,7 @@ public class ASTVisitor {
   private Set<String> specialLabels;
   private SymbolTable currentST;
   private int totalStackOffset;
+  private int scopeStackOffset;
   private int nextPosInStack;
   private int offsetToStoredVariablesInTheStack;
   private int branchNb = 0;
@@ -152,12 +152,14 @@ public class ASTVisitor {
   private void visitFuncsAndChildren(AST root) {
     root.root().children().stream().filter(node -> node instanceof FuncNode)
         .forEach(f -> {
-          totalStackOffset = ((FuncNode) f).funcStackOffset();
-          nextPosInStack = totalStackOffset;
+          scopeStackOffset = ((FuncNode) f).funcStackOffset();
+          totalStackOffset = scopeStackOffset;
+          nextPosInStack = scopeStackOffset;
           visit(f);
         });
-    totalStackOffset = Integer.parseInt(root.stackOffset());
-    nextPosInStack = totalStackOffset;
+    scopeStackOffset = Integer.parseInt(root.stackOffset());
+    totalStackOffset = scopeStackOffset;
+    nextPosInStack = scopeStackOffset;
     enterScope(root.symbolTable());
     instructions.add(new LABEL("main"));
     instructions.add(new PUSH(LR));
@@ -175,14 +177,14 @@ public class ASTVisitor {
 
   private void configureStack(String type) {
     int maxIntImmShift = 1024;
-    if (totalStackOffset > 0) {
-      int temp = totalStackOffset;
+    if (scopeStackOffset > 0) {
+      int temp = scopeStackOffset;
       while (temp / 1024 != 0) {
         instructions.add(buildInstr(type, SP, SP, new Imm_INT(maxIntImmShift)));
         temp = temp - 1024;
       }
       instructions.add(buildInstr(type, SP, SP,
-          new Imm_INT(totalStackOffset % maxIntImmShift)));
+          new Imm_INT(scopeStackOffset % maxIntImmShift)));
     }
   }
 
@@ -662,7 +664,7 @@ public class ASTVisitor {
   public CodeGenData visitReturn(ReturnNode returnNode) {
     REG rd = (REG) visit(returnNode.expr());
     instructions.add(new MOV(R0, rd));
-    configureStack("add");
+    instructions.add(new ADD(SP, SP, new Imm_INT(totalStackOffset)));
     instructions.add(new POP(PC));
     freeReg(rd);
     return null;
@@ -684,7 +686,7 @@ public class ASTVisitor {
     List<Expr> exprList = listExpr.exprList();
     // LR has been pushed and we have some space for the variable declaration
     // the arguments reside at this offset from the current stack pointer
-    int offset = WORD_SIZE + totalStackOffset;
+    int offset = WORD_SIZE + scopeStackOffset;
     for (int i = 0; i < exprList.size(); i++) {
       currentST.lookUpVarScope(paramNames.get(i)).setStackOffset(offset);
       offset += exprList.get(i).sizeOf();
@@ -740,8 +742,10 @@ public class ASTVisitor {
   }
 
   public CodeGenData visitIfElseNode(IfElseNode ifElseNode) {
-    int tempStackOffset = totalStackOffset;
+    int tempTotalStack = totalStackOffset;
+    int tempStackOffset = scopeStackOffset;
     int tempNextPosInStack = nextPosInStack;
+    int tempOffsetToVar = offsetToStoredVariablesInTheStack;
     REG rd = (REG) visit(ifElseNode.cond());
     instructions.add(new CMP(rd, new Imm_INT(0)));
     instructions.add(new B("L" + branchNb, COND.EQ));
@@ -753,25 +757,32 @@ public class ASTVisitor {
     visitIfChild(ifElseNode, "then");
     instructions.add(new B("L" + (scopeBranchNb + 1)));
     instructions.add(new LABEL("L" + (scopeBranchNb)));
+    totalStackOffset = tempStackOffset;
     visitIfChild(ifElseNode, "else");
     instructions.add(new LABEL("L" + (scopeBranchNb + 1)));
-
     exitScope(currentST.getEncSymTable());
     totalStackOffset = tempStackOffset;
+    scopeStackOffset = tempStackOffset;
     nextPosInStack = tempNextPosInStack;
+    offsetToStoredVariablesInTheStack = tempOffsetToVar;
     return null;
   }
 
   private void visitIfChild(IfElseNode ifElseNode, String childName) {
-    totalStackOffset = ifElseNode.elseStatOffset();
+    int temp = totalStackOffset;
+    scopeStackOffset = ifElseNode.elseStatOffset();
+    totalStackOffset = temp + scopeStackOffset;
+
     SymbolTable st = ifElseNode.elseST();;
     ParentNode child = ifElseNode.elseStat();
     if (childName.equals("then")) {
-      totalStackOffset = ifElseNode.thenStackOffset();
+      scopeStackOffset = ifElseNode.thenStackOffset();
+      totalStackOffset = temp + scopeStackOffset;
       st = ifElseNode.thenST();
       child = ifElseNode.thenStat();
     }
-    nextPosInStack = totalStackOffset;
+    nextPosInStack = scopeStackOffset;
+    offsetToStoredVariablesInTheStack = scopeStackOffset;
     enterScope(st);
     configureStack("sub");
     visit(child);
