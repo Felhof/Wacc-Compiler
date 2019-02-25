@@ -225,7 +225,7 @@ public class ASTVisitor {
   public CodeGenData visitUnaryExpr(UnaryExpr expr) {
 
     if ((expr.insideExpr() instanceof IntExpr) // Set int value to negative
-        && expr.operator() == UNOP.MINUS) {
+      && expr.operator() == UNOP.MINUS) {
       ((IntExpr) expr.insideExpr()).setNegative();
       return visit(expr.insideExpr());
     }
@@ -234,8 +234,8 @@ public class ASTVisitor {
     switch (expr.operator()) {
       case MINUS:
         specialLabels.addAll(
-            Arrays.asList("p_throw_overflow_error", "p_throw_runtime_error",
-                "p_print_string"));
+          Arrays.asList("p_throw_overflow_error", "p_throw_runtime_error",
+            "p_print_string"));
         instructions.add(new RS(rd, rd, new Imm_INT(0), "BS"));
         instructions.add(new B("p_throw_overflow_error", true, COND.VS));
         return rd;
@@ -245,6 +245,7 @@ public class ASTVisitor {
       default:
         return null;
     }
+  }
 
   public CodeGenData visitIntExpr(IntExpr expr) {
     REG rd = useAvailableReg();

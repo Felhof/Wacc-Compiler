@@ -106,6 +106,11 @@ public class CodegenTests {
     compileAndCheckExitAndOutput(path + "if.txt");
   }
 
+  @Test
+  public void functionsTest() {
+    //compileAndCheckExitAndOutput(path + "functions.txt");
+  }
+
   public static void compileAndCheckExitAndOutput(String testDataFile) {
     try (BufferedReader br = new BufferedReader(new FileReader(testDataFile))) {
       for (String line; (line = br.readLine()) != null && !line.equals(""); ) {
