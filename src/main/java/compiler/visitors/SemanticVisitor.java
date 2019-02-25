@@ -1,5 +1,7 @@
 package compiler.visitors;
 
+import static compiler.visitors.ASTVisitor.isByteSize;
+
 import antlr.BasicParser.Arg_listContext;
 import antlr.BasicParser.ArrayElemLhsContext;
 import antlr.BasicParser.ArrayExpContext;
@@ -267,12 +269,11 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
   }
 
   private void incrementStackOffset(Type varType) {
-      if (varType.equals(CharType.getInstance()) || varType
-          .equals(BoolType.getInstance())) {
-        stackPointerOffset++;
-      } else {
-        stackPointerOffset += 4;
-      }
+    if (isByteSize(varType)) {
+      stackPointerOffset++;
+    } else {
+      stackPointerOffset += 4;
+    }
   }
 
   @Override
@@ -545,7 +546,13 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
   public ASTData visitArg_list(Arg_listContext ctx) {
     boolean isParams = false;
     ListExpr argsList = new ListExpr(isParams);
-    ctx.expr().forEach(e -> argsList.addExpr(((Expr) visit(e))));
+    //ctx.expr().forEach(e -> argsList.addExpr(((Expr) visit(e))));
+    for (ExprContext e : ctx.expr()) {
+      Expr expr = (Expr) visit(e);
+      argsList.addExpr(expr);
+      argsList.addBytes(
+          (isByteSize(expr.type())) ? 1 : 4);
+    }
     return argsList;
   }
 
@@ -573,7 +580,8 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
     ScopeData stat = visitStatInNewScope(ctx.stat());
     stat.symbolTable.setScopeStackOffset(stackPointerOffset);
     currentParentNode.add(
-        new ScopeNode(stat.astNode(), stat.symbolTable(), ctx.start.getLine(), stackPointerOffset));
+        new ScopeNode(stat.astNode(), stat.symbolTable(), ctx.start.getLine(),
+            stackPointerOffset));
     stackPointerOffset = temp;
     return null;
   }

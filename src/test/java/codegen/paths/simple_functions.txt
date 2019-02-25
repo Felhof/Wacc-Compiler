@@ -7,6 +7,7 @@ src/test/examples/valid/function/simple_functions/functionUpdateParameter.wacc {
 src/test/examples/valid/function/simple_functions/incFunction.wacc {1,4}
 src/test/examples/valid/function/simple_functions/negFunction.wacc {true,false,true}
 
-src/test/examples/valid/function/simple_functions/asciiTable.wacc
-src/test/examples/valid/function/simple_functions/functionManyArguments.wacc
+src/test/examples/valid/function/simple_functions/asciiTable.wacc {}
+src/test/examples/valid/function/simple_functions/functionManyArguments.wacc {a is 42,b is true,c is u,d is hello,e is 0x22150,f is 0x22150,answer is g}
+
 

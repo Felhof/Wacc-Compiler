@@ -48,7 +48,10 @@ public class ListExpr implements ASTData {
 
   public void addExpr(Expr expr) {
     exprList.add(expr);
-    bytesPushed += expr.sizeOf();
+  }
+
+  public void addBytes(int bytes) {
+    bytesPushed += bytes;
   }
 
   public List<Type> getExprTypes() {
