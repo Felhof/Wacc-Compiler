@@ -11,19 +11,16 @@ public class IfElseNode extends Node {
   private ParentNode elseStat;
   private SymbolTable thenST;
   private SymbolTable elseST;
-  private int thenStackOffset;
-  private int elseStatOffset;
+
 
   public IfElseNode(Expr condition, ParentNode thenStat, SymbolTable thenST,
-      ParentNode elseStat, SymbolTable elseST, int lineNumber, int thenStackOffset, int elseStatOffset) {
+      ParentNode elseStat, SymbolTable elseST, int lineNumber) {
     super(lineNumber);
     this.condition = condition;
     this.thenStat = thenStat;
     this.elseStat = elseStat;
     this.thenST = thenST;
     this.elseST = elseST;
-    this.thenStackOffset = thenStackOffset;
-    this.elseStatOffset = elseStatOffset;
   }
 
   @Override
@@ -59,10 +56,10 @@ public class IfElseNode extends Node {
   }
 
   public int thenStackOffset() {
-    return thenStackOffset;
+    return thenST.getStackOffset();
   }
 
   public int elseStatOffset() {
-    return elseStatOffset;
+    return elseST.getStackOffset();
   }
 }
