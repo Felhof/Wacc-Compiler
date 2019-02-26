@@ -9,7 +9,6 @@ job 1:
 job 2:
   stage: test
   script:
-#      - make
       - mvn test
   cache:
     paths:
