@@ -36,7 +36,6 @@ public class SymbolTable {
 
   public ASTData genericLookUpAll(String name, String type) {
     SymbolTable currST = this;
-    int offsetToVar = 0;
     while (currST != null) {
       ASTData identifier;
       if (type.equals("var")) {
@@ -45,14 +44,26 @@ public class SymbolTable {
         identifier = currST.lookUpFuncScope(name);
       }
       if (identifier != null) {
-        if (identifier instanceof VarInfo) {
-          ((VarInfo) identifier).setProgOffset(offsetToVar);
-        }
         return identifier;
       }
-      offsetToVar += currST.getStackOffset();
       currST = currST.getEncSymTable();
+    }
+    return null;
+  }
 
+  public Integer getTotalOffset (String varName) {
+    SymbolTable currST = this;
+    Integer progOffset = 0;
+    while (currST != null) {
+      VarInfo varInfo = currST.lookUpVarScope(varName);
+      if (varInfo != null) {
+        Integer localOffset = varInfo.getLocalOffset();
+        if (localOffset != null) {
+          return progOffset + localOffset;
+        }
+      }
+      progOffset += currST.getStackOffset();
+      currST = currST.getEncSymTable();
     }
     return null;
   }

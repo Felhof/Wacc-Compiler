@@ -1,6 +1,7 @@
 package compiler.visitors;
 
-import antlr.BasicParser;
+import static compiler.visitors.ASTVisitor.isByteSize;
+
 import antlr.BasicParser.Arg_listContext;
 import antlr.BasicParser.ArrayElemLhsContext;
 import antlr.BasicParser.ArrayExpContext;
@@ -209,9 +210,10 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
 
   @Override
   public ASTData visitIfStat(IfStatContext ctx) {
-    int recordStackOffset = stackPointerOffset;
     Expr condition = (Expr) visit(ctx.expr());
     checkBoolExpr(ctx.expr(), condition);
+
+    int recordStackOffset = stackPointerOffset;
     stackPointerOffset = 0;
     ScopeData thenStat = visitStatInNewScope(ctx.stat(0));
     int thenStackOffset = stackPointerOffset;
@@ -224,22 +226,23 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
 
     currentParentNode.add(new IfElseNode(condition, thenStat.astNode(),
         thenStat.symbolTable(), elseStat.astNode(), elseStat.symbolTable(),
-        ctx.start.getLine(), thenStackOffset, elseStackOffset));
+        ctx.start.getLine()));
     stackPointerOffset = recordStackOffset;
     return null;
   }
 
   @Override
   public ASTData visitWhileStat(WhileStatContext ctx) {
-
+    int recordStackOffset = stackPointerOffset;
+    stackPointerOffset = 0;
     Expr condition = (Expr) visit(ctx.expr());
     checkBoolExpr(ctx.expr(), condition);
-
     ScopeData stat = visitStatInNewScope(ctx.stat());
-
+    stat.symbolTable().setScopeStackOffset(stackPointerOffset);
     currentParentNode
         .add(new WhileNode(condition, stat.astNode(), stat.symbolTable(),
             ctx.start.getLine()));
+    stackPointerOffset = recordStackOffset;
     return null;
   }
 
@@ -271,8 +274,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
   }
 
   private void incrementStackOffset(Type varType) {
-    if (varType.equals(CharType.getInstance()) || varType
-        .equals(BoolType.getInstance())) {
+    if (isByteSize(varType)) {
       stackPointerOffset++;
     } else {
       stackPointerOffset += 4;
@@ -549,7 +551,13 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
   public ASTData visitArg_list(Arg_listContext ctx) {
     boolean isParams = false;
     ListExpr argsList = new ListExpr(isParams);
-    ctx.expr().forEach(e -> argsList.addExpr(((Expr) visit(e))));
+    //ctx.expr().forEach(e -> argsList.addExpr(((Expr) visit(e))));
+    for (ExprContext e : ctx.expr()) {
+      Expr expr = (Expr) visit(e);
+      argsList.addExpr(expr);
+      argsList.addBytes(
+          (isByteSize(expr.type())) ? 1 : 4);
+    }
     return argsList;
   }
 
