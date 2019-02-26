@@ -33,6 +33,8 @@ public class LDR extends Instr {
   public enum COND {
     EQ, NE, GT, LT,
     GE, LE, VS, CS
+
+
   }
 }
 

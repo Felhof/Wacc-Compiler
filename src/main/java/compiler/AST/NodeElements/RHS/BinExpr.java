@@ -4,6 +4,8 @@ import compiler.AST.Types.BoolType;
 import compiler.AST.Types.CharType;
 import compiler.AST.Types.IntType;
 import compiler.AST.Types.Type;
+import compiler.instr.LDR;
+import compiler.instr.LDR.COND;
 import compiler.visitors.ASTVisitor;
 import compiler.visitors.CodeGenData;
 import java.util.Arrays;
@@ -82,12 +84,12 @@ public class BinExpr extends Expr {
   }
 
   public enum BINOP {
-    MUL("*", typesInt, intType), DIV("/", typesInt, intType),
-    MOD("%", typesInt, intType), PLUS("+", typesInt, intType),
-    MINUS("-", typesInt, intType), GT(">", typesIntChar, boolType),
-    GE(">=", typesIntChar, boolType), LT("<", typesIntChar, boolType),
-    LE("<=", typesIntChar, boolType), EQUAL("==", null, boolType),
-    NOTEQUAL("!=", null, boolType), AND("&&", typesBool, boolType),
+    MUL("*", typesInt, intType, COND.NE), DIV("/", typesInt, intType),
+    MOD("%", typesInt, intType), PLUS("+", typesInt, intType, COND.VS),
+    MINUS("-", typesInt, intType, COND.VS), GT(">", typesIntChar, boolType, COND.GT),
+    GE(">=", typesIntChar, boolType, COND.GE), LT("<", typesIntChar, boolType, COND.LT),
+    LE("<=", typesIntChar, boolType, COND.LE), EQUAL("==", null, boolType, COND.EQ),
+    NOTEQUAL("!=", null, boolType, COND.NE), AND("&&", typesBool, boolType),
     OR("||", typesBool, boolType);
 
     private String op;
@@ -95,14 +97,27 @@ public class BinExpr extends Expr {
     private Type returnType;
     private static Map<String, BINOP> map;
 
+    private static Map<BINOP,BINOP> opposites;
+    private COND cond;
+
     BINOP(String op,
       List<Type> argTypes,
       Type returnType) {
       this.op = op;
       this.argTypes = argTypes;
       this.returnType = returnType;
-
     }
+
+    BINOP(String op,
+          List<Type> argTypes,
+          Type returnType,
+          COND cond) {
+      this.op = op;
+      this.argTypes = argTypes;
+      this.returnType = returnType;
+      this.cond = cond;
+    }
+
 
     public String op() {
       return op;
@@ -116,11 +131,27 @@ public class BinExpr extends Expr {
       return returnType;
     }
 
+    public static Map<BINOP, BINOP> opposites() { return opposites; }
+
+    public COND cond() { return cond; }
+
     static {
       map = new HashMap<>();
       for (BINOP t : BINOP.values()) {
         map.put(t.op(), t);
       }
+    }
+
+    static {
+      opposites = new HashMap<BINOP, BINOP>(){{
+        put(EQUAL, NOTEQUAL);
+        put(NOTEQUAL, EQUAL);
+        put(GT, LE);
+        put(LE, GT);
+        put(GE, LT);
+        put(LT, GE);
+      }};
+
     }
 
     public static BINOP get(String string) {
