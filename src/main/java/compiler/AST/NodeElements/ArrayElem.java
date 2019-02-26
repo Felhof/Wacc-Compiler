@@ -2,10 +2,8 @@ package compiler.AST.NodeElements;
 
 import compiler.AST.NodeElements.RHS.Expr;
 import compiler.AST.Types.Type;
-import compiler.visitors.ASTVisitor;
-import compiler.visitors.CodeGenData;
 
-public class ArrayElem extends LHS {
+public abstract class ArrayElem extends Expr {
 
   private String varName;
   private Expr[] indexes;
@@ -20,12 +18,6 @@ public class ArrayElem extends LHS {
     return indexes;
   }
 
-  @Override
-  public CodeGenData accept(ASTVisitor visitor) {
-    return visitor.visitArrayElem(this);
-  }
-
-  @Override
   public String varName() {
     return varName;
   }
