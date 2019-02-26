@@ -2,10 +2,9 @@ src/test/examples/valid/function/nested_functions/simpleRecursion.wacc {}
 src/test/examples/valid/function/nested_functions/functionConditionalReturn.wacc {true}
 src/test/examples/valid/function/nested_functions/mutualRecursion.wacc {r1: sending 8,r2: received 8,r1: sending 7,r2: received 7,r1: sending 6,r2: received 6,r1: sending 5,r2: received 5,r1: sending 4,r2: received 4,r1: sending 3,r2: received 3,r1: sending 2,r2: received 2,r1: sending 1,r2: received 1}
 
-src/test/examples/valid/function/nested_functions/fibonacciFullRec.wacc _ 0 {This program calculates the nth fibonacci number recursively.,Please enter n (should not be too large): The input n is 0,The nth fibonacci number is 0}
-src/test/examples/valid/function/nested_functions/fixedPointRealArithmetic.wacc
-src/test/examples/valid/function/nested_functions/printInputTriangle.in
-src/test/examples/valid/function/nested_functions/printInputTriangle.output
-src/test/examples/valid/function/nested_functions/printInputTriangle.wacc
 src/test/examples/valid/function/nested_functions/printTriangle.wacc
 src/test/examples/valid/function/nested_functions/fibonacciRecursive.wacc {The first 20 fibonacci numbers are:,0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987, 1597, 2584, 4181...}
+src/test/examples/valid/function/nested_functions/fibonacciFullRec.wacc _ 0 {This program calculates the nth fibonacci number recursively.,Please enter n (should not be too large): The input n is 0,The nth fibonacci number is 0}
+src/test/examples/valid/function/nested_functions/fixedPointRealArithmetic.wacc
+src/test/examples/valid/function/nested_functions/printInputTriangle.wacc
+
