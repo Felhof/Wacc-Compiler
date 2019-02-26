@@ -8,5 +8,7 @@ src/test/examples/valid/IO/print/printChar.wacc {A simple character example is f
 src/test/examples/valid/IO/print/printEscChar.wacc {An escaped character example is "}
 src/test/examples/valid/IO/print/printInt.wacc {An example integer is 189}
 src/test/examples/valid/IO/print/println.wacc {Hello World!}
-src/test/examples/valid/IO/print/printStringElem.wacc {e}
 src/test/examples/valid/IO/print/multipleStringsAssignment.wacc {s1 is Hi,s2 is Hi,They are not the same.,Now modify s1[0] = 'h',s1 is hi,s2 is Hi,They are not the same.}
+
+src/test/examples/valid/IO/IOLoop.wacc
+src/test/examples/valid/IO/IOSequence.wacc

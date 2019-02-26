@@ -107,8 +107,8 @@ public class CodegenTests {
   }
 
   @Test
-  public void functionsTest() {
-    //compileAndCheckExitAndOutput(path + "functions.txt");
+  public void nestedFunctions() {
+    compileAndCheckExitAndOutput(path + "nested_functions.txt");
   }
 
   @Test
@@ -202,7 +202,12 @@ public class CodegenTests {
         BufferedWriter writer = new BufferedWriter(
             new OutputStreamWriter(emulator.getOutputStream()));
 
-        writer.write(input);
+        try {
+          int inputInt = Integer.parseInt(input);
+          writer.write(inputInt);
+        } catch (NumberFormatException e) {
+          writer.write(input);
+        }
         writer.flush();
       }
 

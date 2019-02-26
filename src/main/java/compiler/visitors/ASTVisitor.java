@@ -45,7 +45,6 @@ import compiler.AST.Types.ArrType;
 import compiler.AST.Types.BoolType;
 import compiler.AST.Types.CharType;
 import compiler.AST.Types.IntType;
-import compiler.AST.Types.PairType;
 import compiler.AST.Types.Type;
 import compiler.SubRoutines;
 import compiler.instr.ADD;
@@ -89,15 +88,14 @@ public class ASTVisitor {
   private static final int SHIFT_TIMES_4 = 2;
   private static final int BYTE_SIZE = 1;
 
-
   private static List<Instr> instructions;
   private static List<Instr> data;
   private static List<REG> availableRegs;
   private Set<String> specialLabels;
   private SymbolTable currentST;
   private int totalStackOffset;
+  private int scopeStackOffset;
   private int nextPosInStack;
-  private int offsetToStoredVariablesInTheStack;
   private int branchNb = 0;
 
   public ASTVisitor() {
@@ -105,7 +103,6 @@ public class ASTVisitor {
     data = new ArrayList<>();
     this.specialLabels = new LinkedHashSet<>();
     availableRegs = new ArrayList<>(allUsableRegs);
-    offsetToStoredVariablesInTheStack = 0;
     new SubRoutines(instructions);
   }
 
@@ -153,12 +150,14 @@ public class ASTVisitor {
   private void visitFuncsAndChildren(AST root) {
     root.root().children().stream().filter(node -> node instanceof FuncNode)
         .forEach(f -> {
-          totalStackOffset = ((FuncNode) f).funcStackOffset();
-          nextPosInStack = totalStackOffset;
+          scopeStackOffset = ((FuncNode) f).funcStackOffset();
+          totalStackOffset = scopeStackOffset;
+          nextPosInStack = scopeStackOffset;
           visit(f);
         });
-    totalStackOffset = Integer.parseInt(root.stackOffset());
-    nextPosInStack = totalStackOffset;
+    scopeStackOffset = Integer.parseInt(root.stackOffset());
+    totalStackOffset = scopeStackOffset;
+    nextPosInStack = scopeStackOffset;
     enterScope(root.symbolTable());
     instructions.add(new LABEL("main"));
     instructions.add(new PUSH(LR));
@@ -176,14 +175,14 @@ public class ASTVisitor {
 
   private void configureStack(String type) {
     int maxIntImmShift = 1024;
-    if (totalStackOffset > 0) {
-      int temp = totalStackOffset;
+    if (scopeStackOffset > 0) {
+      int temp = scopeStackOffset;
       while (temp / 1024 != 0) {
         instructions.add(buildInstr(type, SP, SP, new Imm_INT(maxIntImmShift)));
         temp = temp - 1024;
       }
       instructions.add(buildInstr(type, SP, SP,
-          new Imm_INT(totalStackOffset % maxIntImmShift)));
+          new Imm_INT(scopeStackOffset % maxIntImmShift)));
     }
   }
 
@@ -238,24 +237,21 @@ public class ASTVisitor {
             "p_print_string"));
         instructions.add(new RS(rd, rd, new Imm_INT(0), "BS"));
         instructions.add(new B("p_throw_overflow_error", true, COND.VS));
-        return rd;
+        break;
       case NEG:
         instructions.add(new EOR(rd, rd, new Imm_INT(1)));
-        return rd;
-      case ORD:
-        return rd;
-      case CHR:
-        return rd;
+        break;
       case LEN:
+        int offset =
+            currentST.lookUpAllVar(((Ident)expr.insideExpr()).varName()).getTotalOffset();
         instructions.add(new LDR(rd, new Addr(SP, true,
-                new Imm_INT(currentST.lookUpAllVar(((Ident)expr.insideExpr()).varName()).getStackOffset())))); //load address of array into rd
+            new Imm_INT(offset))));  //load address of array into rd
         instructions.add(new LDR(rd, new Addr(rd))); //load first element at this address, which is the size
-        return rd;
-      case PLUS:
-        return rd;
+        break;
       default:
-        return null;
+        break;
     }
+    return rd;
   }
 
   public CodeGenData visitIntExpr(IntExpr expr) {
@@ -410,17 +406,16 @@ public class ASTVisitor {
   }
 
   public CodeGenData visitReadExpr(ReadNode readNode) {
-    //REG rd = (REG) visit((ASTData) readNode.lhs());
+//    REG rd = (REG) visit((ASTData) readNode.lhs()); todo fix ?
 
     //In this case we don't visit the Node because we don't want to store the value but the address
     REG rd = useAvailableReg();
+    VarInfo varInfo = currentST.lookUpAllVar(readNode.lhs().varName());
     instructions.add(new ADD(rd, SP, new Imm_INT(
-        currentST.lookUpAllVar(readNode.lhs().varName()).getStackOffset()
-            + offsetToStoredVariablesInTheStack),
+        varInfo.getTotalOffset()),
         false));
 
     instructions.add(new MOV(R0, rd));
-
     if ((readNode.lhs()).type().equals(IntType.getInstance())) {
       instructions.add(new B("p_read_int", true));
       specialLabels.add("p_read_int");
@@ -460,7 +455,7 @@ public class ASTVisitor {
     nextPosInStack -= isByteSize(varDeclareNode.varType()) ? BYTE_SIZE : WORD_SIZE;
 
     // store variable in the stack and save offset in symbol table
-    currentST.lookUpAllVar(varDeclareNode.varName()).setStackOffset(nextPosInStack);
+    currentST.lookUpAllVar(varDeclareNode.varName()).setLocalOffset(nextPosInStack);
     saveVarData(varDeclareNode.varType(), rd, SP, nextPosInStack, false);
 
     freeReg(rd);
@@ -483,7 +478,7 @@ public class ASTVisitor {
 
   private CodeGenData visitPairAssign(VarAssignNode varAssignNode) {
     REG rd = (REG) visit(varAssignNode.rhs());
-    REG rn = (REG) visitHeapPairAddr((PairElem) varAssignNode.lhs());
+    REG rn =  visitHeapPairAddr((PairElem) varAssignNode.lhs());
     saveVarData(varAssignNode.lhs().type(), rd, rn, 0, false);
     freeReg(rd);
     freeReg(rn);
@@ -498,11 +493,11 @@ public class ASTVisitor {
     VarInfo varInScope = currentST.lookUpVarScope(varName);
     if (varInScope != null && !varInScope.getType()
         .equals(varAssignNode.lhs().type())) {
-      offset = currentST.getEncSymTable().lookUpAllVar(varName).getStackOffset()
-          + offsetToStoredVariablesInTheStack;
+      VarInfo varInfo = currentST.getEncSymTable().lookUpAllVar(varName);
+      offset = varInfo.getTotalOffset() + currentST.getStackOffset();
     } else {
       offset = currentST.lookUpAllVar(varName)
-          .getStackOffset() + offsetToStoredVariablesInTheStack;
+          .getTotalOffset();
     }
     saveVarData(varAssignNode.rhs().type(), rd, SP, offset, false);
     freeReg(rd);
@@ -514,13 +509,15 @@ public class ASTVisitor {
     REG sizeReg = useAvailableReg();
     Expr[] array = arrayLiter.elems();
     int size = array.length;
+//    int elemSize = isByteSize(((ArrType) arrayLiter.type()).elemType()) ?
+//        BYTE_SIZE : WORD_SIZE;
 
     // malloc the number of elements plus one for to hold the size
     setArg(new Imm_INT_MEM((size + 1) * WORD_SIZE));
     instructions.add(new B("malloc", true));
     instructions.add(new MOV(arrAddress, R0));
 
-    // store array elements in the heap
+    // store array address elements in the heap
     for (int i = 0; i < size; i++) {
       storeArrayElem(array[i], arrAddress, (i + 1) * WORD_SIZE);
     }
@@ -641,8 +638,7 @@ public class ASTVisitor {
 
   private REG loadVar(String varName, boolean isByteInstr) {
     REG rd = useAvailableReg();
-    int offset = currentST.lookUpAllVar(varName).getStackOffset()
-        + offsetToStoredVariablesInTheStack;
+    int offset = currentST.lookUpAllVar(varName).getTotalOffset();
     instructions.add(new LDR(rd,
         new Addr(SP, true, new Imm_INT(offset)), isByteInstr));
     return rd;
@@ -650,8 +646,7 @@ public class ASTVisitor {
 
   private REG loadFromStack(String varName) {
     REG rd = useAvailableReg();
-    int offset = currentST.lookUpAllVar(varName).getStackOffset()
-        + offsetToStoredVariablesInTheStack;
+    int offset = currentST.lookUpAllVar(varName).getTotalOffset();
     instructions.add(new ADD(rd, SP, new Imm_INT(offset)));
     return rd;
   }
@@ -674,7 +669,7 @@ public class ASTVisitor {
   public CodeGenData visitReturn(ReturnNode returnNode) {
     REG rd = (REG) visit(returnNode.expr());
     instructions.add(new MOV(R0, rd));
-    configureStack("add");
+    instructions.add(new ADD(SP, SP, new Imm_INT(totalStackOffset)));
     instructions.add(new POP(PC));
     freeReg(rd);
     return null;
@@ -683,9 +678,9 @@ public class ASTVisitor {
   public CodeGenData visitFuncCall(FuncCall funcCall) {
     visit(funcCall.argsList());
     instructions.add(new B("f_" + funcCall.funcName(), true));
-    offsetToStoredVariablesInTheStack = 0;
     instructions.add(
         new ADD(SP, SP, new Imm_INT(funcCall.argsList().bytesPushed()), false));
+    currentST.decrementStackOffset(funcCall.argsList().bytesPushed());
     REG rd = useAvailableReg();
     instructions.add(new MOV(rd, R0));
     return rd;
@@ -696,9 +691,9 @@ public class ASTVisitor {
     List<Expr> exprList = listExpr.exprList();
     // LR has been pushed and we have some space for the variable declaration
     // the arguments reside at this offset from the current stack pointer
-    int offset = WORD_SIZE + totalStackOffset;
+    int offset = WORD_SIZE + scopeStackOffset;
     for (int i = 0; i < exprList.size(); i++) {
-      currentST.lookUpVarScope(paramNames.get(i)).setStackOffset(offset);
+      currentST.lookUpVarScope(paramNames.get(i)).setLocalOffset(offset);
       offset += exprList.get(i).sizeOf();
     }
     return null;
@@ -712,7 +707,7 @@ public class ASTVisitor {
       int offsetFromBase =
           (!(e.type() instanceof CharType) && !(e.type() instanceof BoolType))
               ? -WORD_SIZE : -BYTE_SIZE;
-      offsetToStoredVariablesInTheStack -= offsetFromBase;
+      currentST.incrementStackOffset(-offsetFromBase);
       saveVarData(e.type(), rd, SP, offsetFromBase,
           true);
       freeReg(rd);
@@ -752,6 +747,9 @@ public class ASTVisitor {
   }
 
   public CodeGenData visitIfElseNode(IfElseNode ifElseNode) {
+    int tempTotalStack = totalStackOffset;
+    int tempStackOffset = scopeStackOffset;
+    int tempNextPosInStack = nextPosInStack;
     REG rd = (REG) visit(ifElseNode.cond());
     instructions.add(new CMP(rd, new Imm_INT(0)));
     instructions.add(new B("L" + branchNb, COND.EQ));
@@ -760,16 +758,37 @@ public class ASTVisitor {
     int scopeBranchNb = branchNb;
     branchNb += 2;
 
-    enterScope(ifElseNode.thenST());
-    visit(ifElseNode.thenStat());
+    visitIfChild(ifElseNode, "then");
     instructions.add(new B("L" + (scopeBranchNb + 1)));
     instructions.add(new LABEL("L" + (scopeBranchNb)));
-
-    enterScope(ifElseNode.elseST());
-    visit(ifElseNode.elseStat());
+    totalStackOffset = tempStackOffset;
+    visitIfChild(ifElseNode, "else");
     instructions.add(new LABEL("L" + (scopeBranchNb + 1)));
     exitScope(currentST.getEncSymTable());
+    totalStackOffset = tempTotalStack;
+    scopeStackOffset = tempStackOffset;
+    nextPosInStack = tempNextPosInStack;
     return null;
+  }
+
+  private void visitIfChild(IfElseNode ifElseNode, String childName) {
+    int temp = totalStackOffset;
+    scopeStackOffset = ifElseNode.elseStatOffset();
+    totalStackOffset = temp + scopeStackOffset;
+
+    SymbolTable st = ifElseNode.elseST();;
+    ParentNode child = ifElseNode.elseStat();
+    if (childName.equals("then")) {
+      scopeStackOffset = ifElseNode.thenStackOffset();
+      totalStackOffset = temp + scopeStackOffset;
+      st = ifElseNode.thenST();
+      child = ifElseNode.thenStat();
+    }
+    nextPosInStack = scopeStackOffset;
+    enterScope(st);
+    configureStack("sub");
+    visit(child);
+    configureStack("add");
   }
 
   public CodeGenData visitWhileNode(WhileNode whileNode) {
@@ -794,8 +813,16 @@ public class ASTVisitor {
   }
 
   public CodeGenData visitNewScope(ScopeNode scopeNode) {
+    int tempScopeStackOffset = scopeStackOffset;
+    int tempNextPosInStack = nextPosInStack;
+    scopeStackOffset = scopeNode.stackOffset();
+    nextPosInStack = scopeStackOffset;
     enterScope(scopeNode.symbolTable());
+    configureStack("sub");
     scopeNode.parentNode().children().forEach(this::visit);
+    configureStack("add");
+    scopeStackOffset = tempScopeStackOffset;
+    nextPosInStack = tempNextPosInStack;
     exitScope(currentST.getEncSymTable());
     return null;
 
@@ -809,7 +836,7 @@ public class ASTVisitor {
     currentST = encSymTable;
   }
 
-  private boolean isByteSize(Type type) {
+  public static boolean isByteSize(Type type) {
     return type.equals(CharType.getInstance())
         || type.equals(BoolType.getInstance());
   }
