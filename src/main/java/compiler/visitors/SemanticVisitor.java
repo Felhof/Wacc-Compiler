@@ -594,9 +594,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
 
   @Override
   public ASTData visitBracketExp(BracketExpContext ctx) {
-    Expr expr = (Expr) visit(ctx.expr());
-    expr.putBrackets();
-    return expr;
+    return visit(ctx.expr());
   }
 
   @Override
