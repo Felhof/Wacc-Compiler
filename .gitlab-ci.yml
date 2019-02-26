@@ -5,6 +5,10 @@ stages:
 job 1:
   stage: build
   script: make
+    cache:
+        path:
+        - target/
+        - bin
 job 2:
   stage: test
   script:
