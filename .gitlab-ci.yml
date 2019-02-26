@@ -6,14 +6,14 @@ job 1:
   stage: build
   script: 
     - make
-  cache:
-    paths:
-    - src/main/java/antlr/
 job 2:
   stage: test
   script:
 #      - make
       - mvn test
+  cache:
+    paths:
+    - src/main/java/antlr/
 #      - mvn test -Dtest=CodegenTests
 #      - mvn test -Dtest=AllValidTests
 #job 3:
