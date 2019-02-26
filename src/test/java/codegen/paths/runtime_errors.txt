@@ -6,3 +6,6 @@ src/test/examples/valid/runtimeErr/integerOverflow/intnegateOverflow3.wacc 255 {
 src/test/examples/valid/runtimeErr/integerOverflow/intnegateOverflow4.wacc 255 {-2000000000,OverflowError: the result is too small/large to store in a 4-byte signed-integer.}
 src/test/examples/valid/runtimeErr/integerOverflow/intUnderflow.wacc 255 {-2147483647,-2147483648,OverflowError: the result is too small/large to store in a 4-byte signed-integer.}
 src/test/examples/valid/runtimeErr/integerOverflow/intWayOverflow.wacc 255 {2000000000,OverflowError: the result is too small/large to store in a 4-byte signed-integer.}
+
+src/test/examples/valid/runtimeErr/nullDereference/readNull1.wacc 255 {}
+src/test/examples/valid/runtimeErr/nullDereference/readNull2.wacc 255 {}

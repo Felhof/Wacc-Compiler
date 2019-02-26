@@ -1,19 +1,20 @@
 package compiler.AST.Nodes;
 
-import compiler.AST.NodeElements.LHS;
+import compiler.AST.NodeElements.NodeElem;
+import compiler.AST.NodeElements.RHS.Expr;
 import compiler.visitors.ASTVisitor;
 import compiler.visitors.CodeGenData;
 
 public class ReadNode extends Node {
 
-  private LHS lhs;
+  private NodeElem lhs;
 
-  public ReadNode(LHS lhs, int lineNumber) {
+  public ReadNode(Expr lhs, int lineNumber) {
     super(lineNumber);
     this.lhs = lhs;
   }
 
-  public LHS lhs(){ return lhs; }
+  public NodeElem lhs(){ return lhs; }
 
   @Override
   public String toString() {

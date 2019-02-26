@@ -1,6 +1,8 @@
 package compiler.instr.Operand;
 
-public class Imm_INT implements Operand {
+import compiler.visitors.CodeGenData;
+
+public class Imm_INT implements Operand, CodeGenData {
   public int value;
 
   public Imm_INT(int value) {

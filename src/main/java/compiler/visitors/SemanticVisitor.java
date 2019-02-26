@@ -1,5 +1,6 @@
 package compiler.visitors;
 
+import antlr.BasicParser;
 import antlr.BasicParser.Arg_listContext;
 import antlr.BasicParser.ArrayElemLhsContext;
 import antlr.BasicParser.ArrayExpContext;
@@ -9,7 +10,6 @@ import antlr.BasicParser.Array_literContext;
 import antlr.BasicParser.AssignArrayContext;
 import antlr.BasicParser.AssignStatContext;
 import antlr.BasicParser.BaseTypeContext;
-import antlr.BasicParser;
 import antlr.BasicParser.BinaryExpContext;
 import antlr.BasicParser.BoolExpContext;
 import antlr.BasicParser.BracketExpContext;
@@ -26,13 +26,15 @@ import antlr.BasicParser.NewPairContext;
 import antlr.BasicParser.NewScopeStatContext;
 import antlr.BasicParser.PairElemArrayTypeContext;
 import antlr.BasicParser.PairElemBaseTypeContext;
+import antlr.BasicParser.PairElemLhsContext;
 import antlr.BasicParser.PairElemPairTypeContext;
+import antlr.BasicParser.PairElemRhsContext;
 import antlr.BasicParser.PairExpContext;
 import antlr.BasicParser.PairTypeContext;
 import antlr.BasicParser.Pair_elemContext;
+import antlr.BasicParser.Pair_typeContext;
 import antlr.BasicParser.ParamContext;
 import antlr.BasicParser.Param_listContext;
-import antlr.BasicParser.Pair_typeContext;
 import antlr.BasicParser.PrintStatContext;
 import antlr.BasicParser.PrintlnStatContext;
 import antlr.BasicParser.ProgContext;
@@ -46,49 +48,51 @@ import antlr.BasicParser.UnaryExpContext;
 import antlr.BasicParser.VarDeclarationStatContext;
 import antlr.BasicParser.WhileStatContext;
 import antlr.BasicParserBaseVisitor;
-import compiler.AST.NodeElements.LHS;
+import compiler.AST.NodeElements.LHS.ArrayElemLHS;
+import compiler.AST.NodeElements.LHS.IdentLHS;
+import compiler.AST.NodeElements.LHS.PairElemLHS;
+import compiler.AST.NodeElements.ListExpr;
+import compiler.AST.NodeElements.NodeElem;
+import compiler.AST.NodeElements.RHS.ArrayElemRHS;
+import compiler.AST.NodeElements.RHS.ArrayLiter;
+import compiler.AST.NodeElements.RHS.BinExpr;
+import compiler.AST.NodeElements.RHS.BinExpr.BINOP;
+import compiler.AST.NodeElements.RHS.BoolExpr;
+import compiler.AST.NodeElements.RHS.CharExpr;
+import compiler.AST.NodeElements.RHS.Expr;
+import compiler.AST.NodeElements.RHS.FuncCall;
+import compiler.AST.NodeElements.RHS.IdentRHS;
+import compiler.AST.NodeElements.RHS.IntExpr;
+import compiler.AST.NodeElements.RHS.Pair;
+import compiler.AST.NodeElements.RHS.PairElemRHS;
+import compiler.AST.NodeElements.RHS.PairExp;
+import compiler.AST.NodeElements.RHS.StringExpr;
+import compiler.AST.NodeElements.RHS.UnaryExpr;
+import compiler.AST.NodeElements.RHS.UnaryExpr.UNOP;
 import compiler.AST.Nodes.AST;
-import compiler.AST.Nodes.Node;
-import compiler.AST.Nodes.ParentNode;
 import compiler.AST.Nodes.ExitNode;
 import compiler.AST.Nodes.FreeNode;
 import compiler.AST.Nodes.FuncNode;
 import compiler.AST.Nodes.IfElseNode;
+import compiler.AST.Nodes.Node;
+import compiler.AST.Nodes.ParentNode;
 import compiler.AST.Nodes.PrintNode;
+import compiler.AST.Nodes.ReadNode;
 import compiler.AST.Nodes.ReturnNode;
 import compiler.AST.Nodes.ScopeNode;
 import compiler.AST.Nodes.VarAssignNode;
 import compiler.AST.Nodes.VarDeclareNode;
+import compiler.AST.Nodes.WhileNode;
 import compiler.AST.SymbolTable.FuncTypes;
 import compiler.AST.SymbolTable.SymbolTable;
-import compiler.AST.NodeElements.ArrayElem;
-import compiler.AST.NodeElements.Ident;
-import compiler.AST.NodeElements.ListExpr;
-import compiler.AST.NodeElements.RHS.ArrayLiter;
-import compiler.AST.NodeElements.NodeElem;
-import compiler.AST.NodeElements.RHS.FuncCall;
-import compiler.AST.NodeElements.PairElem;
-import compiler.AST.NodeElements.RHS.PairExp;
 import compiler.AST.SymbolTable.VarInfo;
 import compiler.AST.Types.ArrType;
-import compiler.AST.NodeElements.RHS.Pair;
 import compiler.AST.Types.BoolType;
 import compiler.AST.Types.CharType;
 import compiler.AST.Types.GenericType;
 import compiler.AST.Types.IntType;
 import compiler.AST.Types.PairType;
 import compiler.AST.Types.Type;
-import compiler.AST.NodeElements.RHS.UnaryExpr;
-import compiler.AST.NodeElements.RHS.UnaryExpr.UNOP;
-import compiler.AST.NodeElements.RHS.BinExpr;
-import compiler.AST.NodeElements.RHS.BinExpr.BINOP;
-import compiler.AST.NodeElements.RHS.BoolExpr;
-import compiler.AST.NodeElements.RHS.CharExpr;
-import compiler.AST.NodeElements.RHS.Expr;
-import compiler.AST.NodeElements.RHS.IntExpr;
-import compiler.AST.NodeElements.RHS.StringExpr;
-import compiler.AST.Nodes.WhileNode;
-import compiler.AST.Nodes.ReadNode;
 import java.util.Arrays;
 import java.util.List;
 
@@ -153,7 +157,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
     boolean isParams = true;
     ListExpr paramList = new ListExpr(isParams);
     ctx.param().forEach(p -> {
-      paramList.addExpr(new Ident(p.IDENT().getText(), (Type) visit(p)));
+      paramList.addExpr(new IdentRHS(p.IDENT().getText(), (Type) visit(p)));
       paramList.addParamName(p.IDENT().getText());
     });
     return paramList;
@@ -192,14 +196,14 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
 
   @Override
   public ASTData visitReadStat(ReadStatContext ctx) {
-    NodeElem lhs = (NodeElem) visit(ctx.assign_lhs());
+    Expr lhs = (Expr) visit(ctx.assign_lhs());
     if (!isReadableType(lhs)) {
       parser.notifyErrorListeners(ctx.assign_lhs().start,
           incompatibleTypeMultiChoiceMsg(ctx.assign_lhs().getText(),
               Arrays.asList(IntType.getInstance(), CharType.getInstance()),
               lhs.type()), null);
     }
-    currentParentNode.add(new ReadNode((LHS) lhs, ctx.start.getLine()));
+    currentParentNode.add(new ReadNode(lhs, ctx.start.getLine()));
     return null;
   }
 
@@ -267,12 +271,12 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
   }
 
   private void incrementStackOffset(Type varType) {
-      if (varType.equals(CharType.getInstance()) || varType
-          .equals(BoolType.getInstance())) {
-        stackPointerOffset++;
-      } else {
-        stackPointerOffset += 4;
-      }
+    if (varType.equals(CharType.getInstance()) || varType
+        .equals(BoolType.getInstance())) {
+      stackPointerOffset++;
+    } else {
+      stackPointerOffset += 4;
+    }
   }
 
   @Override
@@ -336,24 +340,23 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
     if (varInfo == null) {
       parser.notifyErrorListeners(ctx.start,
           identifierNotDefinedMsg(annotateVar(ctx.getText())), null);
-      return new Ident(varName, GenericType.getInstance());
+      return new IdentRHS(varName, GenericType.getInstance());
 
     }
-    return new Ident(varName, varInfo.getType());
+    return new IdentRHS(varName, varInfo.getType());
   }
 
   @Override
   public ASTData visitArrayElemLhs(ArrayElemLhsContext ctx) {
-    return visit(ctx.array_elem());
+    return visitArray_elem(ctx.array_elem(), true);
   }
 
   @Override
   public ASTData visitArrayExp(ArrayExpContext ctx) {
-    return visit(ctx.array_elem());
+    return visitArray_elem(ctx.array_elem(), false);
   }
 
-  @Override
-  public ASTData visitArray_elem(Array_elemContext ctx) {
+  private ASTData visitArray_elem(Array_elemContext ctx, boolean isLHS) {
     String varName = ctx.IDENT().getText();
     int dimensionAccessed = ctx.expr().size();
 
@@ -377,9 +380,11 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
       for (int i = 0; i < dimensionAccessed; i++) {
         indexes[i] = (Expr) visit(ctx.expr(i));
       }
-      return new ArrayElem(
-          ((ArrType) varTypeDef).getArrayElem(dimensionAccessed), varName,
-          indexes);
+      Type type = ((ArrType) varTypeDef).getArrayElem(dimensionAccessed);
+      if (isLHS) {
+        return new ArrayElemLHS(type, varName, indexes);
+      }
+      return new ArrayElemRHS(type, varName, indexes);
     }
     return null;
   }
@@ -489,13 +494,12 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
 
   @Override
   public ASTData visitAssignStat(AssignStatContext ctx) {
-    LHS lhs = (LHS) visit(ctx.assign_lhs());
+    NodeElem lhs = (NodeElem) visit(ctx.assign_lhs());
     NodeElem rhs = (NodeElem) visit(ctx.assign_rhs());
-    if (!((NodeElem) lhs).type().equals(rhs.type())) {
+    if (!lhs.type().equals(rhs.type())) {
       parser.notifyErrorListeners(ctx.assign_rhs().start,
-          incompatibleTypesMsg(ctx.assign_rhs().getText(),
-              ((NodeElem) lhs).type(), rhs.type()),
-          null);
+          incompatibleTypesMsg(ctx.assign_rhs().getText(), lhs.type(),
+              rhs.type()), null);
     }
     currentParentNode.add(new VarAssignNode(lhs, rhs, ctx.start.getLine()));
     return null;
@@ -509,10 +513,10 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
       parser.notifyErrorListeners(ctx.start,
           identifierNotDefinedMsg(annotateVar(varName)),
           null);
-      return new Ident(varName, GenericType.getInstance());
+      return new IdentLHS(varName, GenericType.getInstance());
 
     }
-    return new Ident(varName, varInfo.getType());
+    return new IdentLHS(varName, varInfo.getType());
   }
 
   @Override
@@ -573,7 +577,8 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
     ScopeData stat = visitStatInNewScope(ctx.stat());
     stat.symbolTable.setScopeStackOffset(stackPointerOffset);
     currentParentNode.add(
-        new ScopeNode(stat.astNode(), stat.symbolTable(), ctx.start.getLine(), stackPointerOffset));
+        new ScopeNode(stat.astNode(), stat.symbolTable(), ctx.start.getLine(),
+            stackPointerOffset));
     stackPointerOffset = temp;
     return null;
   }
@@ -586,7 +591,16 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
   }
 
   @Override
-  public ASTData visitPair_elem(Pair_elemContext ctx) {
+  public ASTData visitPairElemLhs(PairElemLhsContext ctx) {
+    return visitPair_elem(ctx.pair_elem(), true);
+  }
+
+  @Override
+  public ASTData visitPairElemRhs(PairElemRhsContext ctx) {
+    return visitPair_elem(ctx.pair_elem(), false);
+  }
+
+  private ASTData visitPair_elem(Pair_elemContext ctx, boolean isLHS) {
     Expr expr = (Expr) visit(ctx.expr());
     if (!(expr.type() instanceof PairType)) {
       parser.notifyErrorListeners(ctx.expr().start,
@@ -597,7 +611,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
           null);
       return null;
     }
-    return getPairElem(expr, ctx);
+    return getPairElem(expr, ctx, isLHS);
   }
 
   @Override
@@ -606,7 +620,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
         new PairType(GenericType.getInstance(), GenericType.getInstance()));
   }
 
-  private ASTData getPairElem(Expr expr, Pair_elemContext ctx) {
+  private ASTData getPairElem(Expr expr, Pair_elemContext ctx, boolean isLHS) {
     Type type;
     int pos;
     if (ctx.SND() == null) {
@@ -616,7 +630,10 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
       type = ((PairType) expr.type()).getSnd();
       pos = 1;
     }
-    return new PairElem(type, expr, pos);
+    if (isLHS) {
+      return new PairElemLHS(type, expr, pos);
+    }
+    return new PairElemRHS(type, expr, pos);
   }
 
   private ScopeData visitStatInNewScope(StatContext stat) {
@@ -668,39 +685,6 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
     }
   }
 
-  public class ScopeData {
-
-    private ParentNode parentNode;
-    private SymbolTable symbolTable;
-    private ListExpr paramList;
-
-    public ScopeData(ParentNode parentNode, SymbolTable symbolTable) {
-      this.parentNode = parentNode;
-      this.symbolTable = symbolTable;
-      paramList = null;
-    }
-
-    public ScopeData(ParentNode parentNode, SymbolTable symbolTable,
-        ListExpr paramList) {
-      this.parentNode = parentNode;
-      this.symbolTable = symbolTable;
-      this.paramList = paramList;
-    }
-
-    public ParentNode astNode() {
-      return parentNode;
-    }
-
-    public SymbolTable symbolTable() {
-      return symbolTable;
-    }
-
-    public ListExpr paramList() {
-      return paramList;
-    }
-
-  }
-
   private boolean isAssignSameType(Type varType, NodeElem rhs) {
     return (rhs instanceof ArrayLiter && ((ArrayLiter) rhs).isEmpty())
         || varType.equals(rhs.type());
@@ -739,8 +723,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
     return sb.toString();
   }
 
-  private String incompatibleTypesMsg(String offendingSymbol,
-      Type expected,
+  private String incompatibleTypesMsg(String offendingSymbol, Type expected,
       Type actual) {
     return incompatibleMsg(offendingSymbol)
         + " (expected: "
@@ -773,6 +756,39 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
 
   private String annotateVar(String identifier) {
     return "Variable " + identifier;
+  }
+
+  public class ScopeData {
+
+    private ParentNode parentNode;
+    private SymbolTable symbolTable;
+    private ListExpr paramList;
+
+    public ScopeData(ParentNode parentNode, SymbolTable symbolTable) {
+      this.parentNode = parentNode;
+      this.symbolTable = symbolTable;
+      paramList = null;
+    }
+
+    public ScopeData(ParentNode parentNode, SymbolTable symbolTable,
+        ListExpr paramList) {
+      this.parentNode = parentNode;
+      this.symbolTable = symbolTable;
+      this.paramList = paramList;
+    }
+
+    public ParentNode astNode() {
+      return parentNode;
+    }
+
+    public SymbolTable symbolTable() {
+      return symbolTable;
+    }
+
+    public ListExpr paramList() {
+      return paramList;
+    }
+
   }
 
 

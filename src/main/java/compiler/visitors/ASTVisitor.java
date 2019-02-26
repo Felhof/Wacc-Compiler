@@ -13,8 +13,11 @@ import static compiler.instr.Shift.SHIFT_TYPE.LSL;
 
 import compiler.AST.NodeElements.ArrayElem;
 import compiler.AST.NodeElements.Ident;
+import compiler.AST.NodeElements.LHS.ArrayElemLHS;
+import compiler.AST.NodeElements.LHS.PairElemLHS;
 import compiler.AST.NodeElements.ListExpr;
 import compiler.AST.NodeElements.PairElem;
+import compiler.AST.NodeElements.RHS.ArrayElemRHS;
 import compiler.AST.NodeElements.RHS.ArrayLiter;
 import compiler.AST.NodeElements.RHS.BinExpr;
 import compiler.AST.NodeElements.RHS.BoolExpr;
@@ -23,6 +26,7 @@ import compiler.AST.NodeElements.RHS.Expr;
 import compiler.AST.NodeElements.RHS.FuncCall;
 import compiler.AST.NodeElements.RHS.IntExpr;
 import compiler.AST.NodeElements.RHS.Pair;
+import compiler.AST.NodeElements.RHS.PairElemRHS;
 import compiler.AST.NodeElements.RHS.StringExpr;
 import compiler.AST.NodeElements.RHS.UnaryExpr;
 import compiler.AST.NodeElements.RHS.UnaryExpr.UNOP;
@@ -51,6 +55,7 @@ import compiler.instr.ADD;
 import compiler.instr.AND;
 import compiler.instr.B;
 import compiler.instr.CMP;
+import compiler.instr.EOR;
 import compiler.instr.Instr;
 import compiler.instr.LABEL;
 import compiler.instr.LDR;
@@ -74,7 +79,6 @@ import compiler.instr.STR;
 import compiler.instr.STRING_FIELD;
 import compiler.instr.SUB;
 import compiler.instr.Shift;
-import compiler.instr.EOR;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -224,7 +228,7 @@ public class ASTVisitor {
   public CodeGenData visitUnaryExpr(UnaryExpr expr) {
 
     if ((expr.insideExpr() instanceof IntExpr) // Set int value to negative
-      && expr.operator() == UNOP.MINUS) {
+        && expr.operator() == UNOP.MINUS) {
       ((IntExpr) expr.insideExpr()).setNegative();
       return visit(expr.insideExpr());
     }
@@ -233,8 +237,8 @@ public class ASTVisitor {
     switch (expr.operator()) {
       case MINUS:
         specialLabels.addAll(
-          Arrays.asList("p_throw_overflow_error", "p_throw_runtime_error",
-            "p_print_string"));
+            Arrays.asList("p_throw_overflow_error", "p_throw_runtime_error",
+                "p_print_string"));
         instructions.add(new RS(rd, rd, new Imm_INT(0), "BS"));
         instructions.add(new B("p_throw_overflow_error", true, COND.VS));
         break;
@@ -243,10 +247,12 @@ public class ASTVisitor {
         break;
       case LEN:
         int offset =
-            currentST.lookUpAllVar(((Ident)expr.insideExpr()).varName()).getTotalOffset();
+            currentST.lookUpAllVar(((Ident) expr.insideExpr()).varName())
+                .getTotalOffset();
         instructions.add(new LDR(rd, new Addr(SP, true,
             new Imm_INT(offset))));  //load address of array into rd
-        instructions.add(new LDR(rd, new Addr(rd))); //load first element at this address, which is the size
+        instructions.add(new LDR(rd, new Addr(
+            rd))); //load first element at this address, which is the size
         break;
       default:
         break;
@@ -406,16 +412,16 @@ public class ASTVisitor {
   }
 
   public CodeGenData visitReadExpr(ReadNode readNode) {
-//    REG rd = (REG) visit((ASTData) readNode.lhs()); todo fix ?
+    REG rd = (REG) visit(readNode.lhs());
 
-    //In this case we don't visit the Node because we don't want to store the value but the address
-    REG rd = useAvailableReg();
-    VarInfo varInfo = currentST.lookUpAllVar(readNode.lhs().varName());
-    instructions.add(new ADD(rd, SP, new Imm_INT(
-        varInfo.getTotalOffset()),
-        false));
+//    //In this case we don't visit the Node because we don't want to store the value but the address
+//    REG rd = useAvailableReg();
+//    VarInfo varInfo = currentST.lookUpAllVar(readNode.lhs().varName());
+//    instructions.add(new ADD(rd, SP, new Imm_INT(
+//        varInfo.getTotalOffset()),
+//        false));
 
-    instructions.add(new MOV(R0, rd));
+    setArg(rd);
     if ((readNode.lhs()).type().equals(IntType.getInstance())) {
       instructions.add(new B("p_read_int", true));
       specialLabels.add("p_read_int");
@@ -424,6 +430,7 @@ public class ASTVisitor {
       instructions.add(new B("p_read_char", true));
       specialLabels.add("p_read_char");
     }
+
     freeReg(rd);
     return null;
   }
@@ -452,10 +459,12 @@ public class ASTVisitor {
 
   public CodeGenData visitVarDeclareNode(VarDeclareNode varDeclareNode) {
     REG rd = (REG) visit(varDeclareNode.rhs());
-    nextPosInStack -= isByteSize(varDeclareNode.varType()) ? BYTE_SIZE : WORD_SIZE;
+    nextPosInStack -=
+        isByteSize(varDeclareNode.varType()) ? BYTE_SIZE : WORD_SIZE;
 
     // store variable in the stack and save offset in symbol table
-    currentST.lookUpAllVar(varDeclareNode.varName()).setLocalOffset(nextPosInStack);
+    currentST.lookUpAllVar(varDeclareNode.varName())
+        .setLocalOffset(nextPosInStack);
     saveVarData(varDeclareNode.varType(), rd, SP, nextPosInStack, false);
 
     freeReg(rd);
@@ -463,44 +472,40 @@ public class ASTVisitor {
   }
 
   public CodeGenData visitAssignNode(VarAssignNode varAssignNode) {
-    //TODO: refactor concat in one
+
     if (varAssignNode.lhs() instanceof Ident) {
+      // todo refactor
       visitIdentAssign(varAssignNode);
     }
-    if (varAssignNode.lhs() instanceof ArrayElem) {
-      visitArrayAssign(varAssignNode);
-    }
-    if (varAssignNode.lhs() instanceof PairElem) {
-      visitPairAssign(varAssignNode);
-    }
-    return null;
-  }
 
-  private CodeGenData visitPairAssign(VarAssignNode varAssignNode) {
-    REG rd = (REG) visit(varAssignNode.rhs());
-    REG rn =  visitHeapPairAddr((PairElem) varAssignNode.lhs());
+    REG rd = (REG) visit(varAssignNode.lhs());
+    REG rn = (REG) visit(varAssignNode.rhs());
+
+    // todo try rhs
     saveVarData(varAssignNode.lhs().type(), rd, rn, 0, false);
+
     freeReg(rd);
     freeReg(rn);
+
     return null;
   }
 
   private CodeGenData visitIdentAssign(VarAssignNode varAssignNode) {
-    //TODO: CONSIDER other cases such as Arrays or Pairs
-    String varName = varAssignNode.lhs().varName();
-    REG rd = (REG) visit(varAssignNode.rhs());
-    int offset;
-    VarInfo varInScope = currentST.lookUpVarScope(varName);
-    if (varInScope != null && !varInScope.getType()
-        .equals(varAssignNode.lhs().type())) {
-      VarInfo varInfo = currentST.getEncSymTable().lookUpAllVar(varName);
-      offset = varInfo.getTotalOffset() + currentST.getStackOffset();
-    } else {
-      offset = currentST.lookUpAllVar(varName)
-          .getTotalOffset();
-    }
-    saveVarData(varAssignNode.rhs().type(), rd, SP, offset, false);
-    freeReg(rd);
+    //TODO: FIX visit IDENT
+//    String varName = varAssignNode.lhs().varName();
+//    REG rd = (REG) visit(varAssignNode.rhs());
+//    int offset;
+//    VarInfo varInScope = currentST.lookUpVarScope(varName);
+//    if (varInScope != null && !varInScope.getType()
+//        .equals(varAssignNode.lhs().type())) {
+//      VarInfo varInfo = currentST.getEncSymTable().lookUpAllVar(varName);
+//      offset = varInfo.getTotalOffset() + currentST.getStackOffset();
+//    } else {
+//      offset = currentST.lookUpAllVar(varName)
+//          .getTotalOffset();
+//    }
+//    saveVarData(varAssignNode.rhs().type(), rd, SP, offset, false);
+//    freeReg(rd);
     return null;
   }
 
@@ -529,13 +534,13 @@ public class ASTVisitor {
   }
 
   private CodeGenData saveVarData(Type varType, REG rd, REG rn, int offset,
-    boolean update) {
+      boolean update) {
     boolean isByteInstr =
-      varType.equals(BoolType.getInstance()) || varType
-        .equals(CharType.getInstance());
+        varType.equals(BoolType.getInstance()) || varType
+            .equals(CharType.getInstance());
     instructions
-      .add(new STR(rd, new Addr(rn, true, new Imm_INT(offset)), isByteInstr,
-        update));
+        .add(new STR(rd, new Addr(rn, true, new Imm_INT(offset)), isByteInstr,
+            update));
     return null;
   }
 
@@ -557,6 +562,18 @@ public class ASTVisitor {
     return null;
   }
 
+  public CodeGenData visitArrayElemLHS(ArrayElemLHS arrayElemLHS) {
+    return visitArrayElem(arrayElemLHS);
+  }
+
+  public CodeGenData visitArrayElemRHS(ArrayElemRHS arrayElemRHS) {
+    REG rd = (REG) visitArrayElem(arrayElemRHS);
+    instructions.add(new LDR(rd, new Addr(rd))); // load value of array elem
+    return rd;
+  }
+
+
+  // returns address of array elem
   public CodeGenData visitArrayElem(ArrayElem arrayElem) {
     REG arrAddress = loadFromStack(arrayElem.varName());
     REG index;
@@ -570,11 +587,9 @@ public class ASTVisitor {
       instructions.add(new B("p_check_array_bounds", true));
       instructions.add(new ADD(arrAddress, arrAddress, new Imm_INT(WORD_SIZE)));
 
-
       if (isByteSize(arrayElem.type())) {
         instructions.add(new ADD(arrAddress, arrAddress, index));
-      }
-      else {
+      } else {
         instructions.add(new ADD(arrAddress, arrAddress, new Reg_Shift(index,
             new Shift(LSL, SHIFT_TIMES_4))));
       }
@@ -582,6 +597,31 @@ public class ASTVisitor {
       freeReg(index);
     }
     return arrAddress;
+  }
+
+  public CodeGenData visitPairElemLHS(PairElemLHS pairElemLHS) {
+    return visitPairElem(pairElemLHS);
+  }
+
+  public CodeGenData visitPairElemRHS(PairElemRHS pairElemRHS) {
+    REG rd = (REG) visitPairElem(pairElemRHS);
+    instructions.add(new LDR(rd, new Addr(rd)));
+    return rd; // returns value of pair element
+  }
+
+  // returns address of pair element
+  public CodeGenData visitPairElem(PairElem pairElem) {
+    specialLabels.addAll(Arrays.asList(
+        "p_check_null_pointer",
+        "p_throw_runtime_error",
+        "p_print_string"));
+    REG rd = (REG) visit(pairElem.expr());
+    instructions.add(new MOV(R0, rd));
+    instructions.add(new B("p_check_null_pointer", true));
+    instructions.add(new LDR(rd,
+        new Addr(rd, true, new Imm_INT(pairElem.posInPair() * WORD_SIZE)),
+        false));
+    return rd;
   }
 
   public CodeGenData visitPair(Pair pair) {
@@ -630,16 +670,24 @@ public class ASTVisitor {
     }
   }
 
-  public CodeGenData visitIdent(Ident ident) {
-    return loadVar(ident.varName(), ident.sizeOf() == 1);
+
+
+  public CodeGenData visitIdentLHS(Ident ident) {
+    return visitIdent(ident);
   }
 
-  private REG loadVar(String varName, boolean isByteInstr) {
+  public CodeGenData visitIdentRHS(Ident ident) {
     REG rd = useAvailableReg();
-    int offset = currentST.lookUpAllVar(varName).getTotalOffset();
-    instructions.add(new LDR(rd,
-        new Addr(SP, true, new Imm_INT(offset)), isByteInstr));
-    return rd;
+    Operand offset = (REG) visitIdent(ident);
+    instructions.add(new LDR(rd, new Addr(SP, true, offset),
+        isByteSize(ident.type())));
+    return rd; // returns value of ident
+  }
+
+  // returns address (offset) of ident
+  private CodeGenData visitIdent(Ident ident) {
+    int offset = currentST.lookUpAllVar(ident.varName()).getTotalOffset();
+    return new Imm_INT(offset);
   }
 
   private REG loadFromStack(String varName) {
@@ -713,26 +761,6 @@ public class ASTVisitor {
     return null;
   }
 
-  public CodeGenData visitPairExpr(PairElem pairElem) {
-    REG rd = visitHeapPairAddr(pairElem);
-    instructions.add(new LDR(rd, new Addr(rd), false));
-    return rd;
-  }
-
-  private REG visitHeapPairAddr(PairElem pairElem) {
-    specialLabels
-        .addAll(Arrays.asList("p_check_null_pointer", "p_throw_runtime_error",
-            "p_print_string"));
-    REG rd = (REG) visit(pairElem.expr());
-    instructions.add(new MOV(R0, rd));
-    instructions.add(new B("p_check_null_pointer", true));
-    instructions
-        .add(new LDR(rd,
-            new Addr(rd, true, new Imm_INT(pairElem.posInPair() * WORD_SIZE)),
-            false));
-    return rd;
-  }
-
   public CodeGenData visitFreeNode(FreeNode freeNode) {
     specialLabels.addAll(Arrays
         .asList("p_free_pair", "p_throw_runtime_error",
@@ -774,7 +802,8 @@ public class ASTVisitor {
     scopeStackOffset = ifElseNode.elseStatOffset();
     totalStackOffset = temp + scopeStackOffset;
 
-    SymbolTable st = ifElseNode.elseST();;
+    SymbolTable st = ifElseNode.elseST();
+    ;
     ParentNode child = ifElseNode.elseStat();
     if (childName.equals("then")) {
       scopeStackOffset = ifElseNode.thenStackOffset();
