@@ -747,8 +747,8 @@ public class ASTVisitor {
 
   private int[] setDynamicFields(int scopeOffset) {
     int[] tempValues = {totalStackOffset, scopeStackOffset, nextPosInStack};
-    totalStackOffset = scopeStackOffset + tempValues[0];
     scopeStackOffset = scopeOffset;
+    totalStackOffset = scopeStackOffset + tempValues[0];
     nextPosInStack = scopeStackOffset;
     return tempValues;
   }
