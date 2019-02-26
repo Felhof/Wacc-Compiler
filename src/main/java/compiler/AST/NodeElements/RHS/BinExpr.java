@@ -4,6 +4,8 @@ import compiler.AST.Types.BoolType;
 import compiler.AST.Types.CharType;
 import compiler.AST.Types.IntType;
 import compiler.AST.Types.Type;
+import compiler.instr.LDR;
+import compiler.instr.LDR.COND;
 import compiler.visitors.ASTVisitor;
 import compiler.visitors.CodeGenData;
 import java.util.Arrays;
@@ -82,12 +84,12 @@ public class BinExpr extends Expr {
   }
 
   public enum BINOP {
-    MUL("*", typesInt, intType), DIV("/", typesInt, intType),
-    MOD("%", typesInt, intType), PLUS("+", typesInt, intType),
-    MINUS("-", typesInt, intType), GT(">", typesIntChar, boolType, "GT"),
-    GE(">=", typesIntChar, boolType, "GE"), LT("<", typesIntChar, boolType, "LT"),
-    LE("<=", typesIntChar, boolType, "LE"), EQUAL("==", null, boolType, "EQ"),
-    NOTEQUAL("!=", null, boolType, "NE"), AND("&&", typesBool, boolType),
+    MUL("*", typesInt, intType, COND.NE), DIV("/", typesInt, intType),
+    MOD("%", typesInt, intType), PLUS("+", typesInt, intType, COND.VS),
+    MINUS("-", typesInt, intType, COND.VS), GT(">", typesIntChar, boolType, COND.GT),
+    GE(">=", typesIntChar, boolType, COND.GE), LT("<", typesIntChar, boolType, COND.LT),
+    LE("<=", typesIntChar, boolType, COND.LE), EQUAL("==", null, boolType, COND.EQ),
+    NOTEQUAL("!=", null, boolType, COND.NE), AND("&&", typesBool, boolType),
     OR("||", typesBool, boolType);
 
     private String op;
@@ -96,7 +98,7 @@ public class BinExpr extends Expr {
     private static Map<String, BINOP> map;
 
     private static Map<BINOP,BINOP> opposites;
-    private String cond;
+    private COND cond;
 
     BINOP(String op,
       List<Type> argTypes,
@@ -109,7 +111,7 @@ public class BinExpr extends Expr {
     BINOP(String op,
           List<Type> argTypes,
           Type returnType,
-          String cond) {
+          COND cond) {
       this.op = op;
       this.argTypes = argTypes;
       this.returnType = returnType;
@@ -131,7 +133,7 @@ public class BinExpr extends Expr {
 
     public static Map<BINOP, BINOP> opposites() { return opposites; }
 
-    public String cond() { return cond; }
+    public COND cond() { return cond; }
 
     static {
       map = new HashMap<>();
