@@ -36,4 +36,8 @@ public class WhileNode extends Node {
   public CodeGenData accept(ASTVisitor visitor) {
     return visitor.visitWhileNode(this);
   }
+
+  public SymbolTable statST() {
+    return statST;
+  }
 }
