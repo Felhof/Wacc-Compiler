@@ -59,6 +59,10 @@ public class ArrType extends Type {
         new ArrType(this.elemType, dimension - indexes);
   }
 
+  public Type getArrayElem() {
+    return getArrayElem(1);
+  }
+
   public static ArrType stringType() {
     return stringType;
   }

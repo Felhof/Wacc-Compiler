@@ -425,23 +425,27 @@ public class ASTVisitor {
 
   public CodeGenData visitArrayLiter(ArrayLiter arrayLiter) {
     REG arrAddress = useAvailableReg();
-    REG sizeReg = useAvailableReg();
     Expr[] array = arrayLiter.elems();
+    int elemSize = 0;
     int size = array.length;
-//    int elemSize = isByteSize(((ArrType) arrayLiter.type()).elemType()) ?
-//        BYTE_SIZE : WORD_SIZE;
+
+    if (size > 0) {
+      elemSize = isByteSize(((ArrType) arrayLiter.type()).getArrayElem())
+          ? BYTE_SIZE : WORD_SIZE;
+    }
 
     // malloc the number of elements plus one for to hold the size
-    setArg(new Imm_INT_MEM((size + 1) * WORD_SIZE), false);
+    setArg(new Imm_INT_MEM(size * elemSize + WORD_SIZE), false);
     instructions.add(new B("malloc", true));
     instructions.add(new MOV(arrAddress, R0));
 
     // store array address elements in the heap
     for (int i = 0; i < size; i++) {
-      storeArrayElem(array[i], arrAddress, (i + 1) * WORD_SIZE);
+      storeArrayElem(array[i], arrAddress, WORD_SIZE + i * elemSize);
     }
 
     // store size of the array in the heap
+    REG sizeReg = useAvailableReg();
     instructions.add(new LDR(sizeReg, new Imm_INT_MEM(size)));
     instructions.add(new STR(sizeReg, new Addr(arrAddress)));
 
