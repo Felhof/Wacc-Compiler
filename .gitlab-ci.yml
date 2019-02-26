@@ -8,7 +8,7 @@ job 1:
     cache:
         path:
         - target/
-        - bin
+        - bin/
 job 2:
   stage: test
   script:
