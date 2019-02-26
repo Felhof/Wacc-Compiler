@@ -84,10 +84,10 @@ public class BinExpr extends Expr {
   public enum BINOP {
     MUL("*", typesInt, intType), DIV("/", typesInt, intType),
     MOD("%", typesInt, intType), PLUS("+", typesInt, intType),
-    MINUS("-", typesInt, intType), GT(">", typesIntChar, boolType),
-    GE(">=", typesIntChar, boolType), LT("<", typesIntChar, boolType),
-    LE("<=", typesIntChar, boolType), EQUAL("==", null, boolType),
-    NOTEQUAL("!=", null, boolType), AND("&&", typesBool, boolType),
+    MINUS("-", typesInt, intType), GT(">", typesIntChar, boolType, "GT"),
+    GE(">=", typesIntChar, boolType, "GE"), LT("<", typesIntChar, boolType, "LT"),
+    LE("<=", typesIntChar, boolType, "LE"), EQUAL("==", null, boolType, "EQ"),
+    NOTEQUAL("!=", null, boolType, "NE"), AND("&&", typesBool, boolType),
     OR("||", typesBool, boolType);
 
     private String op;
@@ -95,14 +95,27 @@ public class BinExpr extends Expr {
     private Type returnType;
     private static Map<String, BINOP> map;
 
+    private static Map<BINOP,BINOP> opposites;
+    private String cond;
+
     BINOP(String op,
       List<Type> argTypes,
       Type returnType) {
       this.op = op;
       this.argTypes = argTypes;
       this.returnType = returnType;
-
     }
+
+    BINOP(String op,
+          List<Type> argTypes,
+          Type returnType,
+          String cond) {
+      this.op = op;
+      this.argTypes = argTypes;
+      this.returnType = returnType;
+      this.cond = cond;
+    }
+
 
     public String op() {
       return op;
@@ -116,11 +129,27 @@ public class BinExpr extends Expr {
       return returnType;
     }
 
+    public static Map<BINOP, BINOP> opposites() { return opposites; }
+
+    public String cond() { return cond; }
+
     static {
       map = new HashMap<>();
       for (BINOP t : BINOP.values()) {
         map.put(t.op(), t);
       }
+    }
+
+    static {
+      opposites = new HashMap<BINOP, BINOP>(){{
+        put(EQUAL, NOTEQUAL);
+        put(NOTEQUAL, EQUAL);
+        put(GT, LE);
+        put(LE, GT);
+        put(GE, LT);
+        put(LT, GE);
+      }};
+
     }
 
     public static BINOP get(String string) {

@@ -326,44 +326,14 @@ public class ASTVisitor {
         break;
 
       case EQUAL:
-        instructions.addAll(Arrays
-            .asList(new CMP(rd, rn, null), new MOV(rd, new Imm_INT(1), COND.EQ),
-                new MOV(rd, new Imm_INT(0), COND.NE)));
-        break;
-
       case GE:
-        instructions.addAll(Arrays
-            .asList(new CMP(rd, rn, null), new MOV(rd, new Imm_INT(1),
-                    COND.GE),
-                new MOV(rd, new Imm_INT(0), COND.LT)));
-        break;
-
       case GT:
-        instructions.addAll(Arrays
-            .asList(new CMP(rd, rn, null), new MOV(rd, new Imm_INT(1),
-                    COND.GT),
-                new MOV(rd, new Imm_INT(0), COND.LE)));
-        break;
-
       case LE:
-        instructions.addAll(Arrays
-            .asList(new CMP(rd, rn, null), new MOV(rd, new Imm_INT(1),
-                    COND.LE),
-                new MOV(rd, new Imm_INT(0), COND.GT)));
-        break;
-
       case LT:
-        instructions.addAll(Arrays
-            .asList(new CMP(rd, rn, null), new MOV(rd, new Imm_INT(1),
-                    COND.LT),
-                new MOV(rd, new Imm_INT(0), COND.GE)));
-        break;
-
       case NOTEQUAL:
         instructions.addAll(Arrays
-            .asList(new CMP(rd, rn, null), new MOV(rd, new Imm_INT(1),
-                    COND.NE),
-                new MOV(rd, new Imm_INT(0), COND.EQ)));
+            .asList(new CMP(rd, rn, null), new MOV(rd, new Imm_INT(1), binExpr.operator().cond()),
+                new MOV(rd, new Imm_INT(0), BinExpr.BINOP.opposites().get(binExpr.operator()).cond())));
         break;
 
     }
