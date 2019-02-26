@@ -9,7 +9,7 @@ public class VarInfo implements ASTData {
 
   private Type type;
   private Integer localOffset;
-  private Integer progOffset = 0;
+  private Integer progOffset;
 
   public VarInfo(Type type, Integer stackOffset) {
     this.type = type;

@@ -222,7 +222,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
 
     currentParentNode.add(new IfElseNode(condition, thenStat.astNode(),
         thenStat.symbolTable(), elseStat.astNode(), elseStat.symbolTable(),
-        ctx.start.getLine(), thenStackOffset, elseStackOffset));
+        ctx.start.getLine()));
     stackPointerOffset = recordStackOffset;
     return null;
   }
