@@ -470,7 +470,6 @@ public class ASTVisitor {
   }
 
   private CodeGenData visitIdentAssign(VarAssignNode varAssignNode) {
-    //TODO: CONSIDER other cases such as Arrays or Pairs
     String varName = varAssignNode.lhs().varName();
     REG rd = (REG) visit(varAssignNode.rhs());
     int offset = currentST.getTotalOffset(varName);
@@ -507,11 +506,9 @@ public class ASTVisitor {
 
   private CodeGenData saveVarData(Type varType, REG rd, REG rn, int offset,
       boolean update) {
-    boolean isByteInstr =
-        varType.equals(BoolType.getInstance()) || varType
-            .equals(CharType.getInstance());
     instructions
-        .add(new STR(rd, new Addr(rn, true, new Imm_INT(offset)), isByteInstr,
+        .add(new STR(rd, new Addr(rn, true, new Imm_INT(offset)),
+            isByteSize(varType),
             update));
     return null;
   }
@@ -750,7 +747,6 @@ public class ASTVisitor {
     SymbolTable st = ifElseNode.elseST();
     scopeStackOffset = st.getStackOffset();
     totalStackOffset = temp + scopeStackOffset;
-
 
     ParentNode child = ifElseNode.elseStat();
     if (childName.equals("then")) {
