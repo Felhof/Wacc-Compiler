@@ -9,7 +9,6 @@ public class VarInfo implements ASTData {
 
   private Type type;
   private Integer localOffset;
-  private Integer progOffset;
 
   public VarInfo(Type type, Integer stackOffset) {
     this.type = type;
@@ -28,20 +27,9 @@ public class VarInfo implements ASTData {
     this.localOffset = stackOffset;
   }
 
-  public void setProgOffset(int progOffset) {
-    this.progOffset = progOffset;
-  }
-
   @Override
   public CodeGenData accept(ASTVisitor visitor) {
     return null;
   }
 
-  public Integer getProgOffset() {
-    return progOffset;
-  }
-
-  public Integer getTotalOffset() {
-    return progOffset + localOffset;
-  }
 }

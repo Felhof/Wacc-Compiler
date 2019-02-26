@@ -207,9 +207,10 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
 
   @Override
   public ASTData visitIfStat(IfStatContext ctx) {
-    int recordStackOffset = stackPointerOffset;
     Expr condition = (Expr) visit(ctx.expr());
     checkBoolExpr(ctx.expr(), condition);
+
+    int recordStackOffset = stackPointerOffset;
     stackPointerOffset = 0;
     ScopeData thenStat = visitStatInNewScope(ctx.stat(0));
     int thenStackOffset = stackPointerOffset;
@@ -229,15 +230,16 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
 
   @Override
   public ASTData visitWhileStat(WhileStatContext ctx) {
-
+    int recordStackOffset = stackPointerOffset;
+    stackPointerOffset = 0;
     Expr condition = (Expr) visit(ctx.expr());
     checkBoolExpr(ctx.expr(), condition);
-
     ScopeData stat = visitStatInNewScope(ctx.stat());
-
+    stat.symbolTable().setScopeStackOffset(stackPointerOffset);
     currentParentNode
         .add(new WhileNode(condition, stat.astNode(), stat.symbolTable(),
             ctx.start.getLine()));
+    stackPointerOffset = recordStackOffset;
     return null;
   }
 
