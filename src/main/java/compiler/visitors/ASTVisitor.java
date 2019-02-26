@@ -117,25 +117,6 @@ public class ASTVisitor {
     return labelName;
   }
 
-  public static void jumpToFunctionLabel(String label) {
-    // todo deprecated
-    List<REG> usedRegs = getUsedRegs();
-    if (!usedRegs.isEmpty()) {
-      instructions.add(new PUSH(usedRegs)); // save onto stack all used regs
-    }
-    instructions.add(new B(label, true));
-    if (!usedRegs.isEmpty()) {
-      Collections.reverse(usedRegs);
-      instructions.add(new POP(usedRegs));  // restore previous regs from stack
-    }
-  }
-
-  private static List<REG> getUsedRegs() {
-    List<REG> regs = new ArrayList<>(allUsableRegs);
-    regs.removeAll(availableRegs);
-    return regs;
-  }
-
   public List<Instr> generate(AST root) {
     constructStartProgram();
     visitFuncsAndChildren(root);
@@ -243,8 +224,7 @@ public class ASTVisitor {
         break;
       case LEN:
         int offset =
-            currentST.lookUpAllVar(((Ident) expr.insideExpr()).varName())
-                .getTotalOffset();
+            currentST.getTotalOffset(((Ident) expr.insideExpr()).varName());
         instructions.add(new LDR(rd, new Addr(SP, true,
             new Imm_INT(offset))));  //load address of array into rd
         instructions.add(new LDR(rd, new Addr(
@@ -412,9 +392,9 @@ public class ASTVisitor {
 
     //In this case we don't visit the Node because we don't want to store the value but the address
     REG rd = useAvailableReg();
-    VarInfo varInfo = currentST.lookUpAllVar(readNode.lhs().varName());
+    Integer offset = currentST.getTotalOffset(readNode.lhs().varName());
     instructions.add(new ADD(rd, SP, new Imm_INT(
-        varInfo.getTotalOffset()),
+        offset),
         false));
 
     instructions.add(new MOV(R0, rd));
@@ -493,17 +473,7 @@ public class ASTVisitor {
     //TODO: CONSIDER other cases such as Arrays or Pairs
     String varName = varAssignNode.lhs().varName();
     REG rd = (REG) visit(varAssignNode.rhs());
-    int offset;
-    VarInfo varInScope = currentST.lookUpVarScope(varName);
-    if (varInScope != null && !varInScope.getType()
-        .equals(varAssignNode.lhs().type()) || (varInScope != null
-        && varInScope.getLocalOffset() == null)) {
-      VarInfo varInfo = currentST.getEncSymTable().lookUpAllVar(varName);
-      offset = varInfo.getTotalOffset() + currentST.getStackOffset();
-    } else {
-      offset = currentST.lookUpAllVar(varName)
-          .getTotalOffset();
-    }
+    int offset = currentST.getTotalOffset(varName);
     saveVarData(varAssignNode.rhs().type(), rd, SP, offset, false);
     freeReg(rd);
     return null;
@@ -641,7 +611,7 @@ public class ASTVisitor {
 
   private REG loadVar(String varName, boolean isByteInstr) {
     REG rd = useAvailableReg();
-    int offset = currentST.lookUpAllVar(varName).getTotalOffset();
+    int offset = currentST.getTotalOffset(varName);
     instructions.add(new LDR(rd,
         new Addr(SP, true, new Imm_INT(offset)), isByteInstr));
     return rd;
@@ -649,7 +619,7 @@ public class ASTVisitor {
 
   private REG loadFromStack(String varName) {
     REG rd = useAvailableReg();
-    int offset = currentST.lookUpAllVar(varName).getTotalOffset();
+    int offset = currentST.getTotalOffset(varName);
     instructions.add(new ADD(rd, SP, new Imm_INT(offset)));
     return rd;
   }
