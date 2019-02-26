@@ -4,12 +4,16 @@ stages:
 
 job 1:
   stage: build
-  script: make
+  script: 
+    - make
 job 2:
   stage: test
   script:
-      - make
+#      - make
       - mvn test
+  cache:
+    paths:
+    - src/main/java/antlr/
 #      - mvn test -Dtest=CodegenTests
 #      - mvn test -Dtest=AllValidTests
 #job 3:
