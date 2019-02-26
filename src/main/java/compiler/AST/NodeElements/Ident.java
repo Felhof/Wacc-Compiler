@@ -4,8 +4,6 @@ import compiler.AST.NodeElements.RHS.Expr;
 import compiler.AST.Types.BoolType;
 import compiler.AST.Types.CharType;
 import compiler.AST.Types.Type;
-import compiler.visitors.ASTVisitor;
-import compiler.visitors.CodeGenData;
 
 public abstract class Ident extends Expr {
 
@@ -24,11 +22,6 @@ public abstract class Ident extends Expr {
 
   public String varName() {
     return varName;
-  }
-
-  @Override
-  public CodeGenData accept(ASTVisitor visitor) {
-    return visitor.visitIdent(this);
   }
 
   @Override

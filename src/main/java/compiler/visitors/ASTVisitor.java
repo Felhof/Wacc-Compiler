@@ -14,6 +14,7 @@ import static compiler.instr.Shift.SHIFT_TYPE.LSL;
 import compiler.AST.NodeElements.ArrayElem;
 import compiler.AST.NodeElements.Ident;
 import compiler.AST.NodeElements.LHS.ArrayElemLHS;
+import compiler.AST.NodeElements.LHS.IdentLHS;
 import compiler.AST.NodeElements.LHS.PairElemLHS;
 import compiler.AST.NodeElements.ListExpr;
 import compiler.AST.NodeElements.PairElem;
@@ -203,7 +204,7 @@ public class ASTVisitor {
 
   private void constructEndProgram() {
     configureStack("add");
-    setArg(new Imm_INT_MEM(toInt("0")));
+    setArg(new Imm_INT_MEM(toInt("0")), false);
     instructions.add(new POP(PC));
     instructions.add(new SECTION("ltorg"));
   }
@@ -379,13 +380,9 @@ public class ASTVisitor {
 
   public CodeGenData visitPrintExpression(PrintNode printNode) {
     REG rd = (REG) visit(printNode.expr());
-    if (printNode.expr() instanceof ArrayElem) {
-      instructions.add(new LDR(rd, new Addr(rd),
-          printNode.expr().sizeOf() == 1));
-    }
 
     // mov result into arg register
-    instructions.add(new MOV(R0, rd));
+    setArg(rd, true);
 
     if (printNode.expr().type().equals(CharType.getInstance())) {
       instructions.add(new B("putchar", true));
@@ -421,7 +418,7 @@ public class ASTVisitor {
 //        varInfo.getTotalOffset()),
 //        false));
 
-    setArg(rd);
+    setArg(rd, true);
     if ((readNode.lhs()).type().equals(IntType.getInstance())) {
       instructions.add(new B("p_read_int", true));
       specialLabels.add("p_read_int");
@@ -475,11 +472,11 @@ public class ASTVisitor {
 
     if (varAssignNode.lhs() instanceof Ident) {
       // todo refactor
-      visitIdentAssign(varAssignNode);
+      return visitIdentAssign(varAssignNode);
     }
 
-    REG rd = (REG) visit(varAssignNode.lhs());
-    REG rn = (REG) visit(varAssignNode.rhs());
+    REG rd = (REG) visit(varAssignNode.rhs());
+    REG rn = (REG) visit(varAssignNode.lhs());
 
     // todo try rhs
     saveVarData(varAssignNode.lhs().type(), rd, rn, 0, false);
@@ -491,21 +488,22 @@ public class ASTVisitor {
   }
 
   private CodeGenData visitIdentAssign(VarAssignNode varAssignNode) {
-    //TODO: FIX visit IDENT
-//    String varName = varAssignNode.lhs().varName();
-//    REG rd = (REG) visit(varAssignNode.rhs());
-//    int offset;
-//    VarInfo varInScope = currentST.lookUpVarScope(varName);
-//    if (varInScope != null && !varInScope.getType()
-//        .equals(varAssignNode.lhs().type())) {
-//      VarInfo varInfo = currentST.getEncSymTable().lookUpAllVar(varName);
-//      offset = varInfo.getTotalOffset() + currentST.getStackOffset();
-//    } else {
-//      offset = currentST.lookUpAllVar(varName)
-//          .getTotalOffset();
-//    }
-//    saveVarData(varAssignNode.rhs().type(), rd, SP, offset, false);
-//    freeReg(rd);
+    //TODO: delete this and use above method together with visitIdentLHS
+    IdentLHS identLHS = (IdentLHS) varAssignNode.lhs();
+    String varName = identLHS.varName();
+    REG rd = (REG) visit(varAssignNode.rhs());
+    int offset;
+    VarInfo varInScope = currentST.lookUpVarScope(varName);
+    if (varInScope != null && !varInScope.getType()
+        .equals(identLHS.type())) {
+      VarInfo varInfo = currentST.getEncSymTable().lookUpAllVar(varName);
+      offset = varInfo.getTotalOffset() + currentST.getStackOffset();
+    } else {
+      offset = currentST.lookUpAllVar(varName)
+          .getTotalOffset();
+    }
+    saveVarData(varAssignNode.rhs().type(), rd, SP, offset, false);
+    freeReg(rd);
     return null;
   }
 
@@ -516,7 +514,7 @@ public class ASTVisitor {
     int size = array.length;
 
     // malloc the number of elements plus one for to hold the size
-    setArg(new Imm_INT_MEM((size + 1) * WORD_SIZE));
+    setArg(new Imm_INT_MEM((size + 1) * WORD_SIZE), false);
     instructions.add(new B("malloc", true));
     instructions.add(new MOV(arrAddress, R0));
 
@@ -616,7 +614,7 @@ public class ASTVisitor {
         "p_throw_runtime_error",
         "p_print_string"));
     REG rd = (REG) visit(pairElem.expr());
-    instructions.add(new MOV(R0, rd));
+    setArg(rd, true);
     instructions.add(new B("p_check_null_pointer", true));
     instructions.add(new LDR(rd,
         new Addr(rd, true, new Imm_INT(pairElem.posInPair() * WORD_SIZE)),
@@ -625,7 +623,7 @@ public class ASTVisitor {
   }
 
   public CodeGenData visitPair(Pair pair) {
-    setArg(new Imm_INT_MEM(2 * WORD_SIZE));
+    setArg(new Imm_INT_MEM(2 * WORD_SIZE), false);
     instructions.add(new B("malloc", true));
     REG rd = useAvailableReg();
     instructions.add(new MOV(rd, R0)); // fetch address of pair
@@ -642,7 +640,7 @@ public class ASTVisitor {
 
   private void storeExpInHeap(Expr expr, REG objectAddr, int offset) {
     REG rd = (REG) visit(expr);
-    setArg(new Imm_INT_MEM(expr.sizeOf()));
+    setArg(new Imm_INT_MEM(expr.sizeOf()), false);
     instructions.add(new B("malloc", true));
     saveVarData(expr.type(), rd, R0, 0, false);
     instructions
@@ -650,8 +648,12 @@ public class ASTVisitor {
     freeReg(rd);
   }
 
-  private void setArg(Operand op2) {
-    instructions.add(new LDR(R0, op2, false));
+  private void setArg(Operand op2, boolean isAddress) {
+    if (isAddress) {
+      instructions.add(new MOV(R0, op2));
+    } else {
+      instructions.add(new LDR(R0, op2, false));
+    }
   }
 
   private void setArgs(Operand[] ops) {
@@ -677,17 +679,20 @@ public class ASTVisitor {
   }
 
   public CodeGenData visitIdentRHS(Ident ident) {
-    REG rd = useAvailableReg();
-    Operand offset = (REG) visitIdent(ident);
-    instructions.add(new LDR(rd, new Addr(SP, true, offset),
-        isByteSize(ident.type())));
+    REG rd = (REG) visitIdent(ident);
+    instructions.add(new LDR(rd, new Addr(rd), isByteSize(ident.type())));
+//    instructions.add(new LDR(rd, new Addr(SP, true, offset),
+//        isByteSize(ident.type()))); direct way
     return rd; // returns value of ident
   }
 
   // returns address (offset) of ident
   private CodeGenData visitIdent(Ident ident) {
+    REG rd = useAvailableReg();
     int offset = currentST.lookUpAllVar(ident.varName()).getTotalOffset();
-    return new Imm_INT(offset);
+    // additional instruction to match with other visitLHS methods
+    instructions.add(new ADD(rd, SP, new Imm_INT(offset)));
+    return rd;
   }
 
   private REG loadFromStack(String varName) {

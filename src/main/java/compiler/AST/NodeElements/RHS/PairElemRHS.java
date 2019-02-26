@@ -1,20 +1,19 @@
-package compiler.AST.NodeElements.LHS;
+package compiler.AST.NodeElements.RHS;
 
 import compiler.AST.NodeElements.PairElem;
-import compiler.AST.NodeElements.RHS.Expr;
 import compiler.AST.Types.Type;
 import compiler.visitors.ASTVisitor;
 import compiler.visitors.CodeGenData;
 
-public class PairElemLHS extends PairElem implements LHS {
+public class PairElemRHS extends PairElem {
 
-  public PairElemLHS(Type type,
+  public PairElemRHS(Type type,
       Expr expr, int posInPair) {
     super(type, expr, posInPair);
   }
 
   @Override
   public CodeGenData accept(ASTVisitor visitor) {
-    return visitor.visitPairElemLHS(this);
+    return visitor.visitPairElemRHS(this);
   }
 }
