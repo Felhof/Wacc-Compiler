@@ -7,7 +7,6 @@ import compiler.visitors.CodeGenData;
 public class ScopeNode extends Node {
 
   private SymbolTable symbolTable;
-  private int stackOffset;
   private ParentNode parentNode;
 
   public ScopeNode(ParentNode parentNode,
@@ -15,7 +14,6 @@ public class ScopeNode extends Node {
     super(lineNumber);
     this.parentNode = parentNode;
     this.symbolTable = symbolTable;
-    this.stackOffset = stackOffset;
   }
 
   @Override
@@ -37,6 +35,6 @@ public class ScopeNode extends Node {
   }
 
   public int stackOffset() {
-    return stackOffset;
+    return symbolTable.getStackOffset();
   }
 }

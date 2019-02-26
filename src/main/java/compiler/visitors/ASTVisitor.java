@@ -14,7 +14,6 @@ import static compiler.instr.Shift.SHIFT_TYPE.LSL;
 import compiler.AST.NodeElements.ArrayElem;
 import compiler.AST.NodeElements.Ident;
 import compiler.AST.NodeElements.LHS.ArrayElemLHS;
-import compiler.AST.NodeElements.LHS.IdentLHS;
 import compiler.AST.NodeElements.LHS.PairElemLHS;
 import compiler.AST.NodeElements.ListExpr;
 import compiler.AST.NodeElements.PairElem;
@@ -45,7 +44,6 @@ import compiler.AST.Nodes.VarAssignNode;
 import compiler.AST.Nodes.VarDeclareNode;
 import compiler.AST.Nodes.WhileNode;
 import compiler.AST.SymbolTable.SymbolTable;
-import compiler.AST.SymbolTable.VarInfo;
 import compiler.AST.Types.ArrType;
 import compiler.AST.Types.BoolType;
 import compiler.AST.Types.CharType;
@@ -590,8 +588,6 @@ public class ASTVisitor {
     }
   }
 
-
-
   public CodeGenData visitIdentLHS(Ident ident) {
     REG rd = useAvailableReg();
     int offset = currentST.getTotalOffset(ident.varName());
@@ -690,50 +686,19 @@ public class ASTVisitor {
   }
 
   public CodeGenData visitIfElseNode(IfElseNode ifElseNode) {
-    int tempTotalStack = totalStackOffset;
-    int tempStackOffset = scopeStackOffset;
-    int tempNextPosInStack = nextPosInStack;
-
     REG rd = (REG) visit(ifElseNode.cond());
     instructions.add(new CMP(rd, new Imm_INT(0)));
     instructions.add(new B("L" + branchNb, COND.EQ));
     freeReg(rd);
-
     int scopeBranchNb = branchNb;
     branchNb += 2;
 
-    visitIfChild(ifElseNode, "then");
+    visitChildStats(ifElseNode.thenST(), ifElseNode.thenStat());
     instructions.add(new B("L" + (scopeBranchNb + 1)));
     instructions.add(new LABEL("L" + (scopeBranchNb)));
-    totalStackOffset = tempStackOffset;
-    visitIfChild(ifElseNode, "else");
+    visitChildStats(ifElseNode.elseST(), ifElseNode.elseStat());
     instructions.add(new LABEL("L" + (scopeBranchNb + 1)));
-
-    totalStackOffset = tempTotalStack;
-    scopeStackOffset = tempStackOffset;
-    nextPosInStack = tempNextPosInStack;
     return null;
-  }
-
-  private void visitIfChild(IfElseNode ifElseNode, String childName) {
-    int temp = totalStackOffset;
-    SymbolTable st = ifElseNode.elseST();
-    scopeStackOffset = st.getStackOffset();
-    totalStackOffset = temp + scopeStackOffset;
-
-    ParentNode child = ifElseNode.elseStat();
-    if (childName.equals("then")) {
-      st = ifElseNode.thenST();
-      scopeStackOffset = st.getStackOffset();
-      totalStackOffset = temp + scopeStackOffset;
-      child = ifElseNode.thenStat();
-    }
-    nextPosInStack = scopeStackOffset;
-    enterScope(st);
-    configureStack("sub");
-    visit(child);
-    configureStack("add");
-    exitScope(currentST.getEncSymTable());
   }
 
   public CodeGenData visitWhileNode(WhileNode whileNode) {
@@ -741,36 +706,47 @@ public class ASTVisitor {
 
     int condBranchNb = branchNb;
     branchNb += 2;
-
     // Add label for do statement
     instructions.add(new LABEL("L" + (condBranchNb + 1)));
-    visit(whileNode.stat());
+
+    visitChildStats(whileNode.statST(), whileNode.parentNode());
 
     // Add label for condition
     instructions.add(new LABEL("L" + condBranchNb));
     REG rd = (REG) visit(whileNode.condition());
-
     instructions.add(new CMP(rd, new Imm_INT(1)));
     instructions.add(new B("L" + (condBranchNb + 1), COND.EQ));
-
     freeReg(rd);
     return null;
   }
 
   public CodeGenData visitNewScope(ScopeNode scopeNode) {
-    int tempScopeStackOffset = scopeStackOffset;
-    int tempNextPosInStack = nextPosInStack;
-    scopeStackOffset = scopeNode.stackOffset();
-    nextPosInStack = scopeStackOffset;
-    enterScope(scopeNode.symbolTable());
-    configureStack("sub");
-    scopeNode.parentNode().children().forEach(this::visit);
-    configureStack("add");
-    scopeStackOffset = tempScopeStackOffset;
-    nextPosInStack = tempNextPosInStack;
-    exitScope(currentST.getEncSymTable());
+    visitChildStats(scopeNode.symbolTable(), scopeNode.parentNode());
     return null;
+  }
 
+  private void visitChildStats(SymbolTable st, ParentNode child) {
+    int[] tempValues = setDynamicFields(st.getStackOffset());
+    configureStack("sub");
+    enterScope(st);
+    visit(child);
+    exitScope(currentST.getEncSymTable());
+    configureStack("add");
+    reinstateDynamicsFields(tempValues);
+  }
+
+  private void reinstateDynamicsFields(int[] tempValues) {
+    totalStackOffset = tempValues[0];
+    scopeStackOffset = tempValues[1];
+    nextPosInStack = tempValues[2];
+  }
+
+  private int[] setDynamicFields(int scopeOffset) {
+    int[] tempValues = {totalStackOffset, scopeStackOffset, nextPosInStack};
+    totalStackOffset = scopeStackOffset + tempValues[0];
+    scopeStackOffset = scopeOffset;
+    nextPosInStack = scopeStackOffset;
+    return tempValues;
   }
 
   private void enterScope(SymbolTable symbolTable) {

@@ -22,7 +22,7 @@ public class WhileNode extends Node {
     return condition;
   }
 
-  public ParentNode stat() {
+  public ParentNode parentNode() {
     return stat;
   }
 
@@ -35,5 +35,9 @@ public class WhileNode extends Node {
   @Override
   public CodeGenData accept(ASTVisitor visitor) {
     return visitor.visitWhileNode(this);
+  }
+
+  public SymbolTable statST() {
+    return statST;
   }
 }
