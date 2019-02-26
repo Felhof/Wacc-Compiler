@@ -22,7 +22,7 @@ public class WhileNode extends Node {
     return condition;
   }
 
-  public ParentNode stat() {
+  public ParentNode parentNode() {
     return stat;
   }
 

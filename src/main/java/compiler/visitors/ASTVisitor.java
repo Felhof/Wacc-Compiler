@@ -14,7 +14,6 @@ import static compiler.instr.Shift.SHIFT_TYPE.LSL;
 import compiler.AST.NodeElements.ArrayElem;
 import compiler.AST.NodeElements.Ident;
 import compiler.AST.NodeElements.LHS.ArrayElemLHS;
-import compiler.AST.NodeElements.LHS.IdentLHS;
 import compiler.AST.NodeElements.LHS.PairElemLHS;
 import compiler.AST.NodeElements.ListExpr;
 import compiler.AST.NodeElements.PairElem;
@@ -45,7 +44,6 @@ import compiler.AST.Nodes.VarAssignNode;
 import compiler.AST.Nodes.VarDeclareNode;
 import compiler.AST.Nodes.WhileNode;
 import compiler.AST.SymbolTable.SymbolTable;
-import compiler.AST.SymbolTable.VarInfo;
 import compiler.AST.Types.ArrType;
 import compiler.AST.Types.BoolType;
 import compiler.AST.Types.CharType;
@@ -695,22 +693,12 @@ public class ASTVisitor {
     int scopeBranchNb = branchNb;
     branchNb += 2;
 
-    visitIfChild(ifElseNode.thenST(), ifElseNode.thenStat());
+    visitChildStats(ifElseNode.thenST(), ifElseNode.thenStat());
     instructions.add(new B("L" + (scopeBranchNb + 1)));
     instructions.add(new LABEL("L" + (scopeBranchNb)));
-    visitIfChild(ifElseNode.elseST(), ifElseNode.elseStat());
+    visitChildStats(ifElseNode.elseST(), ifElseNode.elseStat());
     instructions.add(new LABEL("L" + (scopeBranchNb + 1)));
     return null;
-  }
-
-  private void visitIfChild(SymbolTable st, ParentNode child) {
-    int[] tempValues = setDynamicFields(st.getStackOffset());
-    enterScope(st);
-    configureStack("sub");
-    visit(child);
-    configureStack("add");
-    exitScope(currentST.getEncSymTable());
-    reinstateDynamicsFields(tempValues);
   }
 
   public CodeGenData visitWhileNode(WhileNode whileNode) {
@@ -718,22 +706,14 @@ public class ASTVisitor {
 
     int condBranchNb = branchNb;
     branchNb += 2;
-
     // Add label for do statement
     instructions.add(new LABEL("L" + (condBranchNb + 1)));
 
-    int[] tempValues = setDynamicFields(whileNode.statST().getStackOffset());
-    configureStack("sub");
-    enterScope(whileNode.statST());
-    visit(whileNode.stat());
-    exitScope(whileNode.statST());
-    configureStack("add");
-    reinstateDynamicsFields(tempValues);
+    visitChildStats(whileNode.statST(), whileNode.parentNode());
 
     // Add label for condition
     instructions.add(new LABEL("L" + condBranchNb));
     REG rd = (REG) visit(whileNode.condition());
-
     instructions.add(new CMP(rd, new Imm_INT(1)));
     instructions.add(new B("L" + (condBranchNb + 1), COND.EQ));
     freeReg(rd);
@@ -741,15 +721,18 @@ public class ASTVisitor {
   }
 
   public CodeGenData visitNewScope(ScopeNode scopeNode) {
-    int[] tempValues = setDynamicFields(scopeNode.stackOffset());
+    visitChildStats(scopeNode.symbolTable(), scopeNode.parentNode());
+    return null;
+  }
+
+  private void visitChildStats(SymbolTable st, ParentNode child) {
+    int[] tempValues = setDynamicFields(st.getStackOffset());
     configureStack("sub");
-    enterScope(scopeNode.symbolTable());
-    scopeNode.parentNode().children().forEach(this::visit);
+    enterScope(st);
+    visit(child);
     exitScope(currentST.getEncSymTable());
     configureStack("add");
     reinstateDynamicsFields(tempValues);
-    return null;
-
   }
 
   private void reinstateDynamicsFields(int[] tempValues) {
