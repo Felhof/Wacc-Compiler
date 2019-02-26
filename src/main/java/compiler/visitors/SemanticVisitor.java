@@ -2,6 +2,7 @@ package compiler.visitors;
 
 import static compiler.visitors.ASTVisitor.isByteSize;
 
+import antlr.BasicParser;
 import antlr.BasicParser.Arg_listContext;
 import antlr.BasicParser.ArrayElemLhsContext;
 import antlr.BasicParser.ArrayExpContext;

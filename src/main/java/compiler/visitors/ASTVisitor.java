@@ -391,13 +391,6 @@ public class ASTVisitor {
   public CodeGenData visitReadExpr(ReadNode readNode) {
     REG rd = (REG) visit(readNode.lhs());
 
-//    //In this case we don't visit the Node because we don't want to store the value but the address
-//    REG rd = useAvailableReg();
-//    VarInfo varInfo = currentST.lookUpAllVar(readNode.lhs().varName());
-//    instructions.add(new ADD(rd, SP, new Imm_INT(
-//        varInfo.getTotalOffset()),
-//        false));
-
     setArg(rd, true);
     if ((readNode.lhs()).type().equals(IntType.getInstance())) {
       instructions.add(new B("p_read_int", true));
@@ -449,41 +442,14 @@ public class ASTVisitor {
   }
 
   public CodeGenData visitAssignNode(VarAssignNode varAssignNode) {
-
-    if (varAssignNode.lhs() instanceof Ident) {
-      // todo refactor
-      return visitIdentAssign(varAssignNode);
-    }
-
     REG rd = (REG) visit(varAssignNode.rhs());
     REG rn = (REG) visit(varAssignNode.lhs());
 
-    // todo try rhs
     saveVarData(varAssignNode.lhs().type(), rd, rn, 0, false);
 
     freeReg(rd);
     freeReg(rn);
 
-    return null;
-  }
-
-  private CodeGenData visitIdentAssign(VarAssignNode varAssignNode) {
-    //TODO: delete this and use above method together with visitIdentLHS
-    IdentLHS identLHS = (IdentLHS) varAssignNode.lhs();
-    String varName = identLHS.varName();
-    REG rd = (REG) visit(varAssignNode.rhs());
-    int offset;
-    VarInfo varInScope = currentST.lookUpVarScope(varName);
-    if (varInScope != null && !varInScope.getType()
-        .equals(identLHS.type())) {
-      VarInfo varInfo = currentST.getEncSymTable().lookUpAllVar(varName);
-      offset = varInfo.getTotalOffset() + currentST.getStackOffset();
-    } else {
-      offset = currentST.lookUpAllVar(varName)
-          .getTotalOffset();
-    }
-    saveVarData(varAssignNode.rhs().type(), rd, SP, offset, false);
-    freeReg(rd);
     return null;
   }
 
@@ -655,23 +621,17 @@ public class ASTVisitor {
 
 
   public CodeGenData visitIdentLHS(Ident ident) {
-    return visitIdent(ident);
+    REG rd = useAvailableReg();
+    int offset = currentST.getTotalOffset(ident.varName());
+    instructions.add(new ADD(rd, SP, new Imm_INT(offset)));
+    return rd;
   }
 
   public CodeGenData visitIdentRHS(Ident ident) {
-    REG rd = (REG) visitIdent(ident);
-    instructions.add(new LDR(rd, new Addr(rd), isByteSize(ident.type())));
-//    instructions.add(new LDR(rd, new Addr(SP, true, offset),
-//        isByteSize(ident.type()))); direct way
-    return rd; // returns value of ident
-  }
-
-  // returns address (offset) of ident
-  private CodeGenData visitIdent(Ident ident) {
     REG rd = useAvailableReg();
-    int offset = currentST.lookUpAllVar(ident.varName()).getTotalOffset();
-    // additional instruction to match with other visitLHS methods
-    instructions.add(new ADD(rd, SP, new Imm_INT(offset)));
+    int offset = currentST.getTotalOffset(ident.varName());
+    instructions.add(new LDR(rd, new Addr(SP, true, new Imm_INT(offset)),
+        isByteSize(ident.type())));
     return rd;
   }
 
