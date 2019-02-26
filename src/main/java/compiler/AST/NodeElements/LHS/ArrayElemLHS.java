@@ -6,7 +6,7 @@ import compiler.AST.Types.Type;
 import compiler.visitors.ASTVisitor;
 import compiler.visitors.CodeGenData;
 
-public class ArrayElemLHS extends ArrayElem implements LHS {
+public class ArrayElemLHS extends ArrayElem {
 
   public ArrayElemLHS(Type type, String varName, Expr[] indexes) {
     super(type, varName, indexes);

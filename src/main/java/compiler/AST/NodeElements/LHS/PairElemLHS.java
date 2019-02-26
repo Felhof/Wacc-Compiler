@@ -6,7 +6,7 @@ import compiler.AST.Types.Type;
 import compiler.visitors.ASTVisitor;
 import compiler.visitors.CodeGenData;
 
-public class PairElemLHS extends PairElem implements LHS {
+public class PairElemLHS extends PairElem {
 
   public PairElemLHS(Type type,
       Expr expr, int posInPair) {

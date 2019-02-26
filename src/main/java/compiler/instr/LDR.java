@@ -29,7 +29,8 @@ public class LDR extends Instr {
     return "\tLDR" + (isByteInstr ? "SB" : "") + ((cond != null) ? cond.toString() + " " : " ")
       + rd.toString() + ", " + op2.toString();
   }
-  public static enum COND {
+
+  public enum COND {
     EQ, NE, GT, LT,
     GE, LE, VS, CS
   }
