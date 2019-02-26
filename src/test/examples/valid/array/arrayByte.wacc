@@ -1,0 +1,8 @@
+# Program:
+
+begin
+  char[] c = ['a', 'b', 'c'] ;
+  bool[] b = [true, false] ;
+  bool[][] double = [b,b]
+end
+
