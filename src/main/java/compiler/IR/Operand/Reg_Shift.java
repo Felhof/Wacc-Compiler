@@ -1,7 +1,4 @@
-package compiler.instr.Operand;
-
-import compiler.instr.REG;
-import compiler.instr.Shift;
+package compiler.IR.Operand;
 
 public class Reg_Shift implements Operand {
   private REG rm;

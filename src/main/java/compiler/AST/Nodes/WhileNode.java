@@ -2,7 +2,7 @@ package compiler.AST.Nodes;
 
 import compiler.AST.NodeElements.RHS.Expr;
 import compiler.AST.SymbolTable.SymbolTable;
-import compiler.instr.REG;
+import compiler.IR.Operand.REG;
 import compiler.visitors.ASTVisitor;
 
 public class WhileNode extends Node {

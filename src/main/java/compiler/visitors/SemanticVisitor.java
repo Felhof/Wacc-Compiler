@@ -50,6 +50,7 @@ import antlr.BasicParser.UnaryExpContext;
 import antlr.BasicParser.VarDeclarationStatContext;
 import antlr.BasicParser.WhileStatContext;
 import antlr.BasicParserBaseVisitor;
+import compiler.AST.ASTData;
 import compiler.AST.NodeElements.LHS.ArrayElemLHS;
 import compiler.AST.NodeElements.LHS.IdentLHS;
 import compiler.AST.NodeElements.LHS.PairElemLHS;

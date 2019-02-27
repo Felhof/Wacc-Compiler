@@ -1,6 +1,6 @@
 package compiler.AST.Nodes;
 
-import compiler.instr.REG;
+import compiler.IR.Operand.REG;
 import compiler.visitors.ASTVisitor;
 import java.util.ArrayList;
 import java.util.List;

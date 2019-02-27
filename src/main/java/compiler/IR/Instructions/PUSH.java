@@ -1,10 +1,11 @@
-package compiler.instr;
+package compiler.IR.Instructions;
 
+import compiler.IR.Operand.REG;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class PUSH extends Instr {
+public class PUSH implements Instr {
 
   private List<REG> regsToPush;
 

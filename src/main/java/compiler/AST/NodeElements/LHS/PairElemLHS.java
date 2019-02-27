@@ -3,7 +3,7 @@ package compiler.AST.NodeElements.LHS;
 import compiler.AST.NodeElements.PairElem;
 import compiler.AST.NodeElements.RHS.Expr;
 import compiler.AST.Types.Type;
-import compiler.instr.REG;
+import compiler.IR.Operand.REG;
 import compiler.visitors.ASTVisitor;
 
 public class PairElemLHS extends PairElem {

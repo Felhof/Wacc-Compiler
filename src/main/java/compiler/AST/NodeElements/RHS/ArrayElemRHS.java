@@ -2,7 +2,7 @@ package compiler.AST.NodeElements.RHS;
 
 import compiler.AST.NodeElements.ArrayElem;
 import compiler.AST.Types.Type;
-import compiler.instr.REG;
+import compiler.IR.Operand.REG;
 import compiler.visitors.ASTVisitor;
 
 public class ArrayElemRHS extends ArrayElem {

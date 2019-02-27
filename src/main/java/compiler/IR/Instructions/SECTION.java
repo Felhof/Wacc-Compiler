@@ -1,6 +1,6 @@
-package compiler.instr;
+package compiler.IR.Instructions;
 
-public class SECTION extends Instr {
+public class SECTION implements Instr {
 
   private String name;
   private boolean global = false;

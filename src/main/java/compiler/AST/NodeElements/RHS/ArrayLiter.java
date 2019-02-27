@@ -2,8 +2,8 @@ package compiler.AST.NodeElements.RHS;
 
 import compiler.AST.NodeElements.NodeElem;
 import compiler.AST.Types.Type;
-import compiler.instr.REG;
-import compiler.visitors.ASTData;
+import compiler.IR.Operand.REG;
+import compiler.AST.ASTData;
 import compiler.visitors.ASTVisitor;
 
 public class ArrayLiter extends NodeElem implements ASTData {

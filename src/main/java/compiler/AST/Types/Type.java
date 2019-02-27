@@ -1,6 +1,6 @@
 package compiler.AST.Types;
 
-import compiler.visitors.ASTData;
+import compiler.AST.ASTData;
 
 public abstract class Type implements ASTData {
 

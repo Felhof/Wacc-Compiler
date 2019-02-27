@@ -1,7 +1,6 @@
-package compiler.instr;
+package compiler.IR.Operand;
 
 
-import compiler.instr.Operand.Operand;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

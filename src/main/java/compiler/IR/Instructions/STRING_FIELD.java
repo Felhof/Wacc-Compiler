@@ -1,10 +1,10 @@
-package compiler.instr;
+package compiler.IR.Instructions;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class STRING_FIELD extends Instr {
+public class STRING_FIELD implements Instr {
 
   public static List<String> escape = new ArrayList<>(Arrays.asList("\\0",
       "\\b", "\\t", "\\n", "\\f", "\\r", "\\\"", "\\'"));

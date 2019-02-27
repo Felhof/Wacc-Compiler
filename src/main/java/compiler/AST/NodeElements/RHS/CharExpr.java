@@ -1,8 +1,8 @@
 package compiler.AST.NodeElements.RHS;
 
 import compiler.AST.Types.CharType;
-import compiler.instr.REG;
-import compiler.instr.STRING_FIELD;
+import compiler.IR.Operand.REG;
+import compiler.IR.Instructions.STRING_FIELD;
 import compiler.visitors.ASTVisitor;
 
 public class CharExpr extends Expr {

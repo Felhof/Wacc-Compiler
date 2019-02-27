@@ -3,7 +3,7 @@ package compiler.AST.Nodes;
 import compiler.AST.NodeElements.ListExpr;
 import compiler.AST.SymbolTable.SymbolTable;
 import compiler.AST.Types.Type;
-import compiler.instr.REG;
+import compiler.IR.Operand.REG;
 import compiler.visitors.ASTVisitor;
 
 public class FuncNode extends Node {

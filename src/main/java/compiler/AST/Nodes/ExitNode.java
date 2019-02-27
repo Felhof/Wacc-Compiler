@@ -1,7 +1,7 @@
 package compiler.AST.Nodes;
 
 import compiler.AST.NodeElements.RHS.Expr;
-import compiler.instr.REG;
+import compiler.IR.Operand.REG;
 import compiler.visitors.ASTVisitor;
 
 public class ExitNode extends Node {
@@ -23,7 +23,7 @@ public class ExitNode extends Node {
 
   @Override
   public REG accept(ASTVisitor visitor) {
-    return visitor.visitExit(this);
+    return visitor.visitExitNode(this);
   }
 
 }

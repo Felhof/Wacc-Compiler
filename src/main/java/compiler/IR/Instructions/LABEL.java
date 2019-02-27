@@ -1,6 +1,6 @@
-package compiler.instr;
+package compiler.IR.Instructions;
 
-public class LABEL extends Instr {
+public class LABEL implements Instr {
   private String label;
 
   public LABEL(String label) {

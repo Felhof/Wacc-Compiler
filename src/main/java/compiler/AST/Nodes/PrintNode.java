@@ -1,7 +1,7 @@
 package compiler.AST.Nodes;
 
 import compiler.AST.NodeElements.RHS.Expr;
-import compiler.instr.REG;
+import compiler.IR.Operand.REG;
 import compiler.visitors.ASTVisitor;
 
 public class PrintNode extends Node {
@@ -27,6 +27,6 @@ public class PrintNode extends Node {
 
   @Override
   public REG accept(ASTVisitor visitor) {
-    return visitor.visitPrintExpression(this);
+    return visitor.visitPrintNode(this);
   }
 }

@@ -1,9 +1,9 @@
-package compiler.instr;
+package compiler.IR.Instructions;
 
 
-import compiler.instr.LDR.COND;
+import compiler.IR.Instructions.LDR.COND;
 
-public class B extends Instr {
+public class B implements Instr {
 
   private String label;
   private COND cond;

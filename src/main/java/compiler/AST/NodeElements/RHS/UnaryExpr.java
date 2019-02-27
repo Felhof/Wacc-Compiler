@@ -5,7 +5,7 @@ import compiler.AST.Types.CharType;
 import compiler.AST.Types.GenericType;
 import compiler.AST.Types.IntType;
 import compiler.AST.Types.Type;
-import compiler.instr.REG;
+import compiler.IR.Operand.REG;
 import compiler.visitors.ASTVisitor;
 import java.util.HashMap;
 import java.util.Map;

@@ -1,7 +1,7 @@
 package compiler.AST.SymbolTable;
 
 import compiler.AST.Types.Type;
-import compiler.visitors.ASTData;
+import compiler.AST.ASTData;
 
 public class VarInfo implements ASTData {
 

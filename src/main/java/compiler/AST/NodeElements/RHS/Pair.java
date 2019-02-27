@@ -1,8 +1,8 @@
 package compiler.AST.NodeElements.RHS;
 
 import compiler.AST.Types.PairType;
-import compiler.instr.REG;
-import compiler.visitors.ASTData;
+import compiler.IR.Operand.REG;
+import compiler.AST.ASTData;
 import compiler.visitors.ASTVisitor;
 
 public class Pair extends Expr implements ASTData {

@@ -1,9 +1,10 @@
-package compiler.instr;
+package compiler.IR.Instructions;
 
-import compiler.instr.LDR.COND;
-import compiler.instr.Operand.Operand;
+import compiler.IR.Instructions.LDR.COND;
+import compiler.IR.Operand.Operand;
+import compiler.IR.Operand.REG;
 
-public class MOV extends Instr {
+public class MOV implements Instr {
   private REG rd;
   private Operand op2;
   private COND cond = null;

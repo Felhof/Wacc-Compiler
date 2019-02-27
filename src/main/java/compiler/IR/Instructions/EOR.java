@@ -1,8 +1,9 @@
-package compiler.instr;
+package compiler.IR.Instructions;
 
-import compiler.instr.Operand.Operand;
+import compiler.IR.Operand.Operand;
+import compiler.IR.Operand.REG;
 
-public class EOR extends Instr{
+public class EOR implements Instr{
 
   private REG rd;
   private REG rn;

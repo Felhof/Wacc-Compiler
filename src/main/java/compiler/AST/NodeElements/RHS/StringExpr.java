@@ -2,7 +2,7 @@ package compiler.AST.NodeElements.RHS;
 
 import compiler.AST.Types.ArrType;
 import compiler.AST.Types.CharType;
-import compiler.instr.REG;
+import compiler.IR.Operand.REG;
 import compiler.visitors.ASTVisitor;
 
 public class StringExpr extends Expr {

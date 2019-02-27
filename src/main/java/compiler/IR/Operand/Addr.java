@@ -1,6 +1,4 @@
-package compiler.instr.Operand;
-
-import compiler.instr.REG;
+package compiler.IR.Operand;
 
 public class Addr implements Operand {
 

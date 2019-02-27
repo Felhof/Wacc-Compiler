@@ -2,8 +2,8 @@ package compiler.AST.NodeElements;
 
 import compiler.AST.NodeElements.RHS.Expr;
 import compiler.AST.Types.Type;
-import compiler.instr.REG;
-import compiler.visitors.ASTData;
+import compiler.IR.Operand.REG;
+import compiler.AST.ASTData;
 import compiler.visitors.ASTVisitor;
 import java.util.ArrayList;
 import java.util.List;

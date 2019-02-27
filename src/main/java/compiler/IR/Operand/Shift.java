@@ -1,4 +1,4 @@
-package compiler.instr;
+package compiler.IR.Operand;
 
 public class Shift {
   private SHIFT_TYPE type;
@@ -16,6 +16,6 @@ public class Shift {
   }
 
   public static enum SHIFT_TYPE {
-    ASR, LSR, LSL;
+    ASR, LSL, LSR;
   }
 }

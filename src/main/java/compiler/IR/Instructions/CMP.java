@@ -1,8 +1,10 @@
-package compiler.instr;
+package compiler.IR.Instructions;
 
-import compiler.instr.Operand.Operand;
+import compiler.IR.Operand.Operand;
+import compiler.IR.Operand.REG;
+import compiler.IR.Operand.Shift;
 
-public class CMP extends Instr {
+public class CMP implements Instr {
 
   private REG rd;
   private Operand op;

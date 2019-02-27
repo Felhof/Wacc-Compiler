@@ -1,7 +1,7 @@
 package compiler.AST.Nodes;
 
 import compiler.AST.NodeElements.NodeElem;
-import compiler.instr.REG;
+import compiler.IR.Operand.REG;
 import compiler.visitors.ASTVisitor;
 
 public class VarAssignNode extends Node {

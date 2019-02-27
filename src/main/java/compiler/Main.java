@@ -3,7 +3,7 @@ package compiler;
 import antlr.BasicLexer;
 import antlr.BasicParser;
 import compiler.AST.Nodes.AST;
-import compiler.instr.Instr;
+import compiler.IR.Instructions.Instr;
 import compiler.listeners.ErrorListener;
 import compiler.visitors.ASTVisitor;
 import compiler.visitors.SemanticVisitor;

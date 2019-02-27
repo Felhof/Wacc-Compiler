@@ -1,4 +1,4 @@
-package compiler.instr.Operand;
+package compiler.IR.Operand;
 
 public class Imm_INT implements Operand {
   public int value;

@@ -2,7 +2,7 @@ package compiler.AST.NodeElements.RHS;
 
 import compiler.AST.NodeElements.PairElem;
 import compiler.AST.Types.Type;
-import compiler.instr.REG;
+import compiler.IR.Operand.REG;
 import compiler.visitors.ASTVisitor;
 
 public class PairElemRHS extends PairElem {

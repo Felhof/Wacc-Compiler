@@ -1,7 +1,7 @@
 package compiler.AST.NodeElements.RHS;
 
 import compiler.AST.Types.BoolType;
-import compiler.instr.REG;
+import compiler.IR.Operand.REG;
 import compiler.visitors.ASTVisitor;
 
 public class BoolExpr extends Expr {

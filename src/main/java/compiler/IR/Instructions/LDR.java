@@ -1,8 +1,9 @@
-package compiler.instr;
+package compiler.IR.Instructions;
 
-import compiler.instr.Operand.Operand;
+import compiler.IR.Operand.Operand;
+import compiler.IR.Operand.REG;
 
-public class LDR extends Instr {
+public class LDR implements Instr {
 
   private REG rd;
   private Operand op2;
