@@ -84,9 +84,9 @@ import java.util.List;
 
 public class ASTVisitor {
 
-  private static final int WORD_SIZE = 4;
-  private static final int SHIFT_TIMES_4 = 2;
-  private static final int BYTE_SIZE = 1;
+  public static final int WORD_SIZE = 4;
+  public static final int SHIFT_TIMES_4 = 2;
+  public static final int BYTE_SIZE = 1;
 
   private static List<Instr> data;         // list of data fields on top
   private static List<Instr> instructions; // list of ARM instructions
@@ -220,10 +220,6 @@ public class ASTVisitor {
         instructions.add(new EOR(rd, rd, new Imm_INT(1)));
         break;
       case LEN:
-//        int offset =
-//            currentST.getTotalOffset(((Ident) expr.insideExpr()).varName());
-//        instructions.add(new LDR(rd, new Addr(SP, true,
-//            new Imm_INT(offset))));  //load address of array into rd
         instructions.add(new LDR(rd, new Addr(
             rd))); //load first element at this address, which is the size
         break;

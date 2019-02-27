@@ -6,8 +6,8 @@ import static compiler.instr.REG.R0;
 import static compiler.instr.REG.R1;
 import static compiler.instr.REG.R2;
 import static compiler.instr.REG.SP;
+import static compiler.visitors.ASTVisitor.WORD_SIZE;
 import static compiler.visitors.ASTVisitor.addStringField;
-import static compiler.visitors.ASTVisitor.toInt;
 
 import compiler.instr.ADD;
 import compiler.instr.B;
@@ -46,19 +46,16 @@ public class SubRoutines {
     String labelName = "p_print_string";
 
     if (!addedSubroutines.contains(labelName)) {
-      String msg = addStringField("\"%.*s\\0\"");
+      String field = addStringField("\"%.*s\\0\"");
 
+      addStart(labelName);
       subroutines.addAll(Arrays.asList(
-          new LABEL(labelName),
-          new PUSH(LR),
-          new LDR(R1, new Addr(R0), false),
-          new ADD(R2, R0, new Imm_INT(toInt("4")), false),
-          new LDR(R0, new Imm_STRING_MEM(msg), false),
-          new ADD(R0, R0, new Imm_INT(toInt("4")), false),
-          new B("printf", true),
-          new MOV(R0, new Imm_INT(toInt("0"))),
-          new B("fflush", true),
-          new POP(PC)));
+          new LDR(R1, new Addr(R0)),
+          new ADD(R2, R0, new Imm_INT(WORD_SIZE)),
+          new LDR(R0, new Imm_STRING_MEM(field))));
+      addPrint();
+      addEnd();
+
       addedSubroutines.add(labelName);
     }
     return labelName;
@@ -68,18 +65,14 @@ public class SubRoutines {
     String labelName = "p_print_reference";
 
     if (!addedSubroutines.contains(labelName)) {
-      String msg = addStringField("\"%p\\0\"");
+      String field = addStringField("\"%p\\0\"");
 
-      subroutines.addAll(Arrays.asList(
-          new LABEL(labelName),
-          new PUSH(LR),
-          new MOV(R1, R0),
-          new LDR(R0, new Imm_STRING_MEM(msg), false),
-          new ADD(R0, R0, new Imm_INT(toInt("4")), false),
-          new B("printf", true),
-          new MOV(R0, new Imm_INT(toInt("0"))),
-          new B("fflush", true),
-          new POP(PC)));
+      addStart(labelName);
+      subroutines.add(new MOV(R1, R0));
+      subroutines.add(new LDR(R0, new Imm_STRING_MEM(field)));
+      addPrint();
+      addEnd();
+
       addedSubroutines.add(labelName);
     }
     return labelName;
@@ -89,39 +82,13 @@ public class SubRoutines {
     String labelName = "p_print_int";
 
     if (!addedSubroutines.contains(labelName)) {
-      String msg = addStringField("\"%d\\0\"");
+      String field = addStringField("\"%d\\0\"");
 
-      subroutines.addAll(Arrays.asList(
-          new LABEL(labelName),
-          new PUSH(LR),
-          new MOV(R1, R0),
-          new LDR(R0, new Imm_STRING_MEM(msg), false),
-          new ADD(R0, R0, new Imm_INT(4), false),
-          new B("printf", true),
-          new MOV(R0, new Imm_INT(toInt("0"))),
-          new B("fflush", true),
-          new POP(PC)));
-
-      addedSubroutines.add(labelName);
-    }
-    return labelName;
-  }
-
-  public String addPrintln() {
-    String labelName = "p_print_ln";
-
-    if (!addedSubroutines.contains(labelName)) {
-      String msg = addStringField("\"\\0\"");
-
-      subroutines.addAll(Arrays.asList(
-          new LABEL(labelName),
-          new PUSH(LR),
-          new LDR(R0, new Imm_STRING_MEM(msg), false),
-          new ADD(R0, R0, new Imm_INT(toInt("4")), false),
-          new B("puts", true),
-          new MOV(R0, new Imm_INT(toInt("0"))),
-          new B("fflush", true),
-          new POP(PC)));
+      addStart(labelName);
+      subroutines.add(new MOV(R1, R0));
+      subroutines.add(new LDR(R0, new Imm_STRING_MEM(field)));
+      addPrint();
+      addEnd();
 
       addedSubroutines.add(labelName);
     }
@@ -132,43 +99,50 @@ public class SubRoutines {
     String labelName = "p_print_bool";
 
     if (!addedSubroutines.contains(labelName)) {
-      String trueLabel = addStringField("\"true\\0\"");
-      String falseLabel = addStringField("\"false\\0\"");
+      String trueField = addStringField("\"true\\0\"");
+      String falseField = addStringField("\"false\\0\"");
 
+      addStart(labelName);
       subroutines.addAll(Arrays.asList(
-          new LABEL(labelName),
-          new PUSH(LR),
           new CMP(R0, new Imm_INT(0), null),
-          new LDR(R0, new Imm_STRING_MEM(trueLabel), COND.NE),
-          new LDR(R0, new Imm_STRING_MEM(falseLabel), COND.EQ),
-          new ADD(R0, R0, new Imm_INT(4), false),
-          new B("printf", true),
-          new MOV(R0, new Imm_INT(0)),
-          new B("fflush", true),
-          new POP(PC)
-      ));
+          new LDR(R0, new Imm_STRING_MEM(trueField), COND.NE),
+          new LDR(R0, new Imm_STRING_MEM(falseField), COND.EQ)));
+      addPrint();
+      addEnd();
 
       addedSubroutines.add(labelName);
     }
     return labelName;
   }
 
+  public String addPrintln() {
+    String labelName = "p_print_ln";
+
+    if (!addedSubroutines.contains(labelName)) {
+      String field = addStringField("\"\\0\"");
+
+      addStart(labelName);
+      subroutines.addAll(Arrays.asList(
+          new LDR(R0, new Imm_STRING_MEM(field)),
+          new ADD(R0, R0, new Imm_INT(4)),
+          new B("puts", true),
+          new MOV(R0, new Imm_INT(0)),
+          new B("fflush", true)));
+      addEnd();
+
+      addedSubroutines.add(labelName);
+    }
+    return labelName;
+  }
+
+
+
   public String addReadInt() {
     String labelName = "p_read_int";
 
     if (!addedSubroutines.contains(labelName)) {
-      String msg = addStringField("\"%d\\0\"");
-
-      subroutines.addAll(Arrays.asList(
-          new LABEL(labelName),
-          new PUSH(LR),
-          new MOV(R1, R0),
-          new LDR(R0, new Imm_STRING_MEM(msg), false),
-          new ADD(R0, R0, new Imm_INT(4), false),
-          new B("scanf", true),
-          new POP(PC)
-      ));
-
+      String field = addStringField("\"%d\\0\"");
+      addRead(labelName, field);
       addedSubroutines.add(labelName);
     }
     return labelName;
@@ -178,18 +152,8 @@ public class SubRoutines {
     String labelName = "p_read_char";
 
     if (!addedSubroutines.contains(labelName)) {
-      String msg = addStringField("\" %c\\0\"");
-
-      subroutines.addAll(Arrays.asList(
-          new LABEL(labelName),
-          new PUSH(LR),
-          new MOV(R1, R0),
-          new LDR(R0, new Imm_STRING_MEM(msg), false),
-          new ADD(R0, R0, new Imm_INT(4), false),
-          new B("scanf", true),
-          new POP(PC)
-      ));
-
+      String field = addStringField("\" %c\\0\"");
+      addRead(labelName, field);
       addedSubroutines.add(labelName);
     }
     return labelName;
@@ -200,13 +164,13 @@ public class SubRoutines {
 
     if (!addedSubroutines.contains(labelName)) {
       String runtimeErrLabel = addRuntimeErr();
-      String msg = addStringField(
+      String errorMsg = addStringField(
           "\"OverflowError: the result is too small/large to store in a 4-byte signed-integer."
               + "\\n\"");
 
       subroutines.addAll(Arrays.asList(
           new LABEL(labelName),
-          new LDR(R0, new Imm_STRING_MEM(msg), false),
+          new LDR(R0, new Imm_STRING_MEM(errorMsg)),
           new B(runtimeErrLabel, true)));
 
       addedSubroutines.add(labelName);
@@ -215,6 +179,7 @@ public class SubRoutines {
   }
 
   public String addRuntimeErr() {
+    // todo add line number
     String labelName = "p_throw_runtime_error";
 
     if (!addedSubroutines.contains(labelName)) {
@@ -237,17 +202,16 @@ public class SubRoutines {
 
     if (!addedSubroutines.contains(labelName)) {
       String runtimeErrLabel = addRuntimeErr();
-      String msg = addStringField(
+      String errorMsg = addStringField(
           "\"DivideByZeroError: divide or modulo by zero\\n\\0\"");
 
+      addStart(labelName);
       subroutines.addAll(
           Arrays.asList(
-              new LABEL(labelName),
-              new PUSH(LR),
               new CMP(R1, new Imm_INT(0)),
-              new LDR(R0, new Imm_STRING_MEM(msg), COND.EQ),
-              new B(runtimeErrLabel, true, COND.EQ),
-              new POP(PC)));
+              new LDR(R0, new Imm_STRING_MEM(errorMsg), COND.EQ),
+              new B(runtimeErrLabel, true, COND.EQ)));
+      addEnd();
 
       addedSubroutines.add(labelName);
     }
@@ -262,22 +226,21 @@ public class SubRoutines {
       String runtimeErrLabel = addRuntimeErr();
 
       // todo pass ArrayElem to give index out of bounds used
-      String msg0 = addStringField("\"ArrayOutOfBoundError: "
+      String errorMsg0 = addStringField("\"ArrayIndexOutOfBoundError: "
           + "negative index\\n\\0\"");
-      String msg1 = addStringField("\"ArrayIndexOutOfBoundsError: "
+      String errorMsg1 = addStringField("\"ArrayIndexOutOfBoundsError: "
           + "index too large\\n\\0\"");
 
+      addStart(labelName);
       subroutines.addAll(Arrays.asList(
-          new LABEL(labelName),
-          new PUSH(LR),
           new CMP(R0, new Imm_INT(0)),
-          new LDR(R0, new Imm_STRING_MEM(msg0), COND.LT),
+          new LDR(R0, new Imm_STRING_MEM(errorMsg0), COND.LT),
           new B(runtimeErrLabel, true, COND.LT),
-          new LDR(R1, new Addr(R1), false),
+          new LDR(R1, new Addr(R1)),
           new CMP(R0, R1),
-          new LDR(R0, new Imm_STRING_MEM(msg1), COND.CS),
-          new B(runtimeErrLabel, true, COND.CS),
-          new POP(PC)));
+          new LDR(R0, new Imm_STRING_MEM(errorMsg1), COND.CS),
+          new B(runtimeErrLabel, true, COND.CS)));
+      addEnd();
 
       addedSubroutines.add(labelName);
     }
@@ -289,14 +252,17 @@ public class SubRoutines {
 
     if (!addedSubroutines.contains(labelName)) {
       String runtimeErrLabel = addRuntimeErr();
-      String msg = addStringField(
+      String errorMsg = addStringField(
           "\"NullReferenceError: dereference a null reference\\n\\0\"");
 
+      addStart(labelName);
       subroutines
-          .addAll(Arrays.asList(new LABEL(labelName), new PUSH(LR),
+          .addAll(Arrays.asList(
               new CMP(R0, new Imm_INT(0)),
-              new LDR(R0, new Imm_STRING_MEM(msg), COND.EQ),
-              new B(runtimeErrLabel, true, COND.EQ), new POP(PC)));
+              new LDR(R0, new Imm_STRING_MEM(errorMsg), COND.EQ),
+              new B(runtimeErrLabel, true, COND.EQ)));
+      addEnd();
+
       addedSubroutines.add(labelName);
     }
     return labelName;
@@ -306,23 +272,48 @@ public class SubRoutines {
     String labelName = "p_free_pair";
 
     if (!addedSubroutines.contains(labelName)) {
-      String runtimeErrLabel = addRuntimeErr();
-      String msg = addStringField(
-          "\"NullReferenceError: dereference a null reference\\n\\0\"");
+      String nullPointerCheckLabel = addNullPointerCheck();
 
-      subroutines
-          .addAll(Arrays.asList(new LABEL(labelName), new PUSH(LR),
-              new CMP(R0, new Imm_INT(0)),
-              new LDR(R0, new Imm_STRING_MEM(msg), COND.EQ),
-              new B(runtimeErrLabel, true, COND.EQ), new PUSH(R0),
-              new LDR(R0, new Addr(R0), false),
-              new B("free", true), new LDR(R0, new Addr(SP), false),
-              new LDR(R0, new Addr(R0, true, new Imm_INT(4)), false),
-              new B("free", true), new POP(R0), new B("free", true),
-              new POP(PC)));
+      addStart(labelName);
+      subroutines.addAll(Arrays.asList(
+              new B(nullPointerCheckLabel, true),
+              new PUSH(R0),
+              new LDR(R0, new Addr(R0)),
+              new B("free", true), new LDR(R0, new Addr(SP)),
+              new LDR(R0, new Addr(R0, true, new Imm_INT(4))),
+              new B("free", true), new POP(R0), new B("free", true)));
+      addEnd();
+
       addedSubroutines.add(labelName);
     }
     return labelName;
+  }
+
+  private void addStart(String labelName) {
+    subroutines.add(new LABEL(labelName));
+    subroutines.add(new PUSH(LR));
+  }
+
+  private void addEnd() {
+    subroutines.add(new POP(PC));
+  }
+
+  private void addPrint() {
+    subroutines.addAll(Arrays.asList(
+        new ADD(R0, R0, new Imm_INT(4)),
+        new B("printf", true),
+        new MOV(R0, new Imm_INT(0)),
+        new B("fflush", true)));
+  }
+
+  private void addRead(String labelName, String field) {
+    addStart(labelName);
+    subroutines.addAll(Arrays.asList(
+        new MOV(R1, R0),
+        new LDR(R0, new Imm_STRING_MEM(field)),
+        new ADD(R0, R0, new Imm_INT(4)),
+        new B("scanf", true)));
+    addEnd();
   }
   
 }
