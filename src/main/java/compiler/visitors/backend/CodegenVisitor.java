@@ -1,21 +1,11 @@
 package compiler.visitors.backend;
 
-import static compiler.IR.Operand.REG.NBR_ARG_REGS;
-import static compiler.IR.Operand.REG.R0;
-import static compiler.IR.Operand.REG.SP;
-import static compiler.IR.Operand.REG.allUsableRegs;
+import static compiler.IR.Operand.REG.*;
 
 import compiler.AST.SymbolTable.SymbolTable;
 import compiler.AST.Types.Type;
-import compiler.IR.Instructions.ADD;
-import compiler.IR.Instructions.Instr;
-import compiler.IR.Instructions.LDR;
-import compiler.IR.Instructions.MOV;
-import compiler.IR.Instructions.STR;
-import compiler.IR.Operand.Addr;
-import compiler.IR.Operand.Imm_INT;
-import compiler.IR.Operand.Operand;
-import compiler.IR.Operand.REG;
+import compiler.IR.Instructions.*;
+import compiler.IR.Operand.*;
 import compiler.IR.SubRoutines;
 import java.util.List;
 

@@ -20,8 +20,9 @@ import org.antlr.v4.runtime.tree.ParseTree;
 public class Main {
 
   public static void main(String[] args) {
-    //String path = args[0]; // uncomment for labTS test
-    String path = "src/test/examples/valid/function/simple_functions/functionSimple.wacc";
+    String path = args[0]; // uncomment for labTS test
+    //String path = "src/test/examples/valid/function/simple_functions"
+    //    + "/functionSimple.wacc";
     AST ast = compileProg(path);
     generateCode(ast, extractFileName(path));
     System.exit(0);
@@ -72,8 +73,6 @@ public class Main {
   public static void generateCode(AST ast, String filename){
     ASTVisitor codeGenerator = new ASTVisitor();
     List<Instr> instructions = codeGenerator.generate(ast);
-
-    //instructions.forEach(System.out::println); //test
 
     String assemblyFile = filename + ".s";
     try {

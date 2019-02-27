@@ -1,28 +1,11 @@
 package compiler.IR;
 
 import static compiler.AST.Types.Type.WORD_SIZE;
-import static compiler.IR.Operand.REG.LR;
-import static compiler.IR.Operand.REG.PC;
-import static compiler.IR.Operand.REG.R0;
-import static compiler.IR.Operand.REG.R1;
-import static compiler.IR.Operand.REG.R2;
-import static compiler.IR.Operand.REG.SP;
+import static compiler.IR.Operand.REG.*;
 
-import compiler.IR.Instructions.ADD;
-import compiler.IR.Instructions.B;
-import compiler.IR.Instructions.CMP;
-import compiler.IR.Instructions.Instr;
-import compiler.IR.Instructions.LABEL;
-import compiler.IR.Instructions.LDR;
+import compiler.IR.Instructions.*;
 import compiler.IR.Instructions.LDR.COND;
-import compiler.IR.Instructions.MOV;
-import compiler.IR.Operand.Addr;
-import compiler.IR.Operand.Imm_INT;
-import compiler.IR.Operand.Imm_STRING_MEM;
-import compiler.IR.Instructions.POP;
-import compiler.IR.Instructions.PUSH;
-import compiler.IR.Instructions.SECTION;
-import compiler.IR.Instructions.STRING_FIELD;
+import compiler.IR.Operand.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
