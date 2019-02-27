@@ -29,9 +29,4 @@ public class IntExpr extends Expr {
   public void setNegative() {
     value = "-" + value;
   }
-
-  @Override
-  public int sizeOf() {
-    return 4;
-  }
 }

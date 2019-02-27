@@ -23,10 +23,4 @@ public abstract class Ident extends Expr {
   public String varName() {
     return varName;
   }
-
-  @Override
-  public int sizeOf() {
-    //TODO: get type from symbol or augment the map in visitor
-    return (type instanceof CharType || type instanceof BoolType ? 1 : 4);
-  }
 }

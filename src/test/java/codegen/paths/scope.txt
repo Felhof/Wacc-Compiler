@@ -10,3 +10,4 @@ src/test/examples/valid/scope/scopeSimpleRedefine.wacc {true,12}
 
 src/test/examples/valid/scope/printAllTypes.wacc {}
 
+

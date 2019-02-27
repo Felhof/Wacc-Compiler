@@ -8,6 +8,4 @@ public abstract class Expr extends NodeElem {
   public Expr(Type type) {
     super(type);
   }
-
-  public abstract int sizeOf();
 }

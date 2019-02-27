@@ -29,8 +29,8 @@ public class StringExpr extends Expr {
     return visitor.visitStringExpr(this);
   }
 
-  @Override
-  public int sizeOf() {
-    return (value.length() - 2 - STRING_FIELD.nbSpecialChar(value));
-  }
+//  @Override
+//  public int sizeOf() {
+//    return (value.length() - 2 - STRING_FIELD.nbSpecialChar(value));
+//  }
 }

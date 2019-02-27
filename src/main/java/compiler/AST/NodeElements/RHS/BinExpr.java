@@ -76,13 +76,6 @@ public class BinExpr extends Expr {
     return visitor.visitBinaryExp(this);
   }
 
-  @Override
-  public int sizeOf() {
-    //TODO: need to think about this
-    return (operator.returnType() instanceof CharType || operator.returnType instanceof BoolType)
-      ? 1 : 4;
-  }
-
   public enum BINOP {
     MUL("*", typesInt, intType, COND.NE), DIV("/", typesInt, intType),
     MOD("%", typesInt, intType), PLUS("+", typesInt, intType, COND.VS),
