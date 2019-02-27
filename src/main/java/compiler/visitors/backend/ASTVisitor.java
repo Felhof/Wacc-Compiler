@@ -47,6 +47,10 @@ import java.util.List;
 public class ASTVisitor extends CodegenVisitor {
   /* Code generator visitor to visit AST Node */
 
+  private int nextPosInStack;
+  private int totalStackOffset;
+  private int branchNb = 0;
+
   private NodeElemVisitor nodeElemVisitor;
 
   public ASTVisitor() {

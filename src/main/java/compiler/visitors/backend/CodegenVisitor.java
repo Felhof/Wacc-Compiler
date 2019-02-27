@@ -32,11 +32,7 @@ public abstract class CodegenVisitor {
 
   protected static List<REG> availableRegs;
   protected static SymbolTable currentST;
-  protected static int totalStackOffset;
   protected static int scopeStackOffset;
-  protected static int nextPosInStack;
-  protected static int branchNb = 0;
-
 
   /* Util methods for code generator visitors */
 
