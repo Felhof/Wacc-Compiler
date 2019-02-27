@@ -1,8 +1,5 @@
 package compiler.AST.Types;
 
-import compiler.visitors.ASTVisitor;
-import compiler.visitors.CodeGenData;
-
 public class PairType extends Type {
 
   Type fst;
@@ -44,8 +41,4 @@ public class PairType extends Type {
     return snd;
   }
 
-  @Override
-  public CodeGenData accept(ASTVisitor visitor) {
-    return null;
-  }
 }

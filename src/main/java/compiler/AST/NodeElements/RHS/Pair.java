@@ -1,9 +1,9 @@
 package compiler.AST.NodeElements.RHS;
 
 import compiler.AST.Types.PairType;
-import compiler.visitors.ASTData;
+import compiler.IR.Operand.REG;
+import compiler.AST.ASTData;
 import compiler.visitors.ASTVisitor;
-import compiler.visitors.CodeGenData;
 
 public class Pair extends Expr implements ASTData {
 
@@ -33,7 +33,7 @@ public class Pair extends Expr implements ASTData {
   }
 
   @Override
-  public CodeGenData accept(ASTVisitor visitor) {
+  public REG accept(ASTVisitor visitor) {
     return visitor.visitPair(this);
   }
 }

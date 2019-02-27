@@ -2,8 +2,8 @@ package compiler.AST.Nodes;
 
 import compiler.AST.NodeElements.NodeElem;
 import compiler.AST.Types.Type;
+import compiler.IR.Operand.REG;
 import compiler.visitors.ASTVisitor;
-import compiler.visitors.CodeGenData;
 
 public class VarDeclareNode extends Node {
   private Type varType;
@@ -32,7 +32,7 @@ public class VarDeclareNode extends Node {
   }
 
   @Override
-  public CodeGenData accept(ASTVisitor visitor) {
+  public REG accept(ASTVisitor visitor) {
     return visitor.visitVarDeclareNode(this);
   }
 }

@@ -1,8 +1,8 @@
 package compiler.AST.NodeElements.RHS;
 
 import compiler.AST.Types.BoolType;
+import compiler.IR.Operand.REG;
 import compiler.visitors.ASTVisitor;
-import compiler.visitors.CodeGenData;
 
 public class BoolExpr extends Expr {
   private boolean value;
@@ -22,7 +22,7 @@ public class BoolExpr extends Expr {
   }
 
   @Override
-  public CodeGenData accept(ASTVisitor visitor) {
+  public REG accept(ASTVisitor visitor) {
     return visitor.visitBoolExpr(this);
   }
 }

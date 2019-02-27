@@ -1,9 +1,7 @@
 package compiler.AST.SymbolTable;
 
 import compiler.AST.Types.Type;
-import compiler.visitors.ASTData;
-import compiler.visitors.ASTVisitor;
-import compiler.visitors.CodeGenData;
+import compiler.AST.ASTData;
 
 public class VarInfo implements ASTData {
 
@@ -26,10 +24,4 @@ public class VarInfo implements ASTData {
   public void setLocalOffset(Integer stackOffset) {
     this.localOffset = stackOffset;
   }
-
-  @Override
-  public CodeGenData accept(ASTVisitor visitor) {
-    return null;
-  }
-
 }

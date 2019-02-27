@@ -1,7 +1,7 @@
 package compiler.AST.NodeElements;
 
 import compiler.AST.Types.Type;
-import compiler.visitors.ASTData;
+import compiler.AST.ASTData;
 
 public abstract class NodeElem implements ASTData {
   protected Type type;

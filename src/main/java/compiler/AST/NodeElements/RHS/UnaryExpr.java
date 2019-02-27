@@ -5,8 +5,8 @@ import compiler.AST.Types.CharType;
 import compiler.AST.Types.GenericType;
 import compiler.AST.Types.IntType;
 import compiler.AST.Types.Type;
+import compiler.IR.Operand.REG;
 import compiler.visitors.ASTVisitor;
-import compiler.visitors.CodeGenData;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -43,7 +43,7 @@ public class UnaryExpr extends Expr {
   }
 
   @Override
-  public CodeGenData accept(ASTVisitor visitor) {
+  public REG accept(ASTVisitor visitor) {
     return visitor.visitUnaryExpr(this);
   }
 

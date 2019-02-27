@@ -1,0 +1,22 @@
+package compiler.IR.Instructions;
+
+public class SECTION implements Instr {
+
+  private String name;
+  private boolean global = false;
+
+  public SECTION(String name){
+    this.name = name;
+  }
+
+  public SECTION(String name, boolean global) {
+    this(name);
+    this.global = global;
+  }
+
+  @Override
+  public String toString() {
+    return (global ? ".global " : ".") + name;
+  }
+
+}

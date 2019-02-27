@@ -1,7 +1,7 @@
 package compiler.AST.Nodes;
 
+import compiler.IR.Operand.REG;
 import compiler.visitors.ASTVisitor;
-import compiler.visitors.CodeGenData;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,7 +29,7 @@ public class ParentNode extends Node {
   }
 
   @Override
-  public CodeGenData accept(ASTVisitor visitor) {
+  public REG accept(ASTVisitor visitor) {
     return visitor.visitParentNode(this);
   }
 

@@ -2,8 +2,8 @@ package compiler.AST.Nodes;
 
 import compiler.AST.NodeElements.RHS.Expr;
 import compiler.AST.SymbolTable.SymbolTable;
+import compiler.IR.Operand.REG;
 import compiler.visitors.ASTVisitor;
-import compiler.visitors.CodeGenData;
 
 public class IfElseNode extends Node {
   private Expr condition;
@@ -31,7 +31,7 @@ public class IfElseNode extends Node {
   }
 
   @Override
-  public CodeGenData accept(ASTVisitor visitor) {
+  public REG accept(ASTVisitor visitor) {
     return visitor.visitIfElseNode(this);
   }
 

@@ -2,9 +2,9 @@ package compiler.AST.NodeElements.RHS;
 
 import compiler.AST.NodeElements.NodeElem;
 import compiler.AST.Types.Type;
-import compiler.visitors.ASTData;
+import compiler.IR.Operand.REG;
+import compiler.AST.ASTData;
 import compiler.visitors.ASTVisitor;
-import compiler.visitors.CodeGenData;
 
 public class ArrayLiter extends NodeElem implements ASTData {
   private Expr[] elems;
@@ -23,7 +23,7 @@ public class ArrayLiter extends NodeElem implements ASTData {
   }
 
   @Override
-  public CodeGenData accept(ASTVisitor visitor) {
+  public REG accept(ASTVisitor visitor) {
     return visitor.visitArrayLiter(this);
   }
 }

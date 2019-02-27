@@ -1,82 +1,37 @@
 package compiler.visitors;
 
-import static compiler.instr.REG.LR;
-import static compiler.instr.REG.PC;
-import static compiler.instr.REG.R0;
-import static compiler.instr.REG.R1;
-import static compiler.instr.REG.R10;
-import static compiler.instr.REG.SP;
-import static compiler.instr.REG.allUsableRegs;
-import static compiler.instr.Shift.SHIFT_TYPE.ASR;
-import static compiler.instr.Shift.SHIFT_TYPE.LSL;
+import static compiler.IR.Operand.REG.*;
+import static compiler.IR.Operand.Shift.SHIFT_TYPE.*;
 
-import compiler.AST.NodeElements.ArrayElem;
-import compiler.AST.NodeElements.Ident;
-import compiler.AST.NodeElements.LHS.ArrayElemLHS;
-import compiler.AST.NodeElements.LHS.PairElemLHS;
-import compiler.AST.NodeElements.ListExpr;
-import compiler.AST.NodeElements.PairElem;
-import compiler.AST.NodeElements.RHS.ArrayElemRHS;
-import compiler.AST.NodeElements.RHS.ArrayLiter;
-import compiler.AST.NodeElements.RHS.BinExpr;
-import compiler.AST.NodeElements.RHS.BoolExpr;
-import compiler.AST.NodeElements.RHS.CharExpr;
-import compiler.AST.NodeElements.RHS.Expr;
-import compiler.AST.NodeElements.RHS.FuncCall;
-import compiler.AST.NodeElements.RHS.IntExpr;
-import compiler.AST.NodeElements.RHS.Pair;
-import compiler.AST.NodeElements.RHS.PairElemRHS;
-import compiler.AST.NodeElements.RHS.StringExpr;
-import compiler.AST.NodeElements.RHS.UnaryExpr;
+import compiler.AST.ASTData;
+import compiler.AST.NodeElements.*;
+import compiler.AST.NodeElements.LHS.*;
+import compiler.AST.NodeElements.RHS.*;
 import compiler.AST.NodeElements.RHS.UnaryExpr.UNOP;
-import compiler.AST.Nodes.AST;
-import compiler.AST.Nodes.ExitNode;
-import compiler.AST.Nodes.FreeNode;
-import compiler.AST.Nodes.FuncNode;
-import compiler.AST.Nodes.IfElseNode;
-import compiler.AST.Nodes.ParentNode;
-import compiler.AST.Nodes.PrintNode;
-import compiler.AST.Nodes.ReadNode;
-import compiler.AST.Nodes.ReturnNode;
-import compiler.AST.Nodes.ScopeNode;
-import compiler.AST.Nodes.VarAssignNode;
-import compiler.AST.Nodes.VarDeclareNode;
-import compiler.AST.Nodes.WhileNode;
+import compiler.AST.Nodes.*;
 import compiler.AST.SymbolTable.SymbolTable;
-import compiler.AST.Types.ArrType;
-import compiler.AST.Types.BoolType;
-import compiler.AST.Types.CharType;
-import compiler.AST.Types.IntType;
-import compiler.AST.Types.Type;
-import compiler.SubRoutines;
-import compiler.instr.ADD;
-import compiler.instr.AND;
-import compiler.instr.B;
-import compiler.instr.CMP;
-import compiler.instr.EOR;
-import compiler.instr.Instr;
-import compiler.instr.LABEL;
-import compiler.instr.LDR;
-import compiler.instr.LDR.COND;
-import compiler.instr.MOV;
-import compiler.instr.MUL;
-import compiler.instr.ORR;
-import compiler.instr.Operand.Addr;
-import compiler.instr.Operand.Imm_INT;
-import compiler.instr.Operand.Imm_INT_MEM;
-import compiler.instr.Operand.Imm_STRING;
-import compiler.instr.Operand.Imm_STRING_MEM;
-import compiler.instr.Operand.Operand;
-import compiler.instr.Operand.Reg_Shift;
-import compiler.instr.POP;
-import compiler.instr.PUSH;
-import compiler.instr.REG;
-import compiler.instr.RS;
-import compiler.instr.SECTION;
-import compiler.instr.STR;
-import compiler.instr.STRING_FIELD;
-import compiler.instr.SUB;
-import compiler.instr.Shift;
+import compiler.AST.Types.*;
+import compiler.IR.Instructions.B;
+import compiler.IR.Instructions.CMP;
+import compiler.IR.Instructions.EOR;
+import compiler.IR.Instructions.Instr;
+import compiler.IR.Instructions.LABEL;
+import compiler.IR.Instructions.LDR;
+import compiler.IR.Instructions.MOV;
+import compiler.IR.Instructions.MUL;
+import compiler.IR.Instructions.ORR;
+import compiler.IR.Instructions.POP;
+import compiler.IR.Instructions.PUSH;
+import compiler.IR.Operand.REG;
+import compiler.IR.Instructions.RS;
+import compiler.IR.Instructions.SECTION;
+import compiler.IR.Instructions.STR;
+import compiler.IR.Instructions.SUB;
+import compiler.IR.SubRoutines;
+import compiler.IR.Instructions.ADD;
+import compiler.IR.Instructions.AND;
+import compiler.IR.Instructions.LDR.COND;
+import compiler.IR.Operand.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -88,11 +43,11 @@ public class ASTVisitor {
   public static final int SHIFT_TIMES_4 = 2;
   public static final int BYTE_SIZE = 1;
 
-  private static List<Instr> data;         // list of data fields on top
-  private static List<Instr> instructions; // list of ARM instructions
-  private SubRoutines subroutines;         // list of common labels at the end
+  private List<Instr> instructions; // list of ARM instructions
+  // handles adding subroutines and its data fields
+  private SubRoutines subroutines;
 
-  private static List<REG> availableRegs;
+  private List<REG> availableRegs;
   private SymbolTable currentST;
   private int totalStackOffset;
   private int scopeStackOffset;
@@ -100,31 +55,32 @@ public class ASTVisitor {
   private int branchNb = 0;
 
   public ASTVisitor() {
-    data = new ArrayList<>();
     instructions = new ArrayList<>();
     subroutines = new SubRoutines();
     availableRegs = new ArrayList<>(allUsableRegs);
-  }
-
-  public static int toInt(String s) {
-    return Integer.parseInt(s);
-  }
-
-  public static String addStringField(String string) {
-    String labelName = "msg_" + (data.size() / 2);
-    data.add(new LABEL(labelName));
-    data.add(new STRING_FIELD(string));
-    return labelName;
   }
 
   public List<Instr> generate(AST root) {
     constructStartProgram();
     visitFuncsAndChildren(root);
     constructEndProgram();
-    instructions.addAll(0, data); // add at all data fields at the beginning
+    // add all data fields at the beginning
+    instructions.addAll(0, subroutines.getDataFields());
     // add at all subroutines at the end
     instructions.addAll(subroutines.getInstructions());
     return instructions;
+  }
+
+  private void constructStartProgram() {
+    instructions.add(new SECTION("text"));
+    instructions.add(new SECTION("main", true));
+  }
+
+  private void constructEndProgram() {
+    configureStack("add");
+    loadArg(new Imm_INT_MEM(0), false);
+    instructions.add(new POP(PC));
+    instructions.add(new SECTION("ltorg"));
   }
 
   private void visitFuncsAndChildren(AST root) {
@@ -146,11 +102,6 @@ public class ASTVisitor {
         .forEach(
             this::visit);
 
-  }
-
-  public CodeGenData visitParentNode(ParentNode node) {
-    node.children().forEach(this::visit);
-    return null;
   }
 
   private void configureStack(String type) {
@@ -177,31 +128,172 @@ public class ASTVisitor {
     }
   }
 
-  private void constructStartProgram() {
-    data.add(new SECTION("data"));
-    instructions.add(new SECTION("text"));
-    instructions.add(new SECTION("main", true));
-  }
-
-  private void constructEndProgram() {
-    configureStack("add");
-    loadArg(new Imm_INT_MEM(toInt("0")), false);
-    instructions.add(new POP(PC));
-    instructions.add(new SECTION("ltorg"));
-  }
-
-  private CodeGenData visit(ASTData data) {
+  private REG visit(ASTData data) {
     return data.accept(this);
   }
 
-  public void visitExit(ExitNode exitNode) {
-    REG rd = (REG) visit(exitNode.exitStatus());
+  public REG visitParentNode(ParentNode node) {
+    node.children().forEach(this::visit);
+    return null;
+  }
+
+  public REG visitVarDeclareNode(VarDeclareNode varDeclareNode) {
+    REG rd = visit(varDeclareNode.rhs());
+    nextPosInStack -=
+        isByteSize(varDeclareNode.varType()) ? BYTE_SIZE : WORD_SIZE;
+
+    // store variable in the stack and save offset in symbol table
+    currentST.lookUpAllVar(varDeclareNode.varName())
+        .setLocalOffset(nextPosInStack);
+    saveVarData(varDeclareNode.varType(), rd, SP, nextPosInStack, false);
+
+    freeReg(rd);
+    return null;
+  }
+
+  public REG visitAssignNode(VarAssignNode varAssignNode) {
+    REG rd = visit(varAssignNode.rhs());
+    REG rn = visit(varAssignNode.lhs());
+
+    saveVarData(varAssignNode.lhs().type(), rd, rn, 0, false);
+
+    freeReg(rd);
+    freeReg(rn);
+
+    return null;
+  }
+
+  public REG visitExitNode(ExitNode exitNode) {
+    REG rd = visit(exitNode.exitStatus());
     instructions.add(new MOV(R0, rd));
     instructions.add(new B("exit", true));
     freeReg(rd);
+    return null;
   }
 
-  public CodeGenData visitUnaryExpr(UnaryExpr expr) {
+  public REG visitPrintNode(PrintNode printNode) {
+    REG rd = visit(printNode.expr());
+
+    // mov result into arg register
+    moveArg(rd);
+    String printLabel;
+
+    if (printNode.expr().type().equals(CharType.getInstance())) {
+      instructions.add(new B("putchar", true));
+    } else if (printNode.expr().type().equals(IntType.getInstance())) {
+      printLabel = subroutines.addPrintInt();
+      instructions.add(new B(printLabel, true));
+    } else if (printNode.expr().type().equals(BoolType.getInstance())) {
+      printLabel = subroutines.addPrintBool();
+      instructions.add(new B(printLabel, true));
+    } else if (printNode.expr().type().equals(ArrType.stringType())) {
+      printLabel = subroutines.addPrintString();
+      instructions.add(new B(printLabel, true));
+    } else {
+      printLabel = subroutines.addPrintReference();
+      instructions.add(new B(printLabel, true));
+    }
+
+    if (printNode.newLine()) {
+      printLabel = subroutines.addPrintln();
+      instructions.add(new B(printLabel, true));
+    }
+
+    freeReg(rd);
+    return null;
+  }
+
+  public REG visitReadNode(ReadNode readNode) {
+    REG rd = visit(readNode.lhs());
+    String readLabel;
+
+    moveArg(rd);
+    if ((readNode.lhs()).type().equals(IntType.getInstance())) {
+      readLabel = subroutines.addReadInt();
+      instructions.add(new B(readLabel, true));
+    } else if ((readNode.lhs()).type().equals(CharType.getInstance())) {
+      readLabel = subroutines.addReadChar();
+      instructions.add(new B(readLabel, true));
+    }
+
+    freeReg(rd);
+    return null;
+  }
+
+  public REG visitFuncNode(FuncNode funcNode) {
+    enterScope(funcNode.symbolTable());
+    instructions.add(new LABEL("f_" + funcNode.name()));
+    instructions.add(new PUSH(LR));
+    configureStack("sub");
+    if (!funcNode.paramList().exprList().isEmpty()) {
+      visit(funcNode.paramList());
+    }
+    visit(funcNode.getParentNode());
+    instructions.add(new POP(PC));
+    instructions.add(new SECTION("ltorg"));
+    exitScope(currentST.getEncSymTable());
+    return null;
+  }
+
+  public REG visitFreeNode(FreeNode freeNode) {
+    REG rd = visit(freeNode.freeExpr());
+    instructions.add(new MOV(R0, rd));
+    String freePairLabel = subroutines.addFreePairCheck();
+    instructions.add(new B(freePairLabel, true));
+    freeReg(rd);
+    return null;
+  }
+
+  public REG visitIfElseNode(IfElseNode ifElseNode) {
+    REG rd = visit(ifElseNode.cond());
+    instructions.add(new CMP(rd, new Imm_INT(0)));
+    instructions.add(new B("L" + branchNb, COND.EQ));
+    freeReg(rd);
+    int scopeBranchNb = branchNb;
+    branchNb += 2;
+
+    visitChildStats(ifElseNode.thenST(), ifElseNode.thenStat());
+    instructions.add(new B("L" + (scopeBranchNb + 1)));
+    instructions.add(new LABEL("L" + (scopeBranchNb)));
+    visitChildStats(ifElseNode.elseST(), ifElseNode.elseStat());
+    instructions.add(new LABEL("L" + (scopeBranchNb + 1)));
+    return null;
+  }
+
+  public REG visitWhileNode(WhileNode whileNode) {
+    instructions.add(new B("L" + branchNb));
+
+    int condBranchNb = branchNb;
+    branchNb += 2;
+    // Add label for do statement
+    instructions.add(new LABEL("L" + (condBranchNb + 1)));
+
+    visitChildStats(whileNode.statST(), whileNode.parentNode());
+
+    // Add label for condition
+    instructions.add(new LABEL("L" + condBranchNb));
+    REG rd = visit(whileNode.condition());
+    instructions.add(new CMP(rd, new Imm_INT(1)));
+    instructions.add(new B("L" + (condBranchNb + 1), COND.EQ));
+    freeReg(rd);
+    return null;
+  }
+
+  public REG visitReturnNode(ReturnNode returnNode) {
+    REG rd = visit(returnNode.expr());
+    instructions.add(new MOV(R0, rd));
+    instructions.add(new ADD(SP, SP, new Imm_INT(totalStackOffset)));
+    instructions.add(new POP(PC));
+    freeReg(rd);
+    return null;
+  }
+
+  public REG visitNewScope(ScopeNode scopeNode) {
+    visitChildStats(scopeNode.symbolTable(), scopeNode.parentNode());
+    return null;
+  }
+
+  public REG visitUnaryExpr(UnaryExpr expr) {
 
     if ((expr.insideExpr() instanceof IntExpr) // Set int value to negative
         && expr.operator() == UNOP.MINUS) {
@@ -209,7 +301,7 @@ public class ASTVisitor {
       return visit(expr.insideExpr());
     }
 
-    REG rd = (REG) visit(expr.insideExpr());
+    REG rd = visit(expr.insideExpr());
     switch (expr.operator()) {
       case MINUS:
         String overflowErrLabel = subroutines.addOverflowErr();
@@ -229,24 +321,24 @@ public class ASTVisitor {
     return rd;
   }
 
-  public CodeGenData visitIntExpr(IntExpr expr) {
+  public REG visitIntExpr(IntExpr expr) {
     REG rd = useAvailableReg();
-    instructions.add(new LDR(rd, new Imm_INT_MEM(toInt(expr.value())), false));
+    instructions.add(new LDR(rd, new Imm_INT_MEM(Integer.parseInt(expr.value())), false));
     return rd;
   }
 
-  public CodeGenData visitBinaryExp(BinExpr binExpr) {
-    REG rd = (REG) visit(binExpr.lhs());
+  public REG visitBinaryExp(BinExpr binExpr) {
+    REG rd = visit(binExpr.lhs());
 
     REG rn;
     if (rd == R10) { // push rn to avoid running out of registers
       instructions.add(new PUSH(rd));
       freeReg(rd);
-      rn = (REG) visit(binExpr.rhs());
+      rn = visit(binExpr.rhs());
       rd = useAvailableReg();
       instructions.add(new POP(rd));
     } else {
-      rn = (REG) visit(binExpr.rhs());
+      rn = visit(binExpr.rhs());
     }
 
     BinExpr.BINOP operator = binExpr.operator();
@@ -299,8 +391,10 @@ public class ASTVisitor {
       case LT:
       case NOTEQUAL:
         instructions.addAll(Arrays
-            .asList(new CMP(rd, rn, null), new MOV(rd, new Imm_INT(1), operator.cond()),
-                new MOV(rd, new Imm_INT(0), BinExpr.BINOP.opposites().get(operator).cond())));
+            .asList(new CMP(rd, rn, null),
+                new MOV(rd, new Imm_INT(1), operator.cond()),
+                new MOV(rd, new Imm_INT(0),
+                    BinExpr.BINOP.opposites().get(operator).cond())));
         break;
 
     }
@@ -308,63 +402,14 @@ public class ASTVisitor {
     return rd;
   }
 
-  public CodeGenData visitPrintExpression(PrintNode printNode) {
-    REG rd = (REG) visit(printNode.expr());
-
-    // mov result into arg register
-    moveArg(rd);
-    String printLabel;
-
-    if (printNode.expr().type().equals(CharType.getInstance())) {
-      instructions.add(new B("putchar", true));
-    } else if (printNode.expr().type().equals(IntType.getInstance())) {
-      printLabel = subroutines.addPrintInt();
-      instructions.add(new B(printLabel, true));
-    } else if (printNode.expr().type().equals(BoolType.getInstance())) {
-      printLabel = subroutines.addPrintBool();
-      instructions.add(new B(printLabel, true));
-    } else if (printNode.expr().type().equals(ArrType.stringType())) {
-      printLabel = subroutines.addPrintString();
-      instructions.add(new B(printLabel, true));
-    } else {
-      printLabel = subroutines.addPrintReference();
-      instructions.add(new B(printLabel, true));
-    }
-
-    if (printNode.newLine()) {
-      printLabel = subroutines.addPrintln();
-      instructions.add(new B(printLabel, true));
-    }
-
-    freeReg(rd);
-    return null;
-  }
-
-  public CodeGenData visitReadExpr(ReadNode readNode) {
-    REG rd = (REG) visit(readNode.lhs());
-    String readLabel;
-
-    moveArg(rd);
-    if ((readNode.lhs()).type().equals(IntType.getInstance())) {
-      readLabel = subroutines.addReadInt();
-      instructions.add(new B(readLabel, true));
-    } else if ((readNode.lhs()).type().equals(CharType.getInstance())) {
-      readLabel = subroutines.addReadChar();
-      instructions.add(new B(readLabel, true));
-    }
-
-    freeReg(rd);
-    return null;
-  }
-
-  public CodeGenData visitStringExpr(StringExpr stringExpr) {
-    String labelName = addStringField(stringExpr.getValue());
+  public REG visitStringExpr(StringExpr stringExpr) {
+    String field = subroutines.addStringField(stringExpr.getValue());
     REG rd = useAvailableReg();
-    instructions.add(new LDR(rd, new Imm_STRING_MEM(labelName), false));
+    instructions.add(new LDR(rd, new Imm_STRING_MEM(field), false));
     return rd;
   }
 
-  public CodeGenData visitCharExpr(CharExpr charExpr) {
+  public REG visitCharExpr(CharExpr charExpr) {
     REG rd = useAvailableReg();
     instructions
         .add(new MOV(rd, !(charExpr.isEscapeChar()) ? new Imm_STRING(
@@ -373,39 +418,13 @@ public class ASTVisitor {
     return rd;
   }
 
-  public CodeGenData visitBoolExpr(BoolExpr boolExpr) {
+  public REG visitBoolExpr(BoolExpr boolExpr) {
     REG rd = useAvailableReg();
     instructions.add(new MOV(rd, new Imm_INT(boolExpr.value() ? 1 : 0)));
     return rd;
   }
 
-  public CodeGenData visitVarDeclareNode(VarDeclareNode varDeclareNode) {
-    REG rd = (REG) visit(varDeclareNode.rhs());
-    nextPosInStack -=
-        isByteSize(varDeclareNode.varType()) ? BYTE_SIZE : WORD_SIZE;
-
-    // store variable in the stack and save offset in symbol table
-    currentST.lookUpAllVar(varDeclareNode.varName())
-        .setLocalOffset(nextPosInStack);
-    saveVarData(varDeclareNode.varType(), rd, SP, nextPosInStack, false);
-
-    freeReg(rd);
-    return null;
-  }
-
-  public CodeGenData visitAssignNode(VarAssignNode varAssignNode) {
-    REG rd = (REG) visit(varAssignNode.rhs());
-    REG rn = (REG) visit(varAssignNode.lhs());
-
-    saveVarData(varAssignNode.lhs().type(), rd, rn, 0, false);
-
-    freeReg(rd);
-    freeReg(rn);
-
-    return null;
-  }
-
-  public CodeGenData visitArrayLiter(ArrayLiter arrayLiter) {
+  public REG visitArrayLiter(ArrayLiter arrayLiter) {
     REG arrAddress = useAvailableReg();
     Expr[] array = arrayLiter.elems();
     int elemSize = 0;
@@ -435,51 +454,39 @@ public class ASTVisitor {
     return arrAddress;
   }
 
-  private CodeGenData saveVarData(Type varType, REG rd, REG rn, int offset,
+  private REG saveVarData(Type varType, REG rd, REG rn, int offset,
       boolean update) {
-    instructions
-        .add(new STR(rd, new Addr(rn, true, new Imm_INT(offset)),
+    instructions.add(
+        new STR(rd, new Addr(rn, true, new Imm_INT(offset)),
             isByteSize(varType),
             update));
     return null;
   }
 
   private void storeArrayElem(Expr expr, REG objectAddr, int offset) {
-    REG rd = (REG) visit(expr);
+    REG rd = visit(expr);
     saveVarData(expr.type(), rd, objectAddr, offset, false);
     freeReg(rd);
   }
 
-  public CodeGenData visitArrayAssign(VarAssignNode varAssignNode) {
-    REG rd = (REG) visit(varAssignNode.rhs());  // get new value
-    REG rn = (REG) visit(varAssignNode.lhs());  // get array elem address
-
-    instructions.add(new STR(rd, new Addr(rn),
-        isByteSize(varAssignNode.rhs().type())));
-
-    freeReg(rn);
-    freeReg(rd);
-    return null;
-  }
-
-  public CodeGenData visitArrayElemLHS(ArrayElemLHS arrayElemLHS) {
+  public REG visitArrayElemLHS(ArrayElemLHS arrayElemLHS) {
     return visitArrayElem(arrayElemLHS);
   }
 
-  public CodeGenData visitArrayElemRHS(ArrayElemRHS arrayElemRHS) {
-    REG rd = (REG) visitArrayElem(arrayElemRHS);
-    instructions.add(new LDR(rd, new Addr(rd), isByteSize(arrayElemRHS.type()))); // load value of array elem
+  public REG visitArrayElemRHS(ArrayElemRHS arrayElemRHS) {
+    REG rd = visitArrayElem(arrayElemRHS);
+    instructions.add(new LDR(rd, new Addr(rd),
+        isByteSize(arrayElemRHS.type()))); // load value of array elem
     return rd;
   }
 
-
   // returns address of array elem
-  public CodeGenData visitArrayElem(ArrayElem arrayElem) {
+  public REG visitArrayElem(ArrayElem arrayElem) {
     REG arrAddress = loadFromStack(arrayElem.varName());
     REG index;
 
     for (Expr indexExpr : arrayElem.indexes()) {
-      index = (REG) visit(indexExpr); // simple array case
+      index = visit(indexExpr); // simple array case
       instructions.add(new LDR(arrAddress, new Addr(arrAddress)));
       setArgs(new REG[]{index, arrAddress});
       String checkArrayBoundsLabel = subroutines.addCheckArrayBounds();
@@ -498,19 +505,19 @@ public class ASTVisitor {
     return arrAddress;
   }
 
-  public CodeGenData visitPairElemLHS(PairElemLHS pairElemLHS) {
+  public REG visitPairElemLHS(PairElemLHS pairElemLHS) {
     return visitPairElem(pairElemLHS);
   }
 
-  public CodeGenData visitPairElemRHS(PairElemRHS pairElemRHS) {
-    REG rd = (REG) visitPairElem(pairElemRHS);
+  public REG visitPairElemRHS(PairElemRHS pairElemRHS) {
+    REG rd = visitPairElem(pairElemRHS);
     instructions.add(new LDR(rd, new Addr(rd), isByteSize(pairElemRHS.type())));
     return rd; // returns value of pair element
   }
 
   // returns address of pair element
-  public CodeGenData visitPairElem(PairElem pairElem) {
-    REG rd = (REG) visit(pairElem.expr());
+  public REG visitPairElem(PairElem pairElem) {
+    REG rd = visit(pairElem.expr());
     moveArg(rd);
     String nullPointerLabel = subroutines.addNullPointerCheck();
     instructions.add(new B(nullPointerLabel, true));
@@ -520,7 +527,7 @@ public class ASTVisitor {
     return rd;
   }
 
-  public CodeGenData visitPair(Pair pair) {
+  public REG visitPair(Pair pair) {
     loadArg(new Imm_INT_MEM(2 * WORD_SIZE), false);
     instructions.add(new B("malloc", true));
     REG rd = useAvailableReg();
@@ -530,20 +537,35 @@ public class ASTVisitor {
     return rd;
   }
 
-  public CodeGenData visitNullPair() {
+  public REG visitNullPair() {
     REG rd = useAvailableReg();
     instructions.add(new LDR(rd, new Imm_INT_MEM(0), false));
     return rd;
   }
 
   private void storeExpInHeap(Expr expr, REG objectAddr, int offset) {
-    REG rd = (REG) visit(expr);
+    REG rd = visit(expr);
     loadArg(new Imm_INT_MEM(isByteSize(expr.type()) ? 1 : 4), false);
     instructions.add(new B("malloc", true));
     saveVarData(expr.type(), rd, R0, 0, false);
     instructions
         .add(new STR(R0, new Addr(objectAddr, true, new Imm_INT(offset))));
     freeReg(rd);
+  }
+
+  public REG visitIdentLHS(Ident ident) {
+    REG rd = useAvailableReg();
+    int offset = currentST.getTotalOffset(ident.varName());
+    instructions.add(new ADD(rd, SP, new Imm_INT(offset)));
+    return rd;
+  }
+
+  public REG visitIdentRHS(Ident ident) {
+    REG rd = useAvailableReg();
+    int offset = currentST.getTotalOffset(ident.varName());
+    instructions.add(new LDR(rd, new Addr(SP, true, new Imm_INT(offset)),
+        isByteSize(ident.type())));
+    return rd;
   }
 
   private void loadArg(Operand op2, boolean isByteSize) {
@@ -553,7 +575,6 @@ public class ASTVisitor {
   private void moveArg(Operand op2) {
     instructions.add(new MOV(R0, op2));
   }
-
 
   private void setArgs(Operand[] ops) {
     for (int i = 0; i < ops.length && i < 4; i++) {
@@ -571,21 +592,6 @@ public class ASTVisitor {
     }
   }
 
-  public CodeGenData visitIdentLHS(Ident ident) {
-    REG rd = useAvailableReg();
-    int offset = currentST.getTotalOffset(ident.varName());
-    instructions.add(new ADD(rd, SP, new Imm_INT(offset)));
-    return rd;
-  }
-
-  public CodeGenData visitIdentRHS(Ident ident) {
-    REG rd = useAvailableReg();
-    int offset = currentST.getTotalOffset(ident.varName());
-    instructions.add(new LDR(rd, new Addr(SP, true, new Imm_INT(offset)),
-        isByteSize(ident.type())));
-    return rd;
-  }
-
   private REG loadFromStack(String varName) {
     REG rd = useAvailableReg();
     int offset = currentST.getTotalOffset(varName);
@@ -593,31 +599,7 @@ public class ASTVisitor {
     return rd;
   }
 
-  public CodeGenData visitFuncNode(FuncNode funcNode) {
-    enterScope(funcNode.symbolTable());
-    instructions.add(new LABEL("f_" + funcNode.name()));
-    instructions.add(new PUSH(LR));
-    configureStack("sub");
-    if (!funcNode.paramList().exprList().isEmpty()) {
-      visit(funcNode.paramList());
-    }
-    visit(funcNode.getParentNode());
-    instructions.add(new POP(PC));
-    instructions.add(new SECTION("ltorg"));
-    exitScope(currentST.getEncSymTable());
-    return null;
-  }
-
-  public CodeGenData visitReturn(ReturnNode returnNode) {
-    REG rd = (REG) visit(returnNode.expr());
-    instructions.add(new MOV(R0, rd));
-    instructions.add(new ADD(SP, SP, new Imm_INT(totalStackOffset)));
-    instructions.add(new POP(PC));
-    freeReg(rd);
-    return null;
-  }
-
-  public CodeGenData visitFuncCall(FuncCall funcCall) {
+  public REG visitFuncCall(FuncCall funcCall) {
     visit(funcCall.argsList());
     instructions.add(new B("f_" + funcCall.funcName(), true));
     instructions.add(
@@ -628,7 +610,7 @@ public class ASTVisitor {
     return rd;
   }
 
-  public CodeGenData visitParams(ListExpr listExpr) {
+  public REG visitParams(ListExpr listExpr) {
     List<String> paramNames = listExpr.paramNames();
     List<Expr> exprList = listExpr.exprList();
     // LR has been pushed and we have some space for the variable declaration
@@ -641,11 +623,11 @@ public class ASTVisitor {
     return null;
   }
 
-  public CodeGenData visitArgs(ListExpr listExpr) {
+  public REG visitArgs(ListExpr listExpr) {
     List<Expr> reverseArgs = new ArrayList<>(listExpr.exprList());
     Collections.reverse(reverseArgs);
     for (Expr e : reverseArgs) {
-      REG rd = (REG) visit(e);
+      REG rd = visit(e);
       int offsetFromBase =
           (!(e.type() instanceof CharType) && !(e.type() instanceof BoolType))
               ? -WORD_SIZE : -BYTE_SIZE;
@@ -654,55 +636,6 @@ public class ASTVisitor {
           true);
       freeReg(rd);
     }
-    return null;
-  }
-
-  public CodeGenData visitFreeNode(FreeNode freeNode) {
-    REG rd = (REG) visit(freeNode.freeExpr());
-    instructions.add(new MOV(R0, rd));
-    String freePairLabel = subroutines.addFreePairCheck();
-    instructions.add(new B(freePairLabel, true));
-    freeReg(rd);
-    return null;
-  }
-
-  public CodeGenData visitIfElseNode(IfElseNode ifElseNode) {
-    REG rd = (REG) visit(ifElseNode.cond());
-    instructions.add(new CMP(rd, new Imm_INT(0)));
-    instructions.add(new B("L" + branchNb, COND.EQ));
-    freeReg(rd);
-    int scopeBranchNb = branchNb;
-    branchNb += 2;
-
-    visitChildStats(ifElseNode.thenST(), ifElseNode.thenStat());
-    instructions.add(new B("L" + (scopeBranchNb + 1)));
-    instructions.add(new LABEL("L" + (scopeBranchNb)));
-    visitChildStats(ifElseNode.elseST(), ifElseNode.elseStat());
-    instructions.add(new LABEL("L" + (scopeBranchNb + 1)));
-    return null;
-  }
-
-  public CodeGenData visitWhileNode(WhileNode whileNode) {
-    instructions.add(new B("L" + branchNb));
-
-    int condBranchNb = branchNb;
-    branchNb += 2;
-    // Add label for do statement
-    instructions.add(new LABEL("L" + (condBranchNb + 1)));
-
-    visitChildStats(whileNode.statST(), whileNode.parentNode());
-
-    // Add label for condition
-    instructions.add(new LABEL("L" + condBranchNb));
-    REG rd = (REG) visit(whileNode.condition());
-    instructions.add(new CMP(rd, new Imm_INT(1)));
-    instructions.add(new B("L" + (condBranchNb + 1), COND.EQ));
-    freeReg(rd);
-    return null;
-  }
-
-  public CodeGenData visitNewScope(ScopeNode scopeNode) {
-    visitChildStats(scopeNode.symbolTable(), scopeNode.parentNode());
     return null;
   }
 
@@ -742,4 +675,5 @@ public class ASTVisitor {
     return type.equals(CharType.getInstance())
         || type.equals(BoolType.getInstance());
   }
+
 }
