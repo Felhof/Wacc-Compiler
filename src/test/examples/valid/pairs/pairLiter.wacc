@@ -1,0 +1,3 @@
+begin
+  pair(int,int) p = null
+end

@@ -183,7 +183,7 @@ public class ASTVisitor {
 
   private void constructEndProgram() {
     configureStack("add");
-    setArg(new Imm_INT_MEM(toInt("0")), false);
+    loadArg(new Imm_INT_MEM(toInt("0")), false);
     instructions.add(new POP(PC));
     instructions.add(new SECTION("ltorg"));
   }
@@ -226,10 +226,10 @@ public class ASTVisitor {
         instructions.add(new EOR(rd, rd, new Imm_INT(1)));
         break;
       case LEN:
-        int offset =
-            currentST.getTotalOffset(((Ident) expr.insideExpr()).varName());
-        instructions.add(new LDR(rd, new Addr(SP, true,
-            new Imm_INT(offset))));  //load address of array into rd
+//        int offset =
+//            currentST.getTotalOffset(((Ident) expr.insideExpr()).varName());
+//        instructions.add(new LDR(rd, new Addr(SP, true,
+//            new Imm_INT(offset))));  //load address of array into rd
         instructions.add(new LDR(rd, new Addr(
             rd))); //load first element at this address, which is the size
         break;
@@ -332,7 +332,7 @@ public class ASTVisitor {
     REG rd = (REG) visit(printNode.expr());
 
     // mov result into arg register
-    setArg(rd, true);
+    moveArg(rd);
 
     if (printNode.expr().type().equals(CharType.getInstance())) {
       instructions.add(new B("putchar", true));
@@ -361,7 +361,7 @@ public class ASTVisitor {
   public CodeGenData visitReadExpr(ReadNode readNode) {
     REG rd = (REG) visit(readNode.lhs());
 
-    setArg(rd, true);
+    moveArg(rd);
     if ((readNode.lhs()).type().equals(IntType.getInstance())) {
       instructions.add(new B("p_read_int", true));
       specialLabels.add("p_read_int");
@@ -435,7 +435,7 @@ public class ASTVisitor {
     }
 
     // malloc the number of elements plus one for to hold the size
-    setArg(new Imm_INT_MEM(size * elemSize + WORD_SIZE), false);
+    loadArg(new Imm_INT_MEM(size * elemSize + WORD_SIZE), false);
     instructions.add(new B("malloc", true));
     instructions.add(new MOV(arrAddress, R0));
 
@@ -534,7 +534,7 @@ public class ASTVisitor {
         "p_throw_runtime_error",
         "p_print_string"));
     REG rd = (REG) visit(pairElem.expr());
-    setArg(rd, true);
+    moveArg(rd);
     instructions.add(new B("p_check_null_pointer", true));
     instructions.add(new LDR(rd,
         new Addr(rd, true, new Imm_INT(pairElem.posInPair() * WORD_SIZE)),
@@ -543,7 +543,7 @@ public class ASTVisitor {
   }
 
   public CodeGenData visitPair(Pair pair) {
-    setArg(new Imm_INT_MEM(2 * WORD_SIZE), false);
+    loadArg(new Imm_INT_MEM(2 * WORD_SIZE), false);
     instructions.add(new B("malloc", true));
     REG rd = useAvailableReg();
     instructions.add(new MOV(rd, R0)); // fetch address of pair
@@ -560,7 +560,7 @@ public class ASTVisitor {
 
   private void storeExpInHeap(Expr expr, REG objectAddr, int offset) {
     REG rd = (REG) visit(expr);
-    setArg(new Imm_INT_MEM(expr.sizeOf()), false);
+    loadArg(new Imm_INT_MEM(expr.sizeOf()), false);
     instructions.add(new B("malloc", true));
     saveVarData(expr.type(), rd, R0, 0, false);
     instructions
@@ -568,13 +568,22 @@ public class ASTVisitor {
     freeReg(rd);
   }
 
-  private void setArg(Operand op2, boolean isAddress) {
-    if (isAddress) {
-      instructions.add(new MOV(R0, op2));
-    } else {
-      instructions.add(new LDR(R0, op2, false));
-    }
+//  private void setArg(Operand op2, boolean isAddress) {
+//    if (isAddress) {
+//      instructions.add(new MOV(R0, op2));
+//    } else {
+//      instructions.add(new LDR(R0, op2, false));
+//    }
+//  }
+
+  private void loadArg(Operand op2, boolean isByteSize) {
+    instructions.add(new LDR(R0, op2, isByteSize));
   }
+
+  private void moveArg(Operand op2) {
+    instructions.add(new MOV(R0, op2));
+  }
+
 
   private void setArgs(Operand[] ops) {
     for (int i = 0; i < ops.length && i < 4; i++) {
