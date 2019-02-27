@@ -359,7 +359,7 @@ public class NodeElemVisitor extends CodegenVisitor {
     Collections.reverse(reverseArgs);
     for (Expr e : reverseArgs) {
       REG rd = visit(e);
-      int offsetFromBase = e.type().getSize();
+      int offsetFromBase = - e.type().getSize();
       currentST.incrementStackOffset(-offsetFromBase);
       saveVarData(e.type(), rd, SP, offsetFromBase,
           true);
