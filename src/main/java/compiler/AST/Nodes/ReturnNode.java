@@ -19,7 +19,7 @@ public class ReturnNode extends Node {
 
   @Override
   public REG accept(ASTVisitor visitor) {
-    return visitor.visitReturn(this);
+    return visitor.visitReturnNode(this);
   }
 
   public Expr expr() {

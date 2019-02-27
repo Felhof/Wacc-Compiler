@@ -279,6 +279,15 @@ public class ASTVisitor {
     return null;
   }
 
+  public REG visitReturnNode(ReturnNode returnNode) {
+    REG rd = visit(returnNode.expr());
+    instructions.add(new MOV(R0, rd));
+    instructions.add(new ADD(SP, SP, new Imm_INT(totalStackOffset)));
+    instructions.add(new POP(PC));
+    freeReg(rd);
+    return null;
+  }
+
   public REG visitNewScope(ScopeNode scopeNode) {
     visitChildStats(scopeNode.symbolTable(), scopeNode.parentNode());
     return null;
@@ -588,15 +597,6 @@ public class ASTVisitor {
     int offset = currentST.getTotalOffset(varName);
     instructions.add(new ADD(rd, SP, new Imm_INT(offset)));
     return rd;
-  }
-
-  public REG visitReturn(ReturnNode returnNode) {
-    REG rd = visit(returnNode.expr());
-    instructions.add(new MOV(R0, rd));
-    instructions.add(new ADD(SP, SP, new Imm_INT(totalStackOffset)));
-    instructions.add(new POP(PC));
-    freeReg(rd);
-    return null;
   }
 
   public REG visitFuncCall(FuncCall funcCall) {
