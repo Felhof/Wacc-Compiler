@@ -1,4 +1,4 @@
-package invalid.syntax;
+package frontend.invalid.syntax;
 
 import compiler.Main;
 import java.io.BufferedReader;
@@ -26,7 +26,8 @@ public class InvalidTests {
   @Rule
   public final ExpectedSystemExit exit = ExpectedSystemExit.none();
 
-  private static final String path = "src/test/java/invalid/syntax/paths/";
+  private static final String path = "src/test/java/frontend/invalid/syntax"
+      + "/paths/";
 
   public void checkCompilationFails(String filenames) {
     try(BufferedReader br = new BufferedReader(new FileReader(filenames))) {

@@ -21,7 +21,7 @@ public class Main {
 
   public static void main(String[] args) {
     String path = args[0]; // uncomment for labTS test
-    //String path = "src/test/examples/valid/function/simple_functions"
+    //String path = "src/test/examples/frontend.frontend.frontend.valid/function/simple_functions"
     //    + "/functionSimple.wacc";
     AST ast = compileProg(path);
     generateCode(ast, extractFileName(path));

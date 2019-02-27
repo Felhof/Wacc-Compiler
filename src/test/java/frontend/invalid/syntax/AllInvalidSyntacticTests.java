@@ -1,4 +1,4 @@
-package invalid.semantic;
+package frontend.invalid.syntax;
 
 import compiler.Main;
 import java.io.BufferedReader;
@@ -16,7 +16,7 @@ import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 
 @RunWith(value = Parameterized.class)
-public class AllInvalidSemanticTests {
+public class AllInvalidSyntacticTests {
 
   @Rule
   public final ExpectedSystemExit exit = ExpectedSystemExit.none();
@@ -24,7 +24,8 @@ public class AllInvalidSemanticTests {
   @Parameter
   public String file;
 
-  public static String path = "src/test/java/invalid/semantic/paths/all.txt";
+  public static String path = "src/test/java/frontend/invalid/syntax/paths"
+      + "/all.txt";
 
   @Parameters(name = "{index}: {0}")
   public static List<String> data() {
@@ -48,7 +49,7 @@ public class AllInvalidSemanticTests {
     System.out.println("Compile.. " + filename);
     final ByteArrayOutputStream errStream = new ByteArrayOutputStream();
     System.setErr(new PrintStream(errStream));
-    exit.expectSystemExitWithStatus(200);
+    exit.expectSystemExitWithStatus(100);
     Main.compileProg(filename);
   }
 

@@ -1,4 +1,4 @@
-package codegen;
+package backend;
 
 import static compiler.Main.extractFileName;
 import static junit.framework.TestCase.fail;
@@ -18,8 +18,8 @@ import org.junit.Test;
 
 public class CodegenTests {
 
-  private static final String path = "src/test/java/codegen/paths/";
-  private static final String outputFolder = "src/test/java/codegen/output/";
+  private static final String path = "src/test/java/backend/paths/";
+  private static final String outputFolder = "src/test/java/backend/output/";
 
   @Test
   public void ExitCodeTest() {

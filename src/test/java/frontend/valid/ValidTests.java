@@ -1,4 +1,4 @@
-package valid;
+package frontend.valid;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
@@ -24,7 +24,7 @@ interface advancedVal{}
 
 public class ValidTests {
 
-  String path = "src/test/java/valid/paths/";
+  String path = "src/test/java/frontend/valid/paths/";
 
   public static void checkCompilation(String filenames) {
     try(BufferedReader br = new BufferedReader(new FileReader(filenames))) {

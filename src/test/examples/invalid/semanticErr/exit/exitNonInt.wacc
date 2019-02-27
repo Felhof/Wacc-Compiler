@@ -1,4 +1,4 @@
-# exit with non-int - this should be an invalid program! 
+# exit with non-int - this should be an frontend.frontend.invalid program!
 
 # Output:
 # #semantic_error#
