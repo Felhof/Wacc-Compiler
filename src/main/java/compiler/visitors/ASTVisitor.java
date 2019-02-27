@@ -486,7 +486,7 @@ public class ASTVisitor {
 
   public CodeGenData visitArrayElemRHS(ArrayElemRHS arrayElemRHS) {
     REG rd = (REG) visitArrayElem(arrayElemRHS);
-    instructions.add(new LDR(rd, new Addr(rd))); // load value of array elem
+    instructions.add(new LDR(rd, new Addr(rd), isByteSize(arrayElemRHS.type()))); // load value of array elem
     return rd;
   }
 
@@ -523,7 +523,7 @@ public class ASTVisitor {
 
   public CodeGenData visitPairElemRHS(PairElemRHS pairElemRHS) {
     REG rd = (REG) visitPairElem(pairElemRHS);
-    instructions.add(new LDR(rd, new Addr(rd)));
+    instructions.add(new LDR(rd, new Addr(rd), isByteSize(pairElemRHS.type())));
     return rd; // returns value of pair element
   }
 
