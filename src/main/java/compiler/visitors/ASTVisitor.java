@@ -1,6 +1,5 @@
 package compiler.visitors;
 
-import static compiler.SubRoutines.addSpecialFunction;
 import static compiler.instr.REG.LR;
 import static compiler.instr.REG.PC;
 import static compiler.instr.REG.R0;
@@ -81,9 +80,7 @@ import compiler.instr.Shift;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
 public class ASTVisitor {
 
@@ -91,10 +88,11 @@ public class ASTVisitor {
   private static final int SHIFT_TIMES_4 = 2;
   private static final int BYTE_SIZE = 1;
 
-  private static List<Instr> instructions;
-  private static List<Instr> data;
+  private static List<Instr> data;         // list of data fields on top
+  private static List<Instr> instructions; // list of ARM instructions
+  private SubRoutines subroutines;         // list of common labels at the end
+
   private static List<REG> availableRegs;
-  private Set<String> specialLabels;
   private SymbolTable currentST;
   private int totalStackOffset;
   private int scopeStackOffset;
@@ -102,11 +100,10 @@ public class ASTVisitor {
   private int branchNb = 0;
 
   public ASTVisitor() {
-    instructions = new ArrayList<>();
     data = new ArrayList<>();
-    this.specialLabels = new LinkedHashSet<>();
+    instructions = new ArrayList<>();
+    subroutines = new SubRoutines();
     availableRegs = new ArrayList<>(allUsableRegs);
-    new SubRoutines(instructions);
   }
 
   public static int toInt(String s) {
@@ -124,11 +121,10 @@ public class ASTVisitor {
     constructStartProgram();
     visitFuncsAndChildren(root);
     constructEndProgram();
-    for (String s : specialLabels) {
-      addSpecialFunction(s);
-    }
-    data.addAll(instructions);
-    return data;
+    instructions.addAll(0, data); // add at all data fields at the beginning
+    // add at all subroutines at the end
+    instructions.addAll(subroutines.getInstructions());
+    return instructions;
   }
 
   private void visitFuncsAndChildren(AST root) {
@@ -181,17 +177,17 @@ public class ASTVisitor {
     }
   }
 
+  private void constructStartProgram() {
+    data.add(new SECTION("data"));
+    instructions.add(new SECTION("text"));
+    instructions.add(new SECTION("main", true));
+  }
+
   private void constructEndProgram() {
     configureStack("add");
     loadArg(new Imm_INT_MEM(toInt("0")), false);
     instructions.add(new POP(PC));
     instructions.add(new SECTION("ltorg"));
-  }
-
-  private void constructStartProgram() {
-    data.add(new SECTION("data"));
-    instructions.add(new SECTION("text"));
-    instructions.add(new SECTION("main", true));
   }
 
   private CodeGenData visit(ASTData data) {
@@ -216,11 +212,9 @@ public class ASTVisitor {
     REG rd = (REG) visit(expr.insideExpr());
     switch (expr.operator()) {
       case MINUS:
-        specialLabels.addAll(
-            Arrays.asList("p_throw_overflow_error", "p_throw_runtime_error",
-                "p_print_string"));
+        String overflowErrLabel = subroutines.addOverflowErr();
         instructions.add(new RS(rd, rd, new Imm_INT(0), "BS"));
-        instructions.add(new B("p_throw_overflow_error", true, COND.VS));
+        instructions.add(new B(overflowErrLabel, true, COND.VS));
         break;
       case NEG:
         instructions.add(new EOR(rd, rd, new Imm_INT(1)));
@@ -260,6 +254,8 @@ public class ASTVisitor {
     }
 
     BinExpr.BINOP operator = binExpr.operator();
+    String overflowErrLabel;
+    String divByZeroLabel;
 
     switch (operator) {
       case OR:
@@ -269,47 +265,35 @@ public class ASTVisitor {
         instructions.add(new AND(rd, rd, rn));
         break;
       case PLUS:
-        specialLabels.addAll(
-            Arrays.asList("p_throw_overflow_error", "p_throw_runtime_error",
-                "p_print_string"));
+        overflowErrLabel = subroutines.addOverflowErr();
         instructions.add(new ADD(rd, rd, rn, true));
-        instructions.add(new B("p_throw_overflow_error", true, operator.cond()));
+        instructions.add(new B(overflowErrLabel, true, operator.cond()));
         break;
       case MINUS:
-        specialLabels.addAll(Arrays
-            .asList("p_throw_overflow_error", "p_throw_runtime_error",
-                "p_print_string"));
+        overflowErrLabel = subroutines.addOverflowErr();
         instructions.add(new SUB(rd, rd, rn, true));
-        instructions.add(new B("p_throw_overflow_error", true, operator.cond()));
+        instructions.add(new B(overflowErrLabel, true, operator.cond()));
         break;
       case MUL:
-        specialLabels.addAll(Arrays
-            .asList("p_throw_overflow_error", "p_throw_runtime_error",
-                "p_print_string"));
-
-        instructions.add(new MUL(rd, rn, rd, rn));
-        instructions.add(new CMP(rn, rd, new Shift(ASR, 31)));
-        instructions.add(new B("p_throw_overflow_error", true, operator.cond()));
+        overflowErrLabel = subroutines.addOverflowErr();
+        instructions.addAll(Arrays.asList(
+            new MUL(rd, rn, rd, rn),
+            new CMP(rn, rd, new Shift(ASR, 31)),
+            new B(overflowErrLabel, true, operator.cond())));
         break;
       case DIV:
-        specialLabels.addAll(Arrays
-            .asList("p_check_divide_by_zero", "p_throw_runtime_error",
-                "p_print_string"));
-
-        instructions.addAll(Arrays
-            .asList(new MOV(R0, rd), new MOV(R1, rn),
-                new B("p_check_divide_by_zero", true),
-                new B("__aeabi_idiv", true), new MOV(rd, R0)));
+        divByZeroLabel = subroutines.addCheckDivideByZero();
+        instructions.addAll(Arrays.asList(
+            new MOV(R0, rd), new MOV(R1, rn),
+            new B(divByZeroLabel, true),
+            new B("__aeabi_idiv", true), new MOV(rd, R0)));
         break;
       case MOD:
-        specialLabels.addAll(Arrays
-            .asList("p_check_divide_by_zero", "p_throw_runtime_error",
-                "p_print_string"));
-
-        instructions.addAll(Arrays
-            .asList(new MOV(R0, rd), new MOV(R1, rn),
-                new B("p_check_divide_by_zero", true),
-                new B("__aeabi_idivmod", true), new MOV(rd, R1)));
+        divByZeroLabel = subroutines.addCheckDivideByZero();
+        instructions.addAll(Arrays.asList(
+            new MOV(R0, rd), new MOV(R1, rn),
+            new B(divByZeroLabel, true),
+            new B("__aeabi_idivmod", true), new MOV(rd, R1)));
         break;
 
       case EQUAL:
@@ -333,42 +317,44 @@ public class ASTVisitor {
 
     // mov result into arg register
     moveArg(rd);
+    String printLabel;
 
     if (printNode.expr().type().equals(CharType.getInstance())) {
       instructions.add(new B("putchar", true));
     } else if (printNode.expr().type().equals(IntType.getInstance())) {
-      instructions.add(new B("p_print_int", true));
-      specialLabels.add("p_print_int");
+      printLabel = subroutines.addPrintInt();
+      instructions.add(new B(printLabel, true));
     } else if (printNode.expr().type().equals(BoolType.getInstance())) {
-      instructions.add(new B("p_print_bool", true));
-      specialLabels.add("p_print_bool");
+      printLabel = subroutines.addPrintBool();
+      instructions.add(new B(printLabel, true));
     } else if (printNode.expr().type().equals(ArrType.stringType())) {
-      instructions.add(new B("p_print_string", true));
-      specialLabels.add("p_print_string");
+      printLabel = subroutines.addPrintString();
+      instructions.add(new B(printLabel, true));
     } else {
-      instructions.add(new B("p_print_reference", true));
-      specialLabels.add("p_print_reference");
+      printLabel = subroutines.addPrintReference();
+      instructions.add(new B(printLabel, true));
     }
 
     if (printNode.newLine()) {
-      instructions.add(new B("p_print_ln", true));
-      specialLabels.add("p_print_ln");
+      printLabel = subroutines.addPrintln();
+      instructions.add(new B(printLabel, true));
     }
+
     freeReg(rd);
     return null;
   }
 
   public CodeGenData visitReadExpr(ReadNode readNode) {
     REG rd = (REG) visit(readNode.lhs());
+    String readLabel;
 
     moveArg(rd);
     if ((readNode.lhs()).type().equals(IntType.getInstance())) {
-      instructions.add(new B("p_read_int", true));
-      specialLabels.add("p_read_int");
-    } else if ((readNode.lhs()).type()
-        .equals(CharType.getInstance())) {
-      instructions.add(new B("p_read_char", true));
-      specialLabels.add("p_read_char");
+      readLabel = subroutines.addReadInt();
+      instructions.add(new B(readLabel, true));
+    } else if ((readNode.lhs()).type().equals(CharType.getInstance())) {
+      readLabel = subroutines.addReadChar();
+      instructions.add(new B(readLabel, true));
     }
 
     freeReg(rd);
@@ -500,9 +486,8 @@ public class ASTVisitor {
       index = (REG) visit(indexExpr); // simple array case
       instructions.add(new LDR(arrAddress, new Addr(arrAddress)));
       setArgs(new REG[]{index, arrAddress});
-      specialLabels.addAll(Arrays.asList(
-          "p_check_array_bounds", "p_throw_runtime_error", "p_print_string"));
-      instructions.add(new B("p_check_array_bounds", true));
+      String checkArrayBoundsLabel = subroutines.addCheckArrayBounds();
+      instructions.add(new B(checkArrayBoundsLabel, true));
       instructions.add(new ADD(arrAddress, arrAddress, new Imm_INT(WORD_SIZE)));
 
       if (isByteSize(arrayElem.type())) {
@@ -529,13 +514,10 @@ public class ASTVisitor {
 
   // returns address of pair element
   public CodeGenData visitPairElem(PairElem pairElem) {
-    specialLabels.addAll(Arrays.asList(
-        "p_check_null_pointer",
-        "p_throw_runtime_error",
-        "p_print_string"));
     REG rd = (REG) visit(pairElem.expr());
     moveArg(rd);
-    instructions.add(new B("p_check_null_pointer", true));
+    String nullPointerLabel = subroutines.addNullPointerCheck();
+    instructions.add(new B(nullPointerLabel, true));
     instructions.add(new LDR(rd,
         new Addr(rd, true, new Imm_INT(pairElem.posInPair() * WORD_SIZE)),
         false));
@@ -688,12 +670,10 @@ public class ASTVisitor {
   }
 
   public CodeGenData visitFreeNode(FreeNode freeNode) {
-    specialLabels.addAll(Arrays
-        .asList("p_free_pair", "p_throw_runtime_error",
-            "p_print_string"));
     REG rd = (REG) visit(freeNode.freeExpr());
     instructions.add(new MOV(R0, rd));
-    instructions.add(new B("p_free_pair", true));
+    String freePairLabel = subroutines.addFreePairCheck();
+    instructions.add(new B(freePairLabel, true));
     freeReg(rd);
     return null;
   }
