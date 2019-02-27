@@ -14,12 +14,6 @@ public abstract class PairElem extends Expr {
     this.posInPair = posInPair;
   }
 
-  @Override
-  public int sizeOf() {
-    // todo
-    return 0;
-  }
-
   public Expr expr() {
     return expr;
   }

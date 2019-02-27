@@ -21,10 +21,4 @@ public abstract class ArrayElem extends Expr {
   public String varName() {
     return varName;
   }
-
-  @Override
-  public int sizeOf() {
-    // TODO: To think about
-    return 0;
-  }
 }

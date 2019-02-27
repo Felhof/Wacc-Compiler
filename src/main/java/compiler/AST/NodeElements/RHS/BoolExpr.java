@@ -25,9 +25,4 @@ public class BoolExpr extends Expr {
   public CodeGenData accept(ASTVisitor visitor) {
     return visitor.visitBoolExpr(this);
   }
-
-  @Override
-  public int sizeOf() {
-    return 1;
-  }
 }
