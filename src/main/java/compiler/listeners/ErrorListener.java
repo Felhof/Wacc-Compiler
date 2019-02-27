@@ -1,5 +1,7 @@
 package compiler.listeners;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
@@ -7,12 +9,12 @@ import org.antlr.v4.runtime.Recognizer;
 public class ErrorListener extends BaseErrorListener {
   private String type;
   private int nbOfErrors;
-  private StringBuilder sb;
+  private List<String> listOfErrors;
 
   public ErrorListener(String type) {
     this.type = type;
     this.nbOfErrors = 0;
-    this.sb = new StringBuilder();
+    listOfErrors = new ArrayList<>();
   }
 
   @Override
@@ -24,6 +26,8 @@ public class ErrorListener extends BaseErrorListener {
   {
     charPositionInLine++;
 
+    StringBuilder sb = new StringBuilder();
+
     sb.append(type)
         .append(" Error at ")
         .append(line).append(":")
@@ -32,6 +36,7 @@ public class ErrorListener extends BaseErrorListener {
         .append(msg)
         .append('\n');
 
+    listOfErrors.add(sb.toString());
     nbOfErrors++;
   }
 
@@ -41,7 +46,7 @@ public class ErrorListener extends BaseErrorListener {
       System.err.println("Compilation failed! " + nbOfErrors + " "
           + type + " error" + ((nbOfErrors > 1) ? "s" : ""));
       System.err.println("Exit code " + exitCode + " returned");
-      System.err.println(sb.toString());
+      listOfErrors.forEach(System.err::print);
       System.exit(exitCode);
     }
   }
