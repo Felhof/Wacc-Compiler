@@ -47,6 +47,8 @@ import java.util.List;
 public class ASTVisitor extends CodegenVisitor {
   /* Code generator visitor to visit AST Node */
 
+  public static final int MAX_INT_IMM_SHIFT = 1024;
+
   private int nextPosInStack;
   private int totalStackOffset;
   private int branchNb = 0;
@@ -107,15 +109,14 @@ public class ASTVisitor extends CodegenVisitor {
   }
 
   private void configureStack(String type) {
-    int maxIntImmShift = 1024;
     if (scopeStackOffset > 0) {
       int temp = scopeStackOffset;
-      while (temp / 1024 != 0) {
-        instructions.add(buildInstr(type, new Imm_INT(maxIntImmShift)));
-        temp = temp - 1024;
+      while (temp / MAX_INT_IMM_SHIFT != 0) {
+        instructions.add(buildInstr(type, new Imm_INT(MAX_INT_IMM_SHIFT)));
+        temp = temp - MAX_INT_IMM_SHIFT;
       }
       instructions.add(buildInstr(type,
-          new Imm_INT(scopeStackOffset % maxIntImmShift)));
+          new Imm_INT(scopeStackOffset % MAX_INT_IMM_SHIFT)));
     }
   }
 
@@ -142,8 +143,7 @@ public class ASTVisitor extends CodegenVisitor {
 
   public void visitVarDeclareNode(VarDeclareNode varDeclareNode) {
     REG rd = nodeElemVisitor.visit(varDeclareNode.rhs());
-    nextPosInStack -=
-        isByteSize(varDeclareNode.varType()) ? BYTE_SIZE : WORD_SIZE;
+    nextPosInStack -= varDeclareNode.varType().getSize();
 
     // store variable in the stack and save offset in symbol table
     currentST.lookUpAllVar(varDeclareNode.varName())

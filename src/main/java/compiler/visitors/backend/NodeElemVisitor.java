@@ -1,5 +1,6 @@
 package compiler.visitors.backend;
 
+import static compiler.AST.Types.Type.WORD_SIZE;
 import static compiler.IR.Operand.REG.R0;
 import static compiler.IR.Operand.REG.R1;
 import static compiler.IR.Operand.REG.R10;
@@ -28,8 +29,6 @@ import compiler.AST.NodeElements.RHS.StringExpr;
 import compiler.AST.NodeElements.RHS.UnaryExpr;
 import compiler.AST.NodeElements.RHS.UnaryExpr.UNOP;
 import compiler.AST.Types.ArrType;
-import compiler.AST.Types.BoolType;
-import compiler.AST.Types.CharType;
 import compiler.IR.Instructions.ADD;
 import compiler.IR.Instructions.AND;
 import compiler.IR.Instructions.B;
@@ -204,8 +203,7 @@ public class NodeElemVisitor extends CodegenVisitor {
     int size = array.length;
 
     if (size > 0) {
-      elemSize = isByteSize(((ArrType) arrayLiter.type()).getArrayElem())
-          ? BYTE_SIZE : WORD_SIZE;
+      elemSize = ((ArrType) arrayLiter.type()).getElemType().getSize();
     }
 
     // malloc the number of elements plus one for to hold the size
@@ -240,7 +238,7 @@ public class NodeElemVisitor extends CodegenVisitor {
   public REG visitArrayElemRHS(ArrayElemRHS arrayElemRHS) {
     REG rd = visitArrayElem(arrayElemRHS);
     instructions.add(new LDR(rd, new Addr(rd),
-        isByteSize(arrayElemRHS.type()))); // load value of array elem
+        arrayElemRHS.type().isByteSize())); // load value of array elem
     return rd;
   }
 
@@ -257,7 +255,7 @@ public class NodeElemVisitor extends CodegenVisitor {
       instructions.add(new B(checkArrayBoundsLabel, true));
       instructions.add(new ADD(arrAddress, arrAddress, new Imm_INT(WORD_SIZE)));
 
-      if (isByteSize(arrayElem.type())) {
+      if (arrayElem.type().isByteSize()) {
         instructions.add(new ADD(arrAddress, arrAddress, index));
       } else {
         instructions.add(new ADD(arrAddress, arrAddress, new Reg_Shift(index,
@@ -275,7 +273,7 @@ public class NodeElemVisitor extends CodegenVisitor {
 
   public REG visitPairElemRHS(PairElemRHS pairElemRHS) {
     REG rd = visitPairElem(pairElemRHS);
-    instructions.add(new LDR(rd, new Addr(rd), isByteSize(pairElemRHS.type())));
+    instructions.add(new LDR(rd, new Addr(rd), pairElemRHS.type().isByteSize()));
     return rd; // returns value of pair element
   }
 
@@ -297,7 +295,7 @@ public class NodeElemVisitor extends CodegenVisitor {
     REG rd = useAvailableReg();
     instructions.add(new MOV(rd, R0)); // fetch address of pair
     storeExpInHeap(pair.fst(), rd, 0);
-    storeExpInHeap(pair.snd(), rd, 4);
+    storeExpInHeap(pair.snd(), rd, WORD_SIZE);
     return rd;
   }
 
@@ -309,7 +307,7 @@ public class NodeElemVisitor extends CodegenVisitor {
 
   private void storeExpInHeap(Expr expr, REG objectAddr, int offset) {
     REG rd = visit(expr);
-    loadArg(new Imm_INT_MEM(isByteSize(expr.type()) ? 1 : 4), false);
+    loadArg(new Imm_INT_MEM(expr.type().getSize()), false);
     instructions.add(new B("malloc", true));
     saveVarData(expr.type(), rd, R0, 0, false);
     instructions
@@ -328,7 +326,7 @@ public class NodeElemVisitor extends CodegenVisitor {
     REG rd = useAvailableReg();
     int offset = currentST.getTotalOffset(ident.varName());
     instructions.add(new LDR(rd, new Addr(SP, true, new Imm_INT(offset)),
-        isByteSize(ident.type())));
+        ident.type().isByteSize()));
     return rd;
   }
 
@@ -351,7 +349,7 @@ public class NodeElemVisitor extends CodegenVisitor {
     int offset = WORD_SIZE + scopeStackOffset;
     for (int i = 0; i < exprList.size(); i++) {
       currentST.lookUpVarScope(paramNames.get(i)).setLocalOffset(offset);
-      offset += isByteSize(exprList.get(i).type()) ? BYTE_SIZE : WORD_SIZE;
+      offset += exprList.get(i).type().getSize();
     }
     return null;
   }
@@ -361,9 +359,7 @@ public class NodeElemVisitor extends CodegenVisitor {
     Collections.reverse(reverseArgs);
     for (Expr e : reverseArgs) {
       REG rd = visit(e);
-      int offsetFromBase =
-          (!(e.type() instanceof CharType) && !(e.type() instanceof BoolType))
-              ? -WORD_SIZE : -BYTE_SIZE;
+      int offsetFromBase = e.type().getSize();
       currentST.incrementStackOffset(-offsetFromBase);
       saveVarData(e.type(), rd, SP, offsetFromBase,
           true);

@@ -1,7 +1,7 @@
 package compiler.AST.Nodes;
 
-import compiler.AST.SymbolTable.SymbolTable;
 import compiler.AST.ASTData;
+import compiler.AST.SymbolTable.SymbolTable;
 
 public class AST implements ASTData {
   private ParentNode root;

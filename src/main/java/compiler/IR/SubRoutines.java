@@ -1,12 +1,12 @@
 package compiler.IR;
 
+import static compiler.AST.Types.Type.WORD_SIZE;
 import static compiler.IR.Operand.REG.LR;
 import static compiler.IR.Operand.REG.PC;
 import static compiler.IR.Operand.REG.R0;
 import static compiler.IR.Operand.REG.R1;
 import static compiler.IR.Operand.REG.R2;
 import static compiler.IR.Operand.REG.SP;
-import static compiler.visitors.backend.ASTVisitor.WORD_SIZE;
 
 import compiler.IR.Instructions.ADD;
 import compiler.IR.Instructions.B;
@@ -131,7 +131,7 @@ public class SubRoutines {
       addStart(labelName);
       subroutines.addAll(Arrays.asList(
           new LDR(R0, new Imm_STRING_MEM(field)),
-          new ADD(R0, R0, new Imm_INT(4)),
+          new ADD(R0, R0, new Imm_INT(WORD_SIZE)),
           new B("puts", true),
           new MOV(R0, new Imm_INT(0)),
           new B("fflush", true)));
@@ -287,7 +287,7 @@ public class SubRoutines {
               new PUSH(R0),
               new LDR(R0, new Addr(R0)),
               new B("free", true), new LDR(R0, new Addr(SP)),
-              new LDR(R0, new Addr(R0, true, new Imm_INT(4))),
+              new LDR(R0, new Addr(R0, true, new Imm_INT(WORD_SIZE))),
               new B("free", true), new POP(R0), new B("free", true)));
       addEnd();
 
@@ -307,7 +307,7 @@ public class SubRoutines {
 
   private void addPrint() {
     subroutines.addAll(Arrays.asList(
-        new ADD(R0, R0, new Imm_INT(4)),
+        new ADD(R0, R0, new Imm_INT(WORD_SIZE)),
         new B("printf", true),
         new MOV(R0, new Imm_INT(0)),
         new B("fflush", true)));
@@ -318,7 +318,7 @@ public class SubRoutines {
     subroutines.addAll(Arrays.asList(
         new MOV(R1, R0),
         new LDR(R0, new Imm_STRING_MEM(field)),
-        new ADD(R0, R0, new Imm_INT(4)),
+        new ADD(R0, R0, new Imm_INT(WORD_SIZE)),
         new B("scanf", true)));
     addEnd();
   }

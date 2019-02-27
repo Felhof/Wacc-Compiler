@@ -1,7 +1,7 @@
 package compiler.AST.NodeElements;
 
-import compiler.AST.Types.Type;
 import compiler.AST.ASTData;
+import compiler.AST.Types.Type;
 import compiler.IR.Operand.REG;
 import compiler.visitors.backend.NodeElemVisitor;
 

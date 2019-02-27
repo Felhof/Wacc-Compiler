@@ -1,12 +1,11 @@
 package compiler.visitors.backend;
 
+import static compiler.IR.Operand.REG.NBR_ARG_REGS;
 import static compiler.IR.Operand.REG.R0;
 import static compiler.IR.Operand.REG.SP;
 import static compiler.IR.Operand.REG.allUsableRegs;
 
 import compiler.AST.SymbolTable.SymbolTable;
-import compiler.AST.Types.BoolType;
-import compiler.AST.Types.CharType;
 import compiler.AST.Types.Type;
 import compiler.IR.Instructions.ADD;
 import compiler.IR.Instructions.Instr;
@@ -22,9 +21,7 @@ import java.util.List;
 
 public abstract class CodegenVisitor {
 
-  public static final int WORD_SIZE = 4;
   public static final int SHIFT_TIMES_4 = 2;
-  public static final int BYTE_SIZE = 1;
 
   protected static List<Instr> instructions; // list of ARM instructions
   // handles adding subroutines and its data fields
@@ -55,7 +52,7 @@ public abstract class CodegenVisitor {
   }
 
   protected void setArgs(Operand[] ops) {
-    for (int i = 0; i < ops.length && i < 4; i++) {
+    for (int i = 0; i < ops.length && i < NBR_ARG_REGS; i++) {
       instructions.add(new MOV(REG.values()[i], ops[i]));
     }
   }
@@ -71,14 +68,8 @@ public abstract class CodegenVisitor {
       boolean update) {
     instructions.add(
         new STR(rd, new Addr(rn, true, new Imm_INT(offset)),
-            isByteSize(varType),
-            update));
+            varType.isByteSize(), update));
     return null;
-  }
-
-  public static boolean isByteSize(Type type) {
-    return type.equals(CharType.getInstance())
-        || type.equals(BoolType.getInstance());
   }
 
 }
