@@ -11,12 +11,6 @@ public class PairExp extends Expr {
   }
 
   @Override
-  public int sizeOf() {
-    //TODO: not sure
-    return 4;
-  }
-
-  @Override
   public String toString() {
     return "PairLiter: null";
   }

@@ -36,9 +36,4 @@ public class Pair extends Expr implements ASTData {
   public CodeGenData accept(ASTVisitor visitor) {
     return visitor.visitPair(this);
   }
-
-  @Override
-  public int sizeOf() {
-    return 4;
-  }
 }

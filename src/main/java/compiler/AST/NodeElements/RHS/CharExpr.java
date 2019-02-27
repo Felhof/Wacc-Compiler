@@ -34,9 +34,4 @@ public class CharExpr extends Expr {
   public CodeGenData accept(ASTVisitor visitor) {
     return visitor.visitCharExpr(this);
   }
-
-  @Override
-  public int sizeOf() {
-    return 1;
-  }
 }

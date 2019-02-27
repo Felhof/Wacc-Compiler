@@ -538,21 +538,13 @@ public class ASTVisitor {
 
   private void storeExpInHeap(Expr expr, REG objectAddr, int offset) {
     REG rd = (REG) visit(expr);
-    loadArg(new Imm_INT_MEM(expr.sizeOf()), false);
+    loadArg(new Imm_INT_MEM(isByteSize(expr.type()) ? 1 : 4), false);
     instructions.add(new B("malloc", true));
     saveVarData(expr.type(), rd, R0, 0, false);
     instructions
         .add(new STR(R0, new Addr(objectAddr, true, new Imm_INT(offset))));
     freeReg(rd);
   }
-
-//  private void setArg(Operand op2, boolean isAddress) {
-//    if (isAddress) {
-//      instructions.add(new MOV(R0, op2));
-//    } else {
-//      instructions.add(new LDR(R0, op2, false));
-//    }
-//  }
 
   private void loadArg(Operand op2, boolean isByteSize) {
     instructions.add(new LDR(R0, op2, isByteSize));
@@ -644,7 +636,7 @@ public class ASTVisitor {
     int offset = WORD_SIZE + scopeStackOffset;
     for (int i = 0; i < exprList.size(); i++) {
       currentST.lookUpVarScope(paramNames.get(i)).setLocalOffset(offset);
-      offset += exprList.get(i).sizeOf();
+      offset += isByteSize(exprList.get(i).type()) ? 1 : 4;
     }
     return null;
   }

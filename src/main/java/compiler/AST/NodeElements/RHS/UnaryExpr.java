@@ -47,12 +47,6 @@ public class UnaryExpr extends Expr {
     return visitor.visitUnaryExpr(this);
   }
 
-  @Override
-  public int sizeOf() {
-    //TODO: need to think about this
-    return 0;
-  }
-
   public enum UNOP {
     NEG("!", boolType, boolType), PLUS("+", intType, intType),
     MINUS("-", intType, intType), ORD("ord", charType, intType),
