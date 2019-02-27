@@ -3,7 +3,7 @@ package compiler.AST.NodeElements.RHS;
 import compiler.AST.Types.ArrType;
 import compiler.AST.Types.CharType;
 import compiler.IR.Operand.REG;
-import compiler.visitors.ASTVisitor;
+import compiler.visitors.backend.NodeElemVisitor;
 
 public class StringExpr extends Expr {
 
@@ -24,7 +24,7 @@ public class StringExpr extends Expr {
   }
 
   @Override
-  public REG accept(ASTVisitor visitor) {
+  public REG accept(NodeElemVisitor visitor) {
     return visitor.visitStringExpr(this);
   }
 

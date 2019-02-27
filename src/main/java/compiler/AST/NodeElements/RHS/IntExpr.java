@@ -2,7 +2,7 @@ package compiler.AST.NodeElements.RHS;
 
 import compiler.AST.Types.IntType;
 import compiler.IR.Operand.REG;
-import compiler.visitors.ASTVisitor;
+import compiler.visitors.backend.NodeElemVisitor;
 
 public class IntExpr extends Expr {
   private String value;
@@ -22,7 +22,7 @@ public class IntExpr extends Expr {
   }
 
   @Override
-  public REG accept(ASTVisitor visitor) {
+  public REG accept(NodeElemVisitor visitor) {
     return visitor.visitIntExpr(this);
   }
 

@@ -1,4 +1,4 @@
-package compiler.visitors;
+package compiler.visitors.frontend;
 
 import antlr.BasicParser;
 import antlr.BasicParser.ArrayExpContext;

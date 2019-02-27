@@ -4,7 +4,7 @@ import compiler.AST.NodeElements.ArrayElem;
 import compiler.AST.NodeElements.RHS.Expr;
 import compiler.AST.Types.Type;
 import compiler.IR.Operand.REG;
-import compiler.visitors.ASTVisitor;
+import compiler.visitors.backend.NodeElemVisitor;
 
 public class ArrayElemLHS extends ArrayElem {
 
@@ -13,7 +13,7 @@ public class ArrayElemLHS extends ArrayElem {
   }
 
   @Override
-  public REG accept(ASTVisitor visitor) {
+  public REG accept(NodeElemVisitor visitor) {
     return visitor.visitArrayElemLHS(this);
   }
 }

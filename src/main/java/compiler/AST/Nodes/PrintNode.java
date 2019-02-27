@@ -1,8 +1,7 @@
 package compiler.AST.Nodes;
 
 import compiler.AST.NodeElements.RHS.Expr;
-import compiler.IR.Operand.REG;
-import compiler.visitors.ASTVisitor;
+import compiler.visitors.backend.ASTVisitor;
 
 public class PrintNode extends Node {
   private boolean newLine;
@@ -26,7 +25,7 @@ public class PrintNode extends Node {
   }
 
   @Override
-  public REG accept(ASTVisitor visitor) {
-    return visitor.visitPrintNode(this);
+  public void accept(ASTVisitor visitor) {
+    visitor.visitPrintNode(this);
   }
 }

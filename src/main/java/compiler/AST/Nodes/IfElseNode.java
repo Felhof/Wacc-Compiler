@@ -2,8 +2,7 @@ package compiler.AST.Nodes;
 
 import compiler.AST.NodeElements.RHS.Expr;
 import compiler.AST.SymbolTable.SymbolTable;
-import compiler.IR.Operand.REG;
-import compiler.visitors.ASTVisitor;
+import compiler.visitors.backend.ASTVisitor;
 
 public class IfElseNode extends Node {
   private Expr condition;
@@ -31,8 +30,8 @@ public class IfElseNode extends Node {
   }
 
   @Override
-  public REG accept(ASTVisitor visitor) {
-    return visitor.visitIfElseNode(this);
+  public void accept(ASTVisitor visitor) {
+    visitor.visitIfElseNode(this);
   }
 
   public SymbolTable thenST() {

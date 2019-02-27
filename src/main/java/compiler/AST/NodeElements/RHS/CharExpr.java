@@ -3,7 +3,7 @@ package compiler.AST.NodeElements.RHS;
 import compiler.AST.Types.CharType;
 import compiler.IR.Operand.REG;
 import compiler.IR.Instructions.STRING_FIELD;
-import compiler.visitors.ASTVisitor;
+import compiler.visitors.backend.NodeElemVisitor;
 
 public class CharExpr extends Expr {
 
@@ -31,7 +31,7 @@ public class CharExpr extends Expr {
   }
 
   @Override
-  public REG accept(ASTVisitor visitor) {
+  public REG accept(NodeElemVisitor visitor) {
     return visitor.visitCharExpr(this);
   }
 }

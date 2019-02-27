@@ -1,8 +1,7 @@
 package compiler.AST.Nodes;
 
 import compiler.AST.NodeElements.RHS.Expr;
-import compiler.IR.Operand.REG;
-import compiler.visitors.ASTVisitor;
+import compiler.visitors.backend.ASTVisitor;
 
 public class FreeNode extends Node{
 
@@ -17,8 +16,8 @@ public class FreeNode extends Node{
   public String toString(){ return "Freenode(" + freeExpr.toString() + ")"; }
 
   @Override
-  public REG accept(ASTVisitor visitor) {
-    return visitor.visitFreeNode(this);
+  public void accept(ASTVisitor visitor) {
+    visitor.visitFreeNode(this);
   }
 
   public Expr freeExpr() {

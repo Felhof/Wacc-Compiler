@@ -1,6 +1,6 @@
-package compiler.visitors;
+package compiler.visitors.frontend;
 
-import static compiler.visitors.ASTVisitor.isByteSize;
+import static compiler.visitors.backend.ASTVisitor.isByteSize;
 
 import antlr.BasicParser;
 import antlr.BasicParser.Arg_listContext;

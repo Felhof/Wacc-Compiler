@@ -6,7 +6,7 @@ import static compiler.IR.Operand.REG.R0;
 import static compiler.IR.Operand.REG.R1;
 import static compiler.IR.Operand.REG.R2;
 import static compiler.IR.Operand.REG.SP;
-import static compiler.visitors.ASTVisitor.WORD_SIZE;
+import static compiler.visitors.backend.ASTVisitor.WORD_SIZE;
 
 import compiler.IR.Instructions.ADD;
 import compiler.IR.Instructions.B;

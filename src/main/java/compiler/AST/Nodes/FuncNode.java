@@ -3,8 +3,7 @@ package compiler.AST.Nodes;
 import compiler.AST.NodeElements.ListExpr;
 import compiler.AST.SymbolTable.SymbolTable;
 import compiler.AST.Types.Type;
-import compiler.IR.Operand.REG;
-import compiler.visitors.ASTVisitor;
+import compiler.visitors.backend.ASTVisitor;
 
 public class FuncNode extends Node {
   private Type returnType;
@@ -33,8 +32,8 @@ public class FuncNode extends Node {
   }
 
   @Override
-  public REG accept(ASTVisitor visitor) {
-    return visitor.visitFuncNode(this);
+  public void accept(ASTVisitor visitor) {
+    visitor.visitFuncNode(this);
   }
 
   public SymbolTable symbolTable() {

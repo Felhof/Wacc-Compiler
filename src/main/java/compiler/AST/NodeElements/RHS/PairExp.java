@@ -2,7 +2,7 @@ package compiler.AST.NodeElements.RHS;
 
 import compiler.AST.Types.Type;
 import compiler.IR.Operand.REG;
-import compiler.visitors.ASTVisitor;
+import compiler.visitors.backend.NodeElemVisitor;
 
 public class PairExp extends Expr {
 
@@ -16,7 +16,7 @@ public class PairExp extends Expr {
   }
 
   @Override
-  public REG accept(ASTVisitor visitor) {
+  public REG accept(NodeElemVisitor visitor) {
     return visitor.visitNullPair();
   }
 }
