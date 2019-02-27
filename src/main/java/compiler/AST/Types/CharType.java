@@ -1,8 +1,5 @@
 package compiler.AST.Types;
 
-import compiler.visitors.ASTVisitor;
-import compiler.visitors.CodeGenData;
-
 public class CharType extends Type {
   private static CharType instance = new CharType();
 
@@ -22,8 +19,4 @@ public class CharType extends Type {
     return "CHAR";
   }
 
-  @Override
-  public CodeGenData accept(ASTVisitor visitor) {
-    return null;
-  }
 }

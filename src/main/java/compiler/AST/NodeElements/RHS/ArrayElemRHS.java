@@ -2,8 +2,8 @@ package compiler.AST.NodeElements.RHS;
 
 import compiler.AST.NodeElements.ArrayElem;
 import compiler.AST.Types.Type;
+import compiler.instr.REG;
 import compiler.visitors.ASTVisitor;
-import compiler.visitors.CodeGenData;
 
 public class ArrayElemRHS extends ArrayElem {
 
@@ -13,7 +13,7 @@ public class ArrayElemRHS extends ArrayElem {
   }
 
   @Override
-  public CodeGenData accept(ASTVisitor visitor) {
+  public REG accept(ASTVisitor visitor) {
     return visitor.visitArrayElemRHS(this);
   }
 }

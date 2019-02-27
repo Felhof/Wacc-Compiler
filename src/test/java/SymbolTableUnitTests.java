@@ -1,11 +1,12 @@
-import compiler.AST.SymbolTable.VarInfo;
-import compiler.AST.Types.IntType;
-import compiler.AST.Types.Type;
-import compiler.AST.SymbolTable.SymbolTable;
-import org.junit.Test;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.notNullValue;
+
+import compiler.AST.SymbolTable.SymbolTable;
+import compiler.AST.SymbolTable.VarInfo;
+import compiler.AST.Types.IntType;
+import compiler.AST.Types.Type;
+import org.junit.Test;
 
 public class SymbolTableUnitTests {
 

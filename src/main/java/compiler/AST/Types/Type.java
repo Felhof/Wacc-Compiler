@@ -20,5 +20,4 @@ public abstract class Type implements ASTData {
         return GenericType.getInstance();
     }
   }
-
 }

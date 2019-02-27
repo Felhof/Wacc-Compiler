@@ -1,9 +1,9 @@
 package compiler.AST.NodeElements.RHS;
 
 import compiler.AST.Types.CharType;
+import compiler.instr.REG;
 import compiler.instr.STRING_FIELD;
 import compiler.visitors.ASTVisitor;
-import compiler.visitors.CodeGenData;
 
 public class CharExpr extends Expr {
 
@@ -31,7 +31,7 @@ public class CharExpr extends Expr {
   }
 
   @Override
-  public CodeGenData accept(ASTVisitor visitor) {
+  public REG accept(ASTVisitor visitor) {
     return visitor.visitCharExpr(this);
   }
 }

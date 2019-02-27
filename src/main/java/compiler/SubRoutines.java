@@ -7,7 +7,6 @@ import static compiler.instr.REG.R1;
 import static compiler.instr.REG.R2;
 import static compiler.instr.REG.SP;
 import static compiler.visitors.ASTVisitor.WORD_SIZE;
-import static compiler.visitors.ASTVisitor.addStringField;
 
 import compiler.instr.ADD;
 import compiler.instr.B;
@@ -22,6 +21,8 @@ import compiler.instr.Operand.Imm_INT;
 import compiler.instr.Operand.Imm_STRING_MEM;
 import compiler.instr.POP;
 import compiler.instr.PUSH;
+import compiler.instr.SECTION;
+import compiler.instr.STRING_FIELD;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -30,13 +31,19 @@ import java.util.Set;
 
 public class SubRoutines {
 
-  private List<Instr> subroutines;
+  private List<Instr> data;         // list of data fields on top
+  private List<Instr> subroutines;  // list of common labels at the end
   private Set<String> addedSubroutines;
 
   public SubRoutines() {
+    this.data = new ArrayList<>();
+    data.add(new SECTION("data"));
+
     this.subroutines = new ArrayList<>();
     this.addedSubroutines = new HashSet<>();
   }
+
+  public List<Instr> getDataFields() { return data; }
 
   public List<Instr> getInstructions() {
     return subroutines;
@@ -314,6 +321,13 @@ public class SubRoutines {
         new ADD(R0, R0, new Imm_INT(4)),
         new B("scanf", true)));
     addEnd();
+  }
+
+  public String addStringField(String string) {
+    String labelName = "msg_" + (data.size() / 2);
+    data.add(new LABEL(labelName));
+    data.add(new STRING_FIELD(string));
+    return labelName;
   }
   
 }

@@ -2,8 +2,6 @@ package compiler.AST.SymbolTable;
 
 import compiler.AST.Types.Type;
 import compiler.visitors.ASTData;
-import compiler.visitors.ASTVisitor;
-import compiler.visitors.CodeGenData;
 import java.util.List;
 
 public class FuncTypes implements ASTData {
@@ -24,8 +22,4 @@ public class FuncTypes implements ASTData {
     return returnType;
   }
 
-  @Override
-  public CodeGenData accept(ASTVisitor visitor) {
-    return null;
-  }
 }

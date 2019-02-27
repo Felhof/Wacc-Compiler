@@ -1,8 +1,8 @@
 package compiler.AST.Nodes;
 
 import compiler.AST.NodeElements.NodeElem;
+import compiler.instr.REG;
 import compiler.visitors.ASTVisitor;
-import compiler.visitors.CodeGenData;
 
 public class VarAssignNode extends Node {
 
@@ -23,7 +23,7 @@ public class VarAssignNode extends Node {
   }
 
   @Override
-  public CodeGenData accept(ASTVisitor visitor) {
+  public REG accept(ASTVisitor visitor) {
     return visitor.visitAssignNode(this);
   }
 

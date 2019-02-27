@@ -1,5 +1,11 @@
 package compiler.visitors;
 
+import compiler.instr.REG;
+
 public interface ASTData {
-  CodeGenData accept(ASTVisitor visitor);
+
+  default REG accept(ASTVisitor visitor) {
+    return null;
+  }
+
 }

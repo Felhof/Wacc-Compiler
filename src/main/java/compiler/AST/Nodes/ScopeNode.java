@@ -1,8 +1,8 @@
 package compiler.AST.Nodes;
 
 import compiler.AST.SymbolTable.SymbolTable;
+import compiler.instr.REG;
 import compiler.visitors.ASTVisitor;
-import compiler.visitors.CodeGenData;
 
 public class ScopeNode extends Node {
 
@@ -22,7 +22,7 @@ public class ScopeNode extends Node {
   }
 
   @Override
-  public CodeGenData accept(ASTVisitor visitor) {
+  public REG accept(ASTVisitor visitor) {
     return visitor.visitNewScope(this);
   }
 

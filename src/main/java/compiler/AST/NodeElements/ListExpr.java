@@ -2,9 +2,9 @@ package compiler.AST.NodeElements;
 
 import compiler.AST.NodeElements.RHS.Expr;
 import compiler.AST.Types.Type;
+import compiler.instr.REG;
 import compiler.visitors.ASTData;
 import compiler.visitors.ASTVisitor;
-import compiler.visitors.CodeGenData;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -67,13 +67,12 @@ public class ListExpr implements ASTData {
   }
 
   @Override
-  public CodeGenData accept(ASTVisitor visitor) {
+  public REG accept(ASTVisitor visitor) {
     if (isParams) {
-      visitor.visitParams(this);
+      return visitor.visitParams(this);
     } else {
-      visitor.visitArgs(this);
+      return visitor.visitArgs(this);
     }
-    return null;
   }
 
   public void addParamName(String text) {

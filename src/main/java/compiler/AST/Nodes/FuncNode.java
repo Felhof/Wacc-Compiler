@@ -1,11 +1,10 @@
 package compiler.AST.Nodes;
 
 import compiler.AST.NodeElements.ListExpr;
-import compiler.AST.Types.Type;
 import compiler.AST.SymbolTable.SymbolTable;
-import compiler.visitors.ASTData;
+import compiler.AST.Types.Type;
+import compiler.instr.REG;
 import compiler.visitors.ASTVisitor;
-import compiler.visitors.CodeGenData;
 
 public class FuncNode extends Node {
   private Type returnType;
@@ -34,7 +33,7 @@ public class FuncNode extends Node {
   }
 
   @Override
-  public CodeGenData accept(ASTVisitor visitor) {
+  public REG accept(ASTVisitor visitor) {
     return visitor.visitFuncNode(this);
   }
 

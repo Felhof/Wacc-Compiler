@@ -4,10 +4,9 @@ import compiler.AST.Types.BoolType;
 import compiler.AST.Types.CharType;
 import compiler.AST.Types.IntType;
 import compiler.AST.Types.Type;
-import compiler.instr.LDR;
 import compiler.instr.LDR.COND;
+import compiler.instr.REG;
 import compiler.visitors.ASTVisitor;
-import compiler.visitors.CodeGenData;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -72,7 +71,7 @@ public class BinExpr extends Expr {
   }
 
   @Override
-  public CodeGenData accept(ASTVisitor visitor) {
+  public REG accept(ASTVisitor visitor) {
     return visitor.visitBinaryExp(this);
   }
 

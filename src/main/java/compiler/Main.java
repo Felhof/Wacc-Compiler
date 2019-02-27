@@ -1,16 +1,15 @@
 package compiler;
 
+import antlr.BasicLexer;
+import antlr.BasicParser;
 import compiler.AST.Nodes.AST;
 import compiler.instr.Instr;
 import compiler.listeners.ErrorListener;
 import compiler.visitors.ASTVisitor;
 import compiler.visitors.SemanticVisitor;
 import compiler.visitors.SyntaxVisitor;
-
 import java.io.IOException;
 import java.io.PrintWriter;
-
-import antlr.*;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import org.antlr.v4.runtime.CharStream;

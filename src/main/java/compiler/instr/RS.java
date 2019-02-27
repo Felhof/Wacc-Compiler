@@ -1,8 +1,6 @@
 package compiler.instr;
 
-import compiler.instr.Instr;
 import compiler.instr.Operand.Operand;
-import compiler.instr.REG;
 
 public class RS extends Instr {
 

@@ -1,8 +1,5 @@
 package compiler.AST.Types;
 
-import compiler.visitors.ASTVisitor;
-import compiler.visitors.CodeGenData;
-
 public class ArrType extends Type {
 
   private static ArrType stringType = new ArrType(CharType.getInstance(), 1);
@@ -67,9 +64,4 @@ public class ArrType extends Type {
     return stringType;
   }
 
-
-  @Override
-  public CodeGenData accept(ASTVisitor visitor) {
-    return null;
-  }
 }
