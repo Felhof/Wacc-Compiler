@@ -50,7 +50,7 @@ public class AllInvalidSemanticTests {
     final ByteArrayOutputStream errStream = new ByteArrayOutputStream();
     System.setErr(new PrintStream(errStream));
     exit.expectSystemExitWithStatus(200);
-    Main.compileProg(filename);
+    Main.main(new String[]{filename});
   }
 
 }
