@@ -72,7 +72,31 @@ public class BinExpr extends Expr {
 
   @Override
   public REG accept(NodeElemVisitor visitor) {
-    return visitor.visitBinaryExp(this);
+    switch (operator) {
+      case PLUS:
+        return visitor.visitPlusExpr(this);
+      case MINUS:
+        return visitor.visitMinusExpr(this);
+      case MUL:
+        return visitor.visitMulExpr(this);
+      case DIV:
+        return visitor.visitDivExpr(this);
+      case MOD:
+        return visitor.visitModExpr(this);
+      case AND:
+        return visitor.visitAndExpr(this);
+      case OR:
+        return visitor.visitOrExpr(this);
+      case EQUAL:
+      case GE:
+      case GT:
+      case LE:
+      case LT:
+      case NOTEQUAL:
+        return visitor.visitBoolBinExpr(this);
+      default:
+        return null;
+    }
   }
 
   public enum BINOP {
