@@ -229,8 +229,7 @@ public class NodeElemVisitor extends CodeGenerator {
     }
     return null;
   }
-
-  public REG visitBinaryExp(BinExpr binExpr) {
+  public REG[] visitBinExpr(BinExpr binExpr) {
     REG rd = visit(binExpr.lhs());
 
     REG rn;
@@ -243,66 +242,7 @@ public class NodeElemVisitor extends CodeGenerator {
     } else {
       rn = visit(binExpr.rhs());
     }
-
-    BinExpr.BINOP operator = binExpr.operator();
-    String overflowErrLabel;
-    String divByZeroLabel;
-
-    switch (operator) {
-      case OR:
-        program.addInstr(new ORR(rd, rd, rn));
-        break;
-      case AND:
-        program.addInstr(new AND(rd, rd, rn));
-        break;
-      case PLUS:
-        overflowErrLabel = subroutines.addOverflowErr();
-        program.addInstr(new ADD(rd, rd, rn, true));
-        program.addInstr(new B(overflowErrLabel, true, operator.cond()));
-        break;
-      case MINUS:
-        overflowErrLabel = subroutines.addOverflowErr();
-        program.addInstr(new SUB(rd, rd, rn, true));
-        program.addInstr(new B(overflowErrLabel, true, operator.cond()));
-        break;
-      case MUL:
-        overflowErrLabel = subroutines.addOverflowErr();
-        program.addAllInstr(Arrays.asList(
-            new MUL(rd, rn, rd, rn),
-            new CMP(rn, rd, new Shift(ASR, 31)),
-            new B(overflowErrLabel, true, operator.cond())));
-        break;
-      case DIV:
-        divByZeroLabel = subroutines.addCheckDivideByZero();
-        program.addAllInstr(Arrays.asList(
-            new MOV(R0, rd), new MOV(R1, rn),
-            new B(divByZeroLabel, true),
-            new B("__aeabi_idiv", true), new MOV(rd, R0)));
-        break;
-      case MOD:
-        divByZeroLabel = subroutines.addCheckDivideByZero();
-        program.addAllInstr(Arrays.asList(
-            new MOV(R0, rd), new MOV(R1, rn),
-            new B(divByZeroLabel, true),
-            new B("__aeabi_idivmod", true), new MOV(rd, R1)));
-        break;
-
-      case EQUAL:
-      case GE:
-      case GT:
-      case LE:
-      case LT:
-      case NOTEQUAL:
-        program.addAllInstr(Arrays
-            .asList(new CMP(rd, rn, null),
-                new MOV(rd, new Imm_INT(1), operator.cond()),
-                new MOV(rd, new Imm_INT(0),
-                    BinExpr.BINOP.opposites().get(operator).cond())));
-        break;
-
-    }
-    freeReg(rn);
-    return rd;
+    return new REG[]{rd, rn};
   }
 
   public REG visitUnaryExpr(UnaryExpr expr) {
@@ -333,4 +273,79 @@ public class NodeElemVisitor extends CodeGenerator {
     return rd;
   }
 
+  public REG visitPlusExpr(BinExpr binExpr) {
+    REG[] regs = visitBinExpr(binExpr);
+    String overflowErrLabel = subroutines.addOverflowErr();
+    program.addInstr(new ADD(regs[0], regs[0], regs[1], true));
+    program.addInstr(new B(overflowErrLabel, true, binExpr.operator().cond()));
+    freeReg(regs[1]);
+    return regs[0];
+  }
+
+  public REG visitMinusExpr(BinExpr binExpr) {
+    REG[] regs = visitBinExpr(binExpr);
+    String overflowErrLabel = subroutines.addOverflowErr();
+    program.addInstr(new SUB(regs[0], regs[0], regs[1], true));
+    program.addInstr(new B(overflowErrLabel, true, binExpr.operator().cond()));
+    freeReg(regs[1]);
+    return regs[0];
+  }
+
+  public REG visitMulExpr(BinExpr binExpr) {
+    REG[] regs = visitBinExpr(binExpr);
+    String overflowErrLabel = subroutines.addOverflowErr();
+    program.addAllInstr(Arrays.asList(
+        new MUL(regs[0], regs[1], regs[0], regs[1]),
+        new CMP(regs[1], regs[0], new Shift(ASR, 31)),
+        new B(overflowErrLabel, true, binExpr.operator().cond())));
+    freeReg(regs[1]);
+    return regs[0];
+  }
+
+  public REG visitDivExpr(BinExpr binExpr) {
+    REG[] regs = visitBinExpr(binExpr);
+    String divByZeroLabel = subroutines.addCheckDivideByZero();
+    program.addAllInstr(Arrays.asList(
+        new MOV(R0, regs[0]), new MOV(R1, regs[1]),
+        new B(divByZeroLabel, true),
+        new B("__aeabi_idiv", true), new MOV(regs[0], R0)));
+    freeReg(regs[1]);
+    return regs[0];
+  }
+
+  public REG visitModExpr(BinExpr binExpr) {
+    REG[] regs = visitBinExpr(binExpr);
+    String divByZeroLabel = subroutines.addCheckDivideByZero();
+    program.addAllInstr(Arrays.asList(
+        new MOV(R0, regs[0]), new MOV(R1, regs[1]),
+        new B(divByZeroLabel, true),
+        new B("__aeabi_idivmod", true), new MOV(regs[0], R1)));
+    freeReg(regs[1]);
+    return regs[0];
+  }
+
+  public REG visitAndExpr(BinExpr binExpr) {
+    REG[] regs = visitBinExpr(binExpr);
+    program.addInstr(new AND(regs[0], regs[0], regs[1]));
+    freeReg(regs[1]);
+    return regs[0];
+  }
+
+  public REG visitOrExpr(BinExpr binExpr) {
+    REG[] regs = visitBinExpr(binExpr);
+    program.addInstr(new ORR(regs[0], regs[0], regs[1]));
+    freeReg(regs[1]);
+    return regs[0];
+  }
+
+  public REG visitBoolBinExpr(BinExpr binExpr) {
+    REG[] regs = visitBinExpr(binExpr);
+    program.addAllInstr(Arrays
+        .asList(new CMP(regs[0], regs[1], null),
+            new MOV(regs[0], new Imm_INT(1), binExpr.operator().cond()),
+            new MOV(regs[0], new Imm_INT(0),
+                BinExpr.BINOP.opposites().get(binExpr.operator()).cond())));
+    freeReg(regs[1]);
+    return regs[0];
+  }
 }
