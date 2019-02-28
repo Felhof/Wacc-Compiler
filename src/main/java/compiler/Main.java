@@ -6,7 +6,6 @@ import compiler.AST.Nodes.AST;
 import compiler.IR.IR;
 import compiler.listeners.ErrorListener;
 import compiler.visitors.backend.ASTVisitor;
-import compiler.visitors.backend.CodeGenerator;
 import compiler.visitors.frontend.SemanticVisitor;
 import compiler.visitors.frontend.SyntaxVisitor;
 import java.io.IOException;
@@ -20,8 +19,8 @@ import org.antlr.v4.runtime.tree.ParseTree;
 public class Main {
 
   public static void main(String[] args) {
-    //String path = args[0]; // uncomment for labTS test
-    String path = "src/test/examples/valid/IO/print/assignAndPrint.wacc";
+    String path = args[0]; // uncomment for labTS test
+    //String path = "src/test/examples/valid/IO/print/assignAndPrint.wacc";
     AST ast = compileProg(path);
     generateCode(ast, extractFileName(path));
     System.exit(0);
@@ -71,13 +70,13 @@ public class Main {
 
   public static void generateCode(AST ast, String filename){
     ASTVisitor astVisitor = new ASTVisitor();
-    IR program = astVisitor.generate(ast);
+    IR program = astVisitor.generateCode(ast);
 
     String assemblyFile = filename + ".s";
     try {
-      // write instructions to assembly file
       PrintWriter writer = new PrintWriter(assemblyFile, String.valueOf(StandardCharsets.UTF_8));
-      writer.write(program.print());
+      writer.write(program.print());  // write program instructions to assembly
+      // file
       writer.close();
     } catch (IOException e) {
       e.printStackTrace();

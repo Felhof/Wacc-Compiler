@@ -10,10 +10,11 @@ import compiler.IR.Operand.*;
 import compiler.IR.Subroutines;
 import java.util.List;
 
+// Abstract class that holds all the shared fields and methods useful for
+// code generator classes such as the AST visitors
 public abstract class CodeGenerator {
 
-  public static final int SHIFT_TIMES_4 = 2;
-
+  // Shared references among children
   protected IR program;
   protected Subroutines subroutines;
   protected List<REG> availableRegs;
@@ -27,7 +28,7 @@ public abstract class CodeGenerator {
     this.availableRegs = availableRegs;
   }
 
-  /* Util methods for code generator visitors */
+  // Utils to use efficiently the registers
 
   protected REG useAvailableReg() {
     return availableRegs.remove(0);
@@ -39,18 +40,13 @@ public abstract class CodeGenerator {
     }
   }
 
-  protected void loadArg(Operand op2, boolean isByteSize) {
-    program.addInstr(new LDR(R0, op2, isByteSize));
-  }
+  // Utils to save and load data from stack
 
-  protected void moveArg(Operand op2) {
-    program.addInstr(new MOV(R0, op2));
-  }
-
-  protected void setArgs(Operand[] ops) {
-    for (int i = 0; i < ops.length && i < NBR_ARG_REGS; i++) {
-      program.addInstr(new MOV(REG.values()[i], ops[i]));
-    }
+  protected void saveVarData(Type varType, REG rd, REG rn, int offset,
+      boolean update) {
+    program.addInstr(
+        new STR(rd, new Addr(rn, true, new Imm_INT(offset)),
+            varType.isByteSize(), update));
   }
 
   protected REG loadFromStack(String varName) {
@@ -60,12 +56,21 @@ public abstract class CodeGenerator {
     return rd;
   }
 
-  protected REG saveVarData(Type varType, REG rd, REG rn, int offset,
-      boolean update) {
-    program.addInstr(
-        new STR(rd, new Addr(rn, true, new Imm_INT(offset)),
-            varType.isByteSize(), update));
-    return null;
+  // Utils to set arguments into the appropriate registers before
+  // branch to a function label
+
+  protected void loadArg(Operand op2, boolean isByteSize) {
+    program.addInstr(new LDR(R0, op2, isByteSize));
+  }
+
+  protected void setArgs(Operand[] ops) {
+    for (int i = 0; i < ops.length && i < NBR_ARG_REGS; i++) {
+      program.addInstr(new MOV(REG.values()[i], ops[i]));
+    }
+  }
+
+  protected void moveArg(Operand op2) {
+    program.addInstr(new MOV(R0, op2));
   }
 
 }

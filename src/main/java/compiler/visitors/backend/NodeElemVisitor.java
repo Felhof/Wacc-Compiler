@@ -20,119 +20,19 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+// Visitor responsible to visit AST Node elements (corresponding to internal
+// data hold in wacc statements) and populate the IR of the program
 public class NodeElemVisitor extends CodeGenerator {
-  /* Code generator visitor to visit AST Node Elements */
+
+  private static final int SHIFT_TIMES_4 = 2;
 
   public NodeElemVisitor(IR program, Subroutines subroutines, List<REG> availableRegs) {
     super(program, subroutines, availableRegs);
   }
 
-  public REG visitUnaryExpr(UnaryExpr expr) {
-
-    if ((expr.insideExpr() instanceof IntExpr) // Set int value to negative
-        && expr.operator() == UNOP.MINUS) {
-      ((IntExpr) expr.insideExpr()).setNegative();
-      return visit(expr.insideExpr());
-    }
-
-    REG rd = visit(expr.insideExpr());
-    switch (expr.operator()) {
-      case MINUS:
-        String overflowErrLabel = subroutines.addOverflowErr();
-        program.addInstr(new RS(rd, rd, new Imm_INT(0), "BS"));
-        program.addInstr(new B(overflowErrLabel, true, COND.VS));
-        break;
-      case NEG:
-        program.addInstr(new EOR(rd, rd, new Imm_INT(1)));
-        break;
-      case LEN:
-        program.addInstr(new LDR(rd, new Addr(
-            rd))); //load first element at this address, which is the size
-        break;
-      default:
-        break;
-    }
-    return rd;
-  }
-
   public REG visitIntExpr(IntExpr expr) {
     REG rd = useAvailableReg();
     program.addInstr(new LDR(rd, new Imm_INT_MEM(Integer.parseInt(expr.value())), false));
-    return rd;
-  }
-
-  public REG visitBinaryExp(BinExpr binExpr) {
-    REG rd = visit(binExpr.lhs());
-
-    REG rn;
-    if (rd == R10) { // push rn to avoid running out of registers
-      program.addInstr(new PUSH(rd));
-      freeReg(rd);
-      rn = visit(binExpr.rhs());
-      rd = useAvailableReg();
-      program.addInstr(new POP(rd));
-    } else {
-      rn = visit(binExpr.rhs());
-    }
-
-    BinExpr.BINOP operator = binExpr.operator();
-    String overflowErrLabel;
-    String divByZeroLabel;
-
-    switch (operator) {
-      case OR:
-        program.addInstr(new ORR(rd, rd, rn));
-        break;
-      case AND:
-        program.addInstr(new AND(rd, rd, rn));
-        break;
-      case PLUS:
-        overflowErrLabel = subroutines.addOverflowErr();
-        program.addInstr(new ADD(rd, rd, rn, true));
-        program.addInstr(new B(overflowErrLabel, true, operator.cond()));
-        break;
-      case MINUS:
-        overflowErrLabel = subroutines.addOverflowErr();
-        program.addInstr(new SUB(rd, rd, rn, true));
-        program.addInstr(new B(overflowErrLabel, true, operator.cond()));
-        break;
-      case MUL:
-        overflowErrLabel = subroutines.addOverflowErr();
-        program.addAllInstr(Arrays.asList(
-            new MUL(rd, rn, rd, rn),
-            new CMP(rn, rd, new Shift(ASR, 31)),
-            new B(overflowErrLabel, true, operator.cond())));
-        break;
-      case DIV:
-        divByZeroLabel = subroutines.addCheckDivideByZero();
-        program.addAllInstr(Arrays.asList(
-            new MOV(R0, rd), new MOV(R1, rn),
-            new B(divByZeroLabel, true),
-            new B("__aeabi_idiv", true), new MOV(rd, R0)));
-        break;
-      case MOD:
-        divByZeroLabel = subroutines.addCheckDivideByZero();
-        program.addAllInstr(Arrays.asList(
-            new MOV(R0, rd), new MOV(R1, rn),
-            new B(divByZeroLabel, true),
-            new B("__aeabi_idivmod", true), new MOV(rd, R1)));
-        break;
-
-      case EQUAL:
-      case GE:
-      case GT:
-      case LE:
-      case LT:
-      case NOTEQUAL:
-        program.addAllInstr(Arrays
-            .asList(new CMP(rd, rn, null),
-                new MOV(rd, new Imm_INT(1), operator.cond()),
-                new MOV(rd, new Imm_INT(0),
-                    BinExpr.BINOP.opposites().get(operator).cond())));
-        break;
-
-    }
-    freeReg(rn);
     return rd;
   }
 
@@ -330,13 +230,106 @@ public class NodeElemVisitor extends CodeGenerator {
     return null;
   }
 
-  /* utils */
+  public REG visitBinaryExp(BinExpr binExpr) {
+    REG rd = visit(binExpr.lhs());
 
-  // node elem
-  public REG loadFromStack(String varName) {
-    REG rd = useAvailableReg();
-    int offset = currentST.getTotalOffset(varName);
-    program.addInstr(new ADD(rd, SP, new Imm_INT(offset)));
+    REG rn;
+    if (rd == R10) { // push rn to avoid running out of registers
+      program.addInstr(new PUSH(rd));
+      freeReg(rd);
+      rn = visit(binExpr.rhs());
+      rd = useAvailableReg();
+      program.addInstr(new POP(rd));
+    } else {
+      rn = visit(binExpr.rhs());
+    }
+
+    BinExpr.BINOP operator = binExpr.operator();
+    String overflowErrLabel;
+    String divByZeroLabel;
+
+    switch (operator) {
+      case OR:
+        program.addInstr(new ORR(rd, rd, rn));
+        break;
+      case AND:
+        program.addInstr(new AND(rd, rd, rn));
+        break;
+      case PLUS:
+        overflowErrLabel = subroutines.addOverflowErr();
+        program.addInstr(new ADD(rd, rd, rn, true));
+        program.addInstr(new B(overflowErrLabel, true, operator.cond()));
+        break;
+      case MINUS:
+        overflowErrLabel = subroutines.addOverflowErr();
+        program.addInstr(new SUB(rd, rd, rn, true));
+        program.addInstr(new B(overflowErrLabel, true, operator.cond()));
+        break;
+      case MUL:
+        overflowErrLabel = subroutines.addOverflowErr();
+        program.addAllInstr(Arrays.asList(
+            new MUL(rd, rn, rd, rn),
+            new CMP(rn, rd, new Shift(ASR, 31)),
+            new B(overflowErrLabel, true, operator.cond())));
+        break;
+      case DIV:
+        divByZeroLabel = subroutines.addCheckDivideByZero();
+        program.addAllInstr(Arrays.asList(
+            new MOV(R0, rd), new MOV(R1, rn),
+            new B(divByZeroLabel, true),
+            new B("__aeabi_idiv", true), new MOV(rd, R0)));
+        break;
+      case MOD:
+        divByZeroLabel = subroutines.addCheckDivideByZero();
+        program.addAllInstr(Arrays.asList(
+            new MOV(R0, rd), new MOV(R1, rn),
+            new B(divByZeroLabel, true),
+            new B("__aeabi_idivmod", true), new MOV(rd, R1)));
+        break;
+
+      case EQUAL:
+      case GE:
+      case GT:
+      case LE:
+      case LT:
+      case NOTEQUAL:
+        program.addAllInstr(Arrays
+            .asList(new CMP(rd, rn, null),
+                new MOV(rd, new Imm_INT(1), operator.cond()),
+                new MOV(rd, new Imm_INT(0),
+                    BinExpr.BINOP.opposites().get(operator).cond())));
+        break;
+
+    }
+    freeReg(rn);
+    return rd;
+  }
+
+  public REG visitUnaryExpr(UnaryExpr expr) {
+
+    if ((expr.insideExpr() instanceof IntExpr) // Set int value to negative
+        && expr.operator() == UNOP.MINUS) {
+      ((IntExpr) expr.insideExpr()).setNegative();
+      return visit(expr.insideExpr());
+    }
+
+    REG rd = visit(expr.insideExpr());
+    switch (expr.operator()) {
+      case MINUS:
+        String overflowErrLabel = subroutines.addOverflowErr();
+        program.addInstr(new RS(rd, rd, new Imm_INT(0), "BS"));
+        program.addInstr(new B(overflowErrLabel, true, COND.VS));
+        break;
+      case NEG:
+        program.addInstr(new EOR(rd, rd, new Imm_INT(1)));
+        break;
+      case LEN:
+        program.addInstr(new LDR(rd, new Addr(
+            rd))); //load first element at this address, which is the size
+        break;
+      default:
+        break;
+    }
     return rd;
   }
 

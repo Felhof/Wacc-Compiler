@@ -1,15 +1,7 @@
 package compiler.IR;
 
-import static compiler.IR.Operand.REG.PC;
-import static compiler.IR.Operand.REG.R0;
-
 import compiler.IR.Instructions.Instr;
-import compiler.IR.Instructions.LDR;
-import compiler.IR.Instructions.POP;
-import compiler.IR.Instructions.SECTION;
-import compiler.IR.Operand.Imm_INT_MEM;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class IR {
@@ -28,10 +20,6 @@ public class IR {
     data.add(instr);
   }
 
-  public List<Instr> data() {
-    return data;
-  }
-
   public void addInstr(Instr instr) {
     instructions.add(instr);
   }
@@ -48,7 +36,11 @@ public class IR {
     subroutines.addAll(instrs);
   }
 
-  public String print() {
+  public List<Instr> data() {
+    return data;
+  }
+
+  public String print() { // Converts internal representation into a string
     StringBuilder sb = new StringBuilder();
     data.forEach(i -> sb.append(i.toString()).append('\n'));
     instructions.forEach(i -> sb.append(i.toString()).append('\n'));

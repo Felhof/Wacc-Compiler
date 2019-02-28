@@ -11,12 +11,12 @@ import compiler.IR.Instructions.*;
 import compiler.IR.Instructions.LDR.COND;
 import compiler.IR.Operand.*;
 import compiler.IR.Subroutines;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-
+// Visitor responsible to visit AST Nodes (corresponding to wacc statements)
+// and populate the IR of the program
 public class NodeVisitor extends CodeGenerator {
-  /* Code generator visitor to visit AST Node */
 
   public static final int MAX_INT_IMM_SHIFT = 1024;
 
@@ -28,9 +28,10 @@ public class NodeVisitor extends CodeGenerator {
     super(program, subroutines, availableRegs);
   }
 
-  /* Code generator setup */
-
+  // AST root visit methods that setup code generation fields and visit all
+  // instructions
   void visitFuncsAndChildren(AST root) {
+    // visit all functions with corresponding stack offset
     root.root().children().stream().filter(node -> node instanceof FuncNode)
         .forEach(f -> {
           scopeStackOffset = ((FuncNode) f).stackOffset();
@@ -38,17 +39,28 @@ public class NodeVisitor extends CodeGenerator {
           nextPosInStack = scopeStackOffset;
           visit(f);
         });
-    scopeStackOffset = Integer.parseInt(root.stackOffset());
-    totalStackOffset = scopeStackOffset;
-    nextPosInStack = scopeStackOffset;
+    // Set up main offsets and symbol table
+    scopeStackOffset = totalStackOffset = nextPosInStack = root.stackOffset();
     enterScope(root.symbolTable());
+    // Visit all instructions in main
+    addMainStart();
+    root.root().children().stream().filter(node -> !(node instanceof FuncNode))
+        .forEach(ASTVisitor::visit);
+    addMainEnd();
+  }
+
+  private void addMainStart() {
     program.addInstr(new LABEL("main"));
     program.addInstr(new PUSH(LR));
     configureStack("sub");
-    root.root().children().stream().filter(node -> !(node instanceof FuncNode))
-        .forEach(
-            ASTVisitor::visit);
+  }
+
+  private void addMainEnd() {
     configureStack("add");
+    program.addAllInstr(Arrays.asList(
+        new LDR(R0, new Imm_INT_MEM(0)),
+        new POP(PC),
+        new SECTION("ltorg")));
   }
 
   private void configureStack(String type) {
@@ -74,7 +86,7 @@ public class NodeVisitor extends CodeGenerator {
     }
   }
 
-  /* Ast nodes visit methods */
+  // Ast node visit methods
 
   public void visitParentNode(ParentNode node) {
     node.children().forEach(ASTVisitor::visit);
@@ -250,6 +262,7 @@ public class NodeVisitor extends CodeGenerator {
     return tempValues;
   }
 
+  // helper methods to set the current Symbol table to the appropriate scope
   private void enterScope(SymbolTable symbolTable) {
     currentST = symbolTable;
   }
