@@ -147,11 +147,13 @@ public class CodegenTests {
         }
 
         System.out.println("Compiling.. " + filename + ".wacc");
-        AST ast = Main.compileProg(testData[0]);
-        Main.generateCode(ast, outputFolder + filename);
+//        AST ast = Main.compileProg(testData[0]);
+//        Main.generateCode(ast, outputFolder + filename);
+
+        Main.compileProg(testData[0]);
 
         System.out.println("Assembling.. " + filename + ".s");
-        Process emulator = assembleAndEmulate(outputFolder + filename, input);
+        Process emulator = assembleAndEmulate(filename, input);
 
         System.out.println("Testing.. " + filename + "\n");
         assertThat(emulator.exitValue(), is(expectedExitCode));
