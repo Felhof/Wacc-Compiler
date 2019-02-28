@@ -3,6 +3,11 @@ package compiler.IR;
 import static compiler.AST.Types.Type.WORD_SIZE;
 import static compiler.IR.Operand.REG.*;
 
+import compiler.AST.Types.ArrType;
+import compiler.AST.Types.BoolType;
+import compiler.AST.Types.CharType;
+import compiler.AST.Types.IntType;
+import compiler.AST.Types.Type;
 import compiler.IR.Instructions.*;
 import compiler.IR.Instructions.LDR.COND;
 import compiler.IR.Operand.*;
@@ -21,7 +26,25 @@ public class Subroutines {
     program.addData(new SECTION("data"));
   }
 
-  public String addPrintString() {
+  public String addPrint(Type type) {
+    if (type.equals(CharType.getInstance())) {
+      return "putchar";
+    }
+    else if (type.equals(IntType.getInstance())) {
+      return addPrintInt();
+    }
+    else if (type.equals(BoolType.getInstance())) {
+      return addPrintBool();
+    }
+    else if (type.equals(ArrType.stringType())) {
+      return addPrintString();
+    }
+    else {
+      return addPrintReference();
+    }
+  }
+
+  private String addPrintString() {
     String labelName = "p_print_string";
 
     if (!addedSubroutines.contains(labelName)) {
@@ -32,7 +55,7 @@ public class Subroutines {
           new LDR(R1, new Addr(R0)),
           new ADD(R2, R0, new Imm_INT(WORD_SIZE)),
           new LDR(R0, new Imm_STRING_MEM(field))));
-      addPrint();
+      addPrintf();
       addEnd();
 
       addedSubroutines.add(labelName);
@@ -40,7 +63,7 @@ public class Subroutines {
     return labelName;
   }
 
-  public String addPrintReference() {
+  private String addPrintReference() {
     String labelName = "p_print_reference";
 
     if (!addedSubroutines.contains(labelName)) {
@@ -49,7 +72,7 @@ public class Subroutines {
       addStart(labelName);
       program.addSubroutines(new MOV(R1, R0));
       program.addSubroutines(new LDR(R0, new Imm_STRING_MEM(field)));
-      addPrint();
+      addPrintf();
       addEnd();
 
       addedSubroutines.add(labelName);
@@ -57,7 +80,7 @@ public class Subroutines {
     return labelName;
   }
 
-  public String addPrintInt() {
+  private String addPrintInt() {
     String labelName = "p_print_int";
 
     if (!addedSubroutines.contains(labelName)) {
@@ -66,7 +89,7 @@ public class Subroutines {
       addStart(labelName);
       program.addSubroutines(new MOV(R1, R0));
       program.addSubroutines(new LDR(R0, new Imm_STRING_MEM(field)));
-      addPrint();
+      addPrintf();
       addEnd();
 
       addedSubroutines.add(labelName);
@@ -74,7 +97,7 @@ public class Subroutines {
     return labelName;
   }
 
-  public String addPrintBool() {
+  private String addPrintBool() {
     String labelName = "p_print_bool";
 
     if (!addedSubroutines.contains(labelName)) {
@@ -86,12 +109,20 @@ public class Subroutines {
           new CMP(R0, new Imm_INT(0), null),
           new LDR(R0, new Imm_STRING_MEM(trueField), COND.NE),
           new LDR(R0, new Imm_STRING_MEM(falseField), COND.EQ)));
-      addPrint();
+      addPrintf();
       addEnd();
 
       addedSubroutines.add(labelName);
     }
     return labelName;
+  }
+
+  private void addPrintf() {
+    program.addAllSubroutines(Arrays.asList(
+        new ADD(R0, R0, new Imm_INT(WORD_SIZE)),
+        new B("printf", true),
+        new MOV(R0, new Imm_INT(0)),
+        new B("fflush", true)));
   }
 
   public String addPrintln() {
@@ -114,27 +145,33 @@ public class Subroutines {
     return labelName;
   }
 
+  public String addRead(Type type) {
+    String labelName = "";
+    String string_field = "";
 
-
-  public String addReadInt() {
-    String labelName = "p_read_int";
+    if (type.equals(IntType.getInstance())) {
+      labelName = "p_read_int";
+      string_field = "\"%d\\0\"";
+    }
+    else if (type.equals(CharType.getInstance())) {
+      labelName = "p_read_char";
+      string_field = "\" %c\\0\"";
+    }
 
     if (!addedSubroutines.contains(labelName)) {
-      String field = addStringField("\"%d\\0\"");
-      addRead(labelName, field);
+      String field = addStringField(string_field);
+
+      addStart(labelName);
+      program.addAllSubroutines(Arrays.asList(
+          new MOV(R1, R0),
+          new LDR(R0, new Imm_STRING_MEM(field)),
+          new ADD(R0, R0, new Imm_INT(WORD_SIZE)),
+          new B("scanf", true)));
+      addEnd();
+
       addedSubroutines.add(labelName);
     }
-    return labelName;
-  }
 
-  public String addReadChar() {
-    String labelName = "p_read_char";
-
-    if (!addedSubroutines.contains(labelName)) {
-      String field = addStringField("\" %c\\0\"");
-      addRead(labelName, field);
-      addedSubroutines.add(labelName);
-    }
     return labelName;
   }
 
@@ -158,7 +195,6 @@ public class Subroutines {
   }
 
   public String addRuntimeErr() {
-    // todo add line number
     String labelName = "p_throw_runtime_error";
 
     if (!addedSubroutines.contains(labelName)) {
@@ -204,7 +240,6 @@ public class Subroutines {
     if (!addedSubroutines.contains(labelName)) {
       String runtimeErrLabel = addRuntimeErr();
 
-      // todo pass ArrayElem to give index out of bounds used
       String errorMsg0 = addStringField("\"ArrayIndexOutOfBoundError: "
           + "negative index\\n\\0\"");
       String errorMsg1 = addStringField("\"ArrayIndexOutOfBoundsError: "
@@ -275,24 +310,6 @@ public class Subroutines {
 
   private void addEnd() {
     program.addSubroutines(new POP(PC));
-  }
-
-  private void addPrint() {
-    program.addAllSubroutines(Arrays.asList(
-        new ADD(R0, R0, new Imm_INT(WORD_SIZE)),
-        new B("printf", true),
-        new MOV(R0, new Imm_INT(0)),
-        new B("fflush", true)));
-  }
-
-  private void addRead(String labelName, String field) {
-    addStart(labelName);
-    program.addAllSubroutines(Arrays.asList(
-        new MOV(R1, R0),
-        new LDR(R0, new Imm_STRING_MEM(field)),
-        new ADD(R0, R0, new Imm_INT(WORD_SIZE)),
-        new B("scanf", true)));
-    addEnd();
   }
 
   public String addStringField(String string) {

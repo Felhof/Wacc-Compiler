@@ -124,25 +124,10 @@ public class NodeVisitor extends CodeGenerator {
   public void visitPrintNode(PrintNode printNode) {
     REG rd = visit(printNode.expr());
 
-    // mov result into arg register
     moveArg(rd);
-    String printLabel;
-
-    if (printNode.expr().type().equals(CharType.getInstance())) {
-      program.addInstr(new B("putchar", true));
-    } else if (printNode.expr().type().equals(IntType.getInstance())) {
-      printLabel = subroutines.addPrintInt();
-      program.addInstr(new B(printLabel, true));
-    } else if (printNode.expr().type().equals(BoolType.getInstance())) {
-      printLabel = subroutines.addPrintBool();
-      program.addInstr(new B(printLabel, true));
-    } else if (printNode.expr().type().equals(ArrType.stringType())) {
-      printLabel = subroutines.addPrintString();
-      program.addInstr(new B(printLabel, true));
-    } else {
-      printLabel = subroutines.addPrintReference();
-      program.addInstr(new B(printLabel, true));
-    }
+    // use Subroutines class to add print label corresponding to the expr type
+    String printLabel = subroutines.addPrint(printNode.expr().type());
+    program.addInstr(new B(printLabel, true));
 
     if (printNode.newLine()) {
       printLabel = subroutines.addPrintln();
@@ -154,16 +139,10 @@ public class NodeVisitor extends CodeGenerator {
 
   public void visitReadNode(ReadNode readNode) {
     REG rd = visit(readNode.lhs());
-    String readLabel;
 
     moveArg(rd);
-    if ((readNode.lhs()).type().equals(IntType.getInstance())) {
-      readLabel = subroutines.addReadInt();
-      program.addInstr(new B(readLabel, true));
-    } else if ((readNode.lhs()).type().equals(CharType.getInstance())) {
-      readLabel = subroutines.addReadChar();
-      program.addInstr(new B(readLabel, true));
-    }
+    String readLabel = subroutines.addRead(readNode.lhs().type());
+    program.addInstr(new B(readLabel, true));
 
     freeReg(rd);
   }
