@@ -21,15 +21,14 @@ public class Main {
   public static void main(String[] args) {
     String path = args[0]; // uncomment for labTS test
     //String path = "src/test/examples/valid/IO/print/assignAndPrint.wacc";
-    AST ast = compileProg(path);
-    generateCode(ast, extractFileName(path));
-    System.exit(0);
+    int exitCode = compileProg(path);
+    System.exit(exitCode);
   }
 
-  public static AST compileProg(String filename) {
+  public static int compileProg(String filename) {
     BasicLexer lexer = lexFile(filename);
     CommonTokenStream tokenStream = new CommonTokenStream(lexer);
-    return parser(tokenStream);
+    return parser(tokenStream, filename);
   }
 
   public static BasicLexer lexFile(String filename) {
@@ -42,7 +41,7 @@ public class Main {
     return new BasicLexer(input);
   }
 
-  public static AST parser(CommonTokenStream stream) {
+  public static int parser(CommonTokenStream stream, String filename) {
     BasicParser parser = new BasicParser(stream);
 
     parser.removeErrorListeners();
@@ -53,22 +52,27 @@ public class Main {
 
     SyntaxVisitor syntaxVisitor = new SyntaxVisitor(parser);
     syntaxVisitor.visit(tree);
-    syntaxErrorListener.printCompilationStatus();
-
-    return semanticCheck(parser,tree);
+    int exitCode = syntaxErrorListener.printCompilationStatus();
+    if (exitCode != 0) {
+      return exitCode;
+    }
+    return semanticCheck(parser,tree, filename);
   }
 
-  public static AST semanticCheck(BasicParser parser, ParseTree tree) {
+  public static int semanticCheck(BasicParser parser, ParseTree tree, String filename) {
     parser.removeErrorListeners();
     ErrorListener semanticErrorListener = new ErrorListener("Semantic");
     parser.addErrorListener(semanticErrorListener);
     SemanticVisitor semanticVisitor = new SemanticVisitor(parser);
     AST ast = (AST) semanticVisitor.visit(tree);
-    semanticErrorListener.printCompilationStatus();
-    return ast;
+    int exitCode = semanticErrorListener.printCompilationStatus();
+    if (exitCode != 0) {
+      return exitCode;
+    }
+    return generateCode(ast, extractFileName(filename));
   }
 
-  public static void generateCode(AST ast, String filename){
+  public static int generateCode(AST ast, String filename){
     ASTVisitor astVisitor = new ASTVisitor();
     IR program = astVisitor.generateCode(ast);
 
@@ -81,6 +85,7 @@ public class Main {
     } catch (IOException e) {
       e.printStackTrace();
     }
+    return 0;
   }
 
   public static String extractFileName(String path) {
@@ -89,6 +94,5 @@ public class Main {
     return path.substring((slash == -1) ? 0 : slash + 1, (point == -1) ?
         path.length() -1 : point);
   }
-
 }
 

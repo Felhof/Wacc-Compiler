@@ -6,6 +6,7 @@ import static org.hamcrest.core.Is.is;
 import compiler.Main;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -53,6 +54,8 @@ public class AllValidTests {
     System.setErr(new PrintStream(errStream));
     assertThat(errStream.toString(), is(""));
     Main.compileProg(filename);
+    new File(Main.extractFileName(filename) + ".s").delete();
+    new File(Main.extractFileName(filename)).delete();
   }
 
 }

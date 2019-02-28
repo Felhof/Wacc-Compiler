@@ -40,14 +40,15 @@ public class ErrorListener extends BaseErrorListener {
     nbOfErrors++;
   }
 
-  public void printCompilationStatus() {
+  public int printCompilationStatus() {
     if (nbOfErrors > 0) {
       int exitCode = type.equals("Syntax") ? 100 : 200;
       System.err.println("Compilation failed! " + nbOfErrors + " "
           + type + " error" + ((nbOfErrors > 1) ? "s" : ""));
       System.err.println("Exit code " + exitCode + " returned");
       listOfErrors.forEach(System.err::print);
-      System.exit(exitCode);
+      return exitCode;
     }
+    return 0;
   }
 }

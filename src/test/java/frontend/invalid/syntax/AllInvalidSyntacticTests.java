@@ -50,7 +50,7 @@ public class AllInvalidSyntacticTests {
     final ByteArrayOutputStream errStream = new ByteArrayOutputStream();
     System.setErr(new PrintStream(errStream));
     exit.expectSystemExitWithStatus(100);
-    Main.compileProg(filename);
+    Main.main(new String[]{filename});
   }
 
 }

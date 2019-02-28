@@ -24,7 +24,7 @@ public class SemanticInvalidTests {
         final ByteArrayOutputStream errStream = new ByteArrayOutputStream();
         System.setErr(new PrintStream(errStream));
         exit.expectSystemExitWithStatus(200);
-        Main.compileProg(line);
+        Main.main(new String[]{line});
       }
     } catch (IOException e) {
       e.printStackTrace();

@@ -1,1 +1,0 @@
-folder containing assembly files produced by tests
