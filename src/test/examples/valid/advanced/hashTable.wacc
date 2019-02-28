@@ -174,7 +174,7 @@ begin
 
 	######################### Functions for Command Line Interface ###############################
 	
-	# Print the menu and ask to choose. Returns a valid decision.
+	# Print the menu and ask to choose. Returns a frontend.frontend.valid decision.
 	char printMenu() is
 		println "===========================================" ;
 		println "========== Hash Table Program =============" ;
@@ -205,7 +205,7 @@ begin
 			else 
 				print "You have entered: " ;
 				print d ;
-				println " which is invalid, please try again."
+				println " which is frontend.frontend.invalid, please try again."
 			fi
 		done ;
 		# The compiler is not smart enough to know that this never reaches. 

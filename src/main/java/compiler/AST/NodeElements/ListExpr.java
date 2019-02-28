@@ -3,13 +3,12 @@ package compiler.AST.NodeElements;
 import compiler.AST.NodeElements.RHS.Expr;
 import compiler.AST.Types.Type;
 import compiler.IR.Operand.REG;
-import compiler.AST.ASTData;
-import compiler.visitors.ASTVisitor;
+import compiler.visitors.backend.NodeElemVisitor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class ListExpr implements ASTData {
+public class ListExpr extends NodeElem {
 
   private List<String> paramNames;
   private List<Expr> exprList;
@@ -18,6 +17,7 @@ public class ListExpr implements ASTData {
 
 
   public ListExpr(boolean isParams) {
+    super(null);
     this.isParams = isParams;
     this.exprList = new ArrayList<>();
     this.paramNames = new ArrayList<>();
@@ -67,7 +67,7 @@ public class ListExpr implements ASTData {
   }
 
   @Override
-  public REG accept(ASTVisitor visitor) {
+  public REG accept(NodeElemVisitor visitor) {
     if (isParams) {
       return visitor.visitParams(this);
     } else {

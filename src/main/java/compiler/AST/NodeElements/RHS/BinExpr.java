@@ -6,7 +6,7 @@ import compiler.AST.Types.IntType;
 import compiler.AST.Types.Type;
 import compiler.IR.Instructions.LDR.COND;
 import compiler.IR.Operand.REG;
-import compiler.visitors.ASTVisitor;
+import compiler.visitors.backend.NodeElemVisitor;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -71,7 +71,7 @@ public class BinExpr extends Expr {
   }
 
   @Override
-  public REG accept(ASTVisitor visitor) {
+  public REG accept(NodeElemVisitor visitor) {
     return visitor.visitBinaryExp(this);
   }
 

@@ -1,6 +1,6 @@
-package compiler.visitors;
+package compiler.visitors.frontend;
 
-import static compiler.visitors.ASTVisitor.isByteSize;
+import static compiler.AST.Types.Type.WORD_SIZE;
 
 import antlr.BasicParser;
 import antlr.BasicParser.Arg_listContext;
@@ -276,10 +276,10 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
   }
 
   private void incrementStackOffset(Type varType) {
-    if (isByteSize(varType)) {
+    if (varType.isByteSize()) {
       stackPointerOffset++;
     } else {
-      stackPointerOffset += 4;
+      stackPointerOffset += WORD_SIZE;
     }
   }
 
@@ -384,7 +384,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
       for (int i = 0; i < dimensionAccessed; i++) {
         indexes[i] = (Expr) visit(ctx.expr(i));
       }
-      Type type = ((ArrType) varTypeDef).getArrayElem(dimensionAccessed);
+      Type type = ((ArrType) varTypeDef).getElemType(dimensionAccessed);
       if (isLHS) {
         return new ArrayElemLHS(type, varName, indexes);
       }
@@ -557,8 +557,7 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
     for (ExprContext e : ctx.expr()) {
       Expr expr = (Expr) visit(e);
       argsList.addExpr(expr);
-      argsList.addBytes(
-          (isByteSize(expr.type())) ? 1 : 4);
+      argsList.addBytes(expr.type().getSize());
     }
     return argsList;
   }

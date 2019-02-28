@@ -125,7 +125,7 @@ begin
 		return true
 	end
 	
-	# Ask for a move from the human player. The valid move is then stored in the given move array. 
+	# Ask for a move from the human player. The frontend.frontend.valid move is then stored in the given move array.
 	# The row number is stored at move[0], the column number is stored at move[1]. Return true.
 	bool askForAMoveHuman(pair(pair, pair) board, int[] move) is
 		bool success = false ;
@@ -146,14 +146,14 @@ begin
 				move[1] = column ;
 				return true
 			else
-				println "Your move is invalid. Please try again."
+				println "Your move is frontend.frontend.invalid. Please try again."
 			fi			
 		done ; 
 		# Should not reach here
 		return true
 	end
 	
-	# Validate that the give move is valid. Returns true iff it is valid.
+	# Validate that the give move is frontend.frontend.valid. Returns true iff it is frontend.frontend.valid.
 	bool validateMove(pair(pair, pair) board, int moveRow, int moveColumn) is
 		if 1 <= moveRow && moveRow <= 3 && 1 <= moveColumn && moveColumn <= 3 then
 			char sym = call symbolAt(board, moveRow, moveColumn) ;
@@ -783,7 +783,7 @@ begin
 	
 	############################### Game Engine Functions ##################################
 	
-	# Ask for a move from the current player. The valid move is stored in the move array. Return true.
+	# Ask for a move from the current player. The frontend.frontend.valid move is stored in the move array. Return true.
 	bool askForAMove(pair(pair, pair) board, char currentTurn, char playerSymbol, pair(pair, pair) aiData, int[] move) is
 		if currentTurn == playerSymbol then
 			bool _ = call askForAMoveHuman(board, move)

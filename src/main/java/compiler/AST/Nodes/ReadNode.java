@@ -2,8 +2,7 @@ package compiler.AST.Nodes;
 
 import compiler.AST.NodeElements.NodeElem;
 import compiler.AST.NodeElements.RHS.Expr;
-import compiler.IR.Operand.REG;
-import compiler.visitors.ASTVisitor;
+import compiler.visitors.backend.NodeVisitor;
 
 public class ReadNode extends Node {
 
@@ -22,7 +21,7 @@ public class ReadNode extends Node {
   }
 
   @Override
-  public REG accept(ASTVisitor visitor) {
-    return visitor.visitReadNode(this);
+  public void accept(NodeVisitor visitor) {
+    visitor.visitReadNode(this);
   }
 }

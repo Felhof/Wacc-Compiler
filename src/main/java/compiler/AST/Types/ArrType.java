@@ -51,13 +51,13 @@ public class ArrType extends Type {
         ((ArrType) elemType).addDimension() : new ArrType(elemType);
   }
 
-  public Type getArrayElem(int indexes) {
+  public Type getElemType(int indexes) {
     return (indexes == this.dimension) ? elemType() :
         new ArrType(this.elemType, dimension - indexes);
   }
 
-  public Type getArrayElem() {
-    return getArrayElem(1);
+  public Type getElemType() {
+    return getElemType(1);
   }
 
   public static ArrType stringType() {

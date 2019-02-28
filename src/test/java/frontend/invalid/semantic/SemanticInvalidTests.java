@@ -1,4 +1,4 @@
-package invalid.semantic;
+package frontend.invalid.semantic;
 
 import compiler.Main;
 import java.io.BufferedReader;
@@ -12,7 +12,7 @@ import org.junit.contrib.java.lang.system.ExpectedSystemExit;
 
 public class SemanticInvalidTests {
 
-  String path = "src/test/java/invalid/semantic/paths/";
+  String path = "src/test/java/frontend/invalid/semantic/paths/";
 
   @Rule
   public final ExpectedSystemExit exit = ExpectedSystemExit.none();

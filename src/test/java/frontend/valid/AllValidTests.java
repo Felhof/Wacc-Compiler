@@ -1,4 +1,7 @@
-package invalid.syntax;
+package frontend.valid;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
 
 import compiler.Main;
 import java.io.BufferedReader;
@@ -16,7 +19,7 @@ import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 
 @RunWith(value = Parameterized.class)
-public class AllInvalidSyntacticTests {
+public class AllValidTests {
 
   @Rule
   public final ExpectedSystemExit exit = ExpectedSystemExit.none();
@@ -24,7 +27,7 @@ public class AllInvalidSyntacticTests {
   @Parameter
   public String file;
 
-  public static String path = "src/test/java/invalid/syntax/paths/all.txt";
+  public static String path = "src/test/java/frontend/valid/paths/all.txt";
 
   @Parameters(name = "{index}: {0}")
   public static List<String> data() {
@@ -48,7 +51,7 @@ public class AllInvalidSyntacticTests {
     System.out.println("Compile.. " + filename);
     final ByteArrayOutputStream errStream = new ByteArrayOutputStream();
     System.setErr(new PrintStream(errStream));
-    exit.expectSystemExitWithStatus(100);
+    assertThat(errStream.toString(), is(""));
     Main.compileProg(filename);
   }
 

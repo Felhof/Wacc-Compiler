@@ -3,7 +3,7 @@ package compiler.AST.NodeElements.RHS;
 import compiler.AST.NodeElements.PairElem;
 import compiler.AST.Types.Type;
 import compiler.IR.Operand.REG;
-import compiler.visitors.ASTVisitor;
+import compiler.visitors.backend.NodeElemVisitor;
 
 public class PairElemRHS extends PairElem {
 
@@ -13,7 +13,7 @@ public class PairElemRHS extends PairElem {
   }
 
   @Override
-  public REG accept(ASTVisitor visitor) {
+  public REG accept(NodeElemVisitor visitor) {
     return visitor.visitPairElemRHS(this);
   }
 }

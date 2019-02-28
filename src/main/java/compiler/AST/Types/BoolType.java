@@ -19,4 +19,8 @@ public class BoolType extends Type {
     return "BOOL";
   }
 
+  @Override
+  public boolean isByteSize() {
+    return true;
+  }
 }

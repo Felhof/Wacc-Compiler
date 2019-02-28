@@ -3,7 +3,7 @@ package compiler.AST.NodeElements.LHS;
 import compiler.AST.NodeElements.Ident;
 import compiler.AST.Types.Type;
 import compiler.IR.Operand.REG;
-import compiler.visitors.ASTVisitor;
+import compiler.visitors.backend.NodeElemVisitor;
 
 public class IdentLHS extends Ident {
 
@@ -12,7 +12,7 @@ public class IdentLHS extends Ident {
   }
 
   @Override
-  public REG accept(ASTVisitor visitor) {
+  public REG accept(NodeElemVisitor visitor) {
     return visitor.visitIdentLHS(this);
   }
 }

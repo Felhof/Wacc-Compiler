@@ -22,4 +22,6 @@ public enum REG implements Operand {
   public static final List<REG> allUsableRegs =
     new ArrayList<>(Arrays.asList(R4, R5, R6, R7, R8, R9, R10, R11, R12));
 
+  public static final int NBR_ARG_REGS = 4;
+
 }

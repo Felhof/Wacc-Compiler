@@ -1,7 +1,6 @@
 package compiler.AST.Nodes;
 
-import compiler.IR.Operand.REG;
-import compiler.visitors.ASTVisitor;
+import compiler.visitors.backend.NodeVisitor;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,8 +28,8 @@ public class ParentNode extends Node {
   }
 
   @Override
-  public REG accept(ASTVisitor visitor) {
-    return visitor.visitParentNode(this);
+  public void accept(NodeVisitor visitor) {
+    visitor.visitParentNode(this);
   }
 
   public List<Node> children() {

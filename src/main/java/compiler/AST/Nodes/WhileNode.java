@@ -2,8 +2,7 @@ package compiler.AST.Nodes;
 
 import compiler.AST.NodeElements.RHS.Expr;
 import compiler.AST.SymbolTable.SymbolTable;
-import compiler.IR.Operand.REG;
-import compiler.visitors.ASTVisitor;
+import compiler.visitors.backend.NodeVisitor;
 
 public class WhileNode extends Node {
 
@@ -33,8 +32,8 @@ public class WhileNode extends Node {
   }
 
   @Override
-  public REG accept(ASTVisitor visitor) {
-    return visitor.visitWhileNode(this);
+  public void accept(NodeVisitor visitor) {
+    visitor.visitWhileNode(this);
   }
 
   public SymbolTable statST() {

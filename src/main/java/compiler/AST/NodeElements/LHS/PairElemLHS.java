@@ -4,7 +4,7 @@ import compiler.AST.NodeElements.PairElem;
 import compiler.AST.NodeElements.RHS.Expr;
 import compiler.AST.Types.Type;
 import compiler.IR.Operand.REG;
-import compiler.visitors.ASTVisitor;
+import compiler.visitors.backend.NodeElemVisitor;
 
 public class PairElemLHS extends PairElem {
 
@@ -14,7 +14,7 @@ public class PairElemLHS extends PairElem {
   }
 
   @Override
-  public REG accept(ASTVisitor visitor) {
+  public REG accept(NodeElemVisitor visitor) {
     return visitor.visitPairElemLHS(this);
   }
 }

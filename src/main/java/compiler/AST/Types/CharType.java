@@ -19,4 +19,8 @@ public class CharType extends Type {
     return "CHAR";
   }
 
+  @Override
+  public boolean isByteSize() {
+    return true;
+  }
 }

@@ -1,7 +1,9 @@
 package compiler.AST.NodeElements;
 
-import compiler.AST.Types.Type;
 import compiler.AST.ASTData;
+import compiler.AST.Types.Type;
+import compiler.IR.Operand.REG;
+import compiler.visitors.backend.NodeElemVisitor;
 
 public abstract class NodeElem implements ASTData {
   protected Type type;
@@ -18,4 +20,7 @@ public abstract class NodeElem implements ASTData {
   public String toString() {
     return type.toString();
   }
+
+  public abstract REG accept(NodeElemVisitor visitor);
+
 }
