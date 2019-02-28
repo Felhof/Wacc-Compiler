@@ -12,6 +12,7 @@ import compiler.IR.Instructions.LDR.COND;
 import compiler.IR.Operand.*;
 import compiler.IR.Subroutines;
 import java.util.ArrayList;
+import java.util.List;
 
 
 public class NodeVisitor extends CodeGenerator {
@@ -23,38 +24,13 @@ public class NodeVisitor extends CodeGenerator {
   private int totalStackOffset;
   private int branchNb = 0;
 
-  public NodeVisitor() {
-    availableRegs = new ArrayList<>(allUsableRegs);
+  public NodeVisitor(IR program, Subroutines subroutines, List<REG> availableRegs) {
+    super(program, subroutines, availableRegs);
   }
 
   /* Code generator setup */
 
-  public IR visitAST(AST root) {
-    program = new IR();
-    subroutines = new Subroutines(program);
-    constructStartProgram();
-    visitFuncsAndChildren(root);
-    constructEndProgram();
-    // add all data fields at the beginning
-    //program.addAllInstr(0, subroutines.getDataFields());
-    // add at all subroutines at the end
-    //program.addAllInstr(subroutines.getInstructions());
-    return program;
-  }
-
-  private void constructStartProgram() {
-    program.addInstr(new SECTION("text"));
-    program.addInstr(new SECTION("main", true));
-  }
-
-  private void constructEndProgram() {
-    configureStack("add");
-    loadArg(new Imm_INT_MEM(0), false);
-    program.addInstr(new POP(PC));
-    program.addInstr(new SECTION("ltorg"));
-  }
-
-  private void visitFuncsAndChildren(AST root) {
+  void visitFuncsAndChildren(AST root) {
     root.root().children().stream().filter(node -> node instanceof FuncNode)
         .forEach(f -> {
           scopeStackOffset = ((FuncNode) f).stackOffset();
@@ -72,7 +48,7 @@ public class NodeVisitor extends CodeGenerator {
     root.root().children().stream().filter(node -> !(node instanceof FuncNode))
         .forEach(
             ASTVisitor::visit);
-
+    configureStack("add");
   }
 
   private void configureStack(String type) {

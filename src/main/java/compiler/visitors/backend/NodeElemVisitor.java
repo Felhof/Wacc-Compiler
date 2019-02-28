@@ -10,9 +10,11 @@ import compiler.AST.NodeElements.LHS.*;
 import compiler.AST.NodeElements.RHS.*;
 import compiler.AST.NodeElements.RHS.UnaryExpr.UNOP;
 import compiler.AST.Types.ArrType;
+import compiler.IR.IR;
 import compiler.IR.Instructions.*;
 import compiler.IR.Instructions.LDR.COND;
 import compiler.IR.Operand.*;
+import compiler.IR.Subroutines;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -20,6 +22,10 @@ import java.util.List;
 
 public class NodeElemVisitor extends CodeGenerator {
   /* Code generator visitor to visit AST Node Elements */
+
+  public NodeElemVisitor(IR program, Subroutines subroutines, List<REG> availableRegs) {
+    super(program, subroutines, availableRegs);
+  }
 
   public REG visitUnaryExpr(UnaryExpr expr) {
 

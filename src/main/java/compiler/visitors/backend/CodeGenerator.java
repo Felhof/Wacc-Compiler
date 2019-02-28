@@ -14,12 +14,18 @@ public abstract class CodeGenerator {
 
   public static final int SHIFT_TIMES_4 = 2;
 
-  protected static IR program;
-  protected static Subroutines subroutines;
+  protected IR program;
+  protected Subroutines subroutines;
+  protected List<REG> availableRegs;
 
-  protected static List<REG> availableRegs;
   protected static SymbolTable currentST;
   protected static int scopeStackOffset;
+
+  public CodeGenerator(IR program, Subroutines subroutines, List<REG> availableRegs) {
+    this.program = program;
+    this.subroutines = subroutines;
+    this.availableRegs = availableRegs;
+  }
 
   /* Util methods for code generator visitors */
 

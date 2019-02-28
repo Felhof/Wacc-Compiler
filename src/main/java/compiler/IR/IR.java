@@ -1,7 +1,15 @@
 package compiler.IR;
 
+import static compiler.IR.Operand.REG.PC;
+import static compiler.IR.Operand.REG.R0;
+
 import compiler.IR.Instructions.Instr;
+import compiler.IR.Instructions.LDR;
+import compiler.IR.Instructions.POP;
+import compiler.IR.Instructions.SECTION;
+import compiler.IR.Operand.Imm_INT_MEM;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class IR {
