@@ -3,6 +3,7 @@ package compiler.visitors.backend;
 import static compiler.AST.Types.Type.WORD_SIZE;
 import static compiler.IR.Operand.REG.*;
 import static compiler.IR.Operand.Shift.SHIFT_TYPE.*;
+import static compiler.visitors.backend.ASTVisitor.visit;
 
 import compiler.AST.NodeElements.*;
 import compiler.AST.NodeElements.LHS.*;
@@ -17,13 +18,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-public class NodeElemVisitor extends CodegenVisitor {
+public class NodeElemVisitor extends CodeGenerator {
   /* Code generator visitor to visit AST Node Elements */
-
-
-  public REG visit(NodeElem data) {
-    return data.accept(this);
-  }
 
   public REG visitUnaryExpr(UnaryExpr expr) {
 
@@ -37,14 +33,14 @@ public class NodeElemVisitor extends CodegenVisitor {
     switch (expr.operator()) {
       case MINUS:
         String overflowErrLabel = subroutines.addOverflowErr();
-        instructions.add(new RS(rd, rd, new Imm_INT(0), "BS"));
-        instructions.add(new B(overflowErrLabel, true, COND.VS));
+        program.addInstr(new RS(rd, rd, new Imm_INT(0), "BS"));
+        program.addInstr(new B(overflowErrLabel, true, COND.VS));
         break;
       case NEG:
-        instructions.add(new EOR(rd, rd, new Imm_INT(1)));
+        program.addInstr(new EOR(rd, rd, new Imm_INT(1)));
         break;
       case LEN:
-        instructions.add(new LDR(rd, new Addr(
+        program.addInstr(new LDR(rd, new Addr(
             rd))); //load first element at this address, which is the size
         break;
       default:
@@ -55,7 +51,7 @@ public class NodeElemVisitor extends CodegenVisitor {
 
   public REG visitIntExpr(IntExpr expr) {
     REG rd = useAvailableReg();
-    instructions.add(new LDR(rd, new Imm_INT_MEM(Integer.parseInt(expr.value())), false));
+    program.addInstr(new LDR(rd, new Imm_INT_MEM(Integer.parseInt(expr.value())), false));
     return rd;
   }
 
@@ -64,11 +60,11 @@ public class NodeElemVisitor extends CodegenVisitor {
 
     REG rn;
     if (rd == R10) { // push rn to avoid running out of registers
-      instructions.add(new PUSH(rd));
+      program.addInstr(new PUSH(rd));
       freeReg(rd);
       rn = visit(binExpr.rhs());
       rd = useAvailableReg();
-      instructions.add(new POP(rd));
+      program.addInstr(new POP(rd));
     } else {
       rn = visit(binExpr.rhs());
     }
@@ -79,38 +75,38 @@ public class NodeElemVisitor extends CodegenVisitor {
 
     switch (operator) {
       case OR:
-        instructions.add(new ORR(rd, rd, rn));
+        program.addInstr(new ORR(rd, rd, rn));
         break;
       case AND:
-        instructions.add(new AND(rd, rd, rn));
+        program.addInstr(new AND(rd, rd, rn));
         break;
       case PLUS:
         overflowErrLabel = subroutines.addOverflowErr();
-        instructions.add(new ADD(rd, rd, rn, true));
-        instructions.add(new B(overflowErrLabel, true, operator.cond()));
+        program.addInstr(new ADD(rd, rd, rn, true));
+        program.addInstr(new B(overflowErrLabel, true, operator.cond()));
         break;
       case MINUS:
         overflowErrLabel = subroutines.addOverflowErr();
-        instructions.add(new SUB(rd, rd, rn, true));
-        instructions.add(new B(overflowErrLabel, true, operator.cond()));
+        program.addInstr(new SUB(rd, rd, rn, true));
+        program.addInstr(new B(overflowErrLabel, true, operator.cond()));
         break;
       case MUL:
         overflowErrLabel = subroutines.addOverflowErr();
-        instructions.addAll(Arrays.asList(
+        program.addAllInstr(Arrays.asList(
             new MUL(rd, rn, rd, rn),
             new CMP(rn, rd, new Shift(ASR, 31)),
             new B(overflowErrLabel, true, operator.cond())));
         break;
       case DIV:
         divByZeroLabel = subroutines.addCheckDivideByZero();
-        instructions.addAll(Arrays.asList(
+        program.addAllInstr(Arrays.asList(
             new MOV(R0, rd), new MOV(R1, rn),
             new B(divByZeroLabel, true),
             new B("__aeabi_idiv", true), new MOV(rd, R0)));
         break;
       case MOD:
         divByZeroLabel = subroutines.addCheckDivideByZero();
-        instructions.addAll(Arrays.asList(
+        program.addAllInstr(Arrays.asList(
             new MOV(R0, rd), new MOV(R1, rn),
             new B(divByZeroLabel, true),
             new B("__aeabi_idivmod", true), new MOV(rd, R1)));
@@ -122,7 +118,7 @@ public class NodeElemVisitor extends CodegenVisitor {
       case LE:
       case LT:
       case NOTEQUAL:
-        instructions.addAll(Arrays
+        program.addAllInstr(Arrays
             .asList(new CMP(rd, rn, null),
                 new MOV(rd, new Imm_INT(1), operator.cond()),
                 new MOV(rd, new Imm_INT(0),
@@ -137,14 +133,14 @@ public class NodeElemVisitor extends CodegenVisitor {
   public REG visitStringExpr(StringExpr stringExpr) {
     String field = subroutines.addStringField(stringExpr.getValue());
     REG rd = useAvailableReg();
-    instructions.add(new LDR(rd, new Imm_STRING_MEM(field), false));
+    program.addInstr(new LDR(rd, new Imm_STRING_MEM(field), false));
     return rd;
   }
 
   public REG visitCharExpr(CharExpr charExpr) {
     REG rd = useAvailableReg();
-    instructions
-        .add(new MOV(rd, !(charExpr.isEscapeChar()) ? new Imm_STRING(
+    program.addInstr(
+        new MOV(rd, !(charExpr.isEscapeChar()) ? new Imm_STRING(
             "'" + charExpr.value() + "'")
             : new Imm_INT(Integer.parseInt(charExpr.value()))));
     return rd;
@@ -152,7 +148,7 @@ public class NodeElemVisitor extends CodegenVisitor {
 
   public REG visitBoolExpr(BoolExpr boolExpr) {
     REG rd = useAvailableReg();
-    instructions.add(new MOV(rd, new Imm_INT(boolExpr.value() ? 1 : 0)));
+    program.addInstr(new MOV(rd, new Imm_INT(boolExpr.value() ? 1 : 0)));
     return rd;
   }
 
@@ -168,8 +164,8 @@ public class NodeElemVisitor extends CodegenVisitor {
 
     // malloc the number of elements plus one for to hold the size
     loadArg(new Imm_INT_MEM(size * elemSize + WORD_SIZE), false);
-    instructions.add(new B("malloc", true));
-    instructions.add(new MOV(arrAddress, R0));
+    program.addInstr(new B("malloc", true));
+    program.addInstr(new MOV(arrAddress, R0));
 
     // store array address elements in the heap
     for (int i = 0; i < size; i++) {
@@ -178,8 +174,8 @@ public class NodeElemVisitor extends CodegenVisitor {
 
     // store size of the array in the heap
     REG sizeReg = useAvailableReg();
-    instructions.add(new LDR(sizeReg, new Imm_INT_MEM(size)));
-    instructions.add(new STR(sizeReg, new Addr(arrAddress)));
+    program.addInstr(new LDR(sizeReg, new Imm_INT_MEM(size)));
+    program.addInstr(new STR(sizeReg, new Addr(arrAddress)));
 
     freeReg(sizeReg);
     return arrAddress;
@@ -197,7 +193,7 @@ public class NodeElemVisitor extends CodegenVisitor {
 
   public REG visitArrayElemRHS(ArrayElemRHS arrayElemRHS) {
     REG rd = visitArrayElem(arrayElemRHS);
-    instructions.add(new LDR(rd, new Addr(rd),
+    program.addInstr(new LDR(rd, new Addr(rd),
         arrayElemRHS.type().isByteSize())); // load value of array elem
     return rd;
   }
@@ -209,16 +205,16 @@ public class NodeElemVisitor extends CodegenVisitor {
 
     for (Expr indexExpr : arrayElem.indexes()) {
       index = visit(indexExpr); // simple array case
-      instructions.add(new LDR(arrAddress, new Addr(arrAddress)));
+      program.addInstr(new LDR(arrAddress, new Addr(arrAddress)));
       setArgs(new REG[]{index, arrAddress});
       String checkArrayBoundsLabel = subroutines.addCheckArrayBounds();
-      instructions.add(new B(checkArrayBoundsLabel, true));
-      instructions.add(new ADD(arrAddress, arrAddress, new Imm_INT(WORD_SIZE)));
+      program.addInstr(new B(checkArrayBoundsLabel, true));
+      program.addInstr(new ADD(arrAddress, arrAddress, new Imm_INT(WORD_SIZE)));
 
       if (arrayElem.type().isByteSize()) {
-        instructions.add(new ADD(arrAddress, arrAddress, index));
+        program.addInstr(new ADD(arrAddress, arrAddress, index));
       } else {
-        instructions.add(new ADD(arrAddress, arrAddress, new Reg_Shift(index,
+        program.addInstr(new ADD(arrAddress, arrAddress, new Reg_Shift(index,
             new Shift(LSL, SHIFT_TIMES_4))));
       }
 
@@ -233,7 +229,7 @@ public class NodeElemVisitor extends CodegenVisitor {
 
   public REG visitPairElemRHS(PairElemRHS pairElemRHS) {
     REG rd = visitPairElem(pairElemRHS);
-    instructions.add(new LDR(rd, new Addr(rd), pairElemRHS.type().isByteSize()));
+    program.addInstr(new LDR(rd, new Addr(rd), pairElemRHS.type().isByteSize()));
     return rd; // returns value of pair element
   }
 
@@ -242,8 +238,8 @@ public class NodeElemVisitor extends CodegenVisitor {
     REG rd = visit(pairElem.expr());
     moveArg(rd);
     String nullPointerLabel = subroutines.addNullPointerCheck();
-    instructions.add(new B(nullPointerLabel, true));
-    instructions.add(new LDR(rd,
+    program.addInstr(new B(nullPointerLabel, true));
+    program.addInstr(new LDR(rd,
         new Addr(rd, true, new Imm_INT(pairElem.posInPair() * WORD_SIZE)),
         false));
     return rd;
@@ -251,9 +247,9 @@ public class NodeElemVisitor extends CodegenVisitor {
 
   public REG visitPair(Pair pair) {
     loadArg(new Imm_INT_MEM(2 * WORD_SIZE), false);
-    instructions.add(new B("malloc", true));
+    program.addInstr(new B("malloc", true));
     REG rd = useAvailableReg();
-    instructions.add(new MOV(rd, R0)); // fetch address of pair
+    program.addInstr(new MOV(rd, R0)); // fetch address of pair
     storeExpInHeap(pair.fst(), rd, 0);
     storeExpInHeap(pair.snd(), rd, WORD_SIZE);
     return rd;
@@ -261,43 +257,43 @@ public class NodeElemVisitor extends CodegenVisitor {
 
   public REG visitNullPair() {
     REG rd = useAvailableReg();
-    instructions.add(new LDR(rd, new Imm_INT_MEM(0), false));
+    program.addInstr(new LDR(rd, new Imm_INT_MEM(0), false));
     return rd;
   }
 
   private void storeExpInHeap(Expr expr, REG objectAddr, int offset) {
     REG rd = visit(expr);
     loadArg(new Imm_INT_MEM(expr.type().getSize()), false);
-    instructions.add(new B("malloc", true));
+    program.addInstr(new B("malloc", true));
     saveVarData(expr.type(), rd, R0, 0, false);
-    instructions
-        .add(new STR(R0, new Addr(objectAddr, true, new Imm_INT(offset))));
+    program.addInstr(
+        new STR(R0, new Addr(objectAddr, true, new Imm_INT(offset))));
     freeReg(rd);
   }
 
   public REG visitIdentLHS(Ident ident) {
     REG rd = useAvailableReg();
     int offset = currentST.getTotalOffset(ident.varName());
-    instructions.add(new ADD(rd, SP, new Imm_INT(offset)));
+    program.addInstr(new ADD(rd, SP, new Imm_INT(offset)));
     return rd;
   }
 
   public REG visitIdentRHS(Ident ident) {
     REG rd = useAvailableReg();
-    int offset = currentST.getTotalOffset(ident.varName());
-    instructions.add(new LDR(rd, new Addr(SP, true, new Imm_INT(offset)),
+    int offset = CodeGenerator.currentST.getTotalOffset(ident.varName());
+    program.addInstr(new LDR(rd, new Addr(SP, true, new Imm_INT(offset)),
         ident.type().isByteSize()));
     return rd;
   }
 
   public REG visitFuncCall(FuncCall funcCall) {
     visit(funcCall.argsList());
-    instructions.add(new B("f_" + funcCall.funcName(), true));
-    instructions.add(
+    program.addInstr(new B("f_" + funcCall.funcName(), true));
+    program.addInstr(
         new ADD(SP, SP, new Imm_INT(funcCall.argsList().bytesPushed()), false));
     currentST.decrementStackOffset(funcCall.argsList().bytesPushed());
     REG rd = useAvailableReg();
-    instructions.add(new MOV(rd, R0));
+    program.addInstr(new MOV(rd, R0));
     return rd;
   }
 
@@ -326,6 +322,16 @@ public class NodeElemVisitor extends CodegenVisitor {
       freeReg(rd);
     }
     return null;
+  }
+
+  /* utils */
+
+  // node elem
+  public REG loadFromStack(String varName) {
+    REG rd = useAvailableReg();
+    int offset = currentST.getTotalOffset(varName);
+    program.addInstr(new ADD(rd, SP, new Imm_INT(offset)));
+    return rd;
   }
 
 }

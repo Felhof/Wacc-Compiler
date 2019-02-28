@@ -1,7 +1,7 @@
 package compiler.AST.Nodes;
 
 import compiler.AST.NodeElements.RHS.Expr;
-import compiler.visitors.backend.ASTVisitor;
+import compiler.visitors.backend.NodeVisitor;
 
 public class ReturnNode extends Node {
   private Expr expr;
@@ -17,7 +17,7 @@ public class ReturnNode extends Node {
   }
 
   @Override
-  public void accept(ASTVisitor visitor) {
+  public void accept(NodeVisitor visitor) {
     visitor.visitReturnNode(this);
   }
 

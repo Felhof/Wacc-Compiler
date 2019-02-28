@@ -1,7 +1,7 @@
 package compiler.AST.Nodes;
 
 import compiler.AST.ASTData;
-import compiler.visitors.backend.ASTVisitor;
+import compiler.visitors.backend.NodeVisitor;
 
 public abstract class Node implements ASTData {
   int lineNumber;
@@ -10,6 +10,6 @@ public abstract class Node implements ASTData {
     this.lineNumber = lineNumber;
   }
 
-  public abstract void accept(ASTVisitor visitor);
+  public abstract void accept(NodeVisitor visitor);
 
 }

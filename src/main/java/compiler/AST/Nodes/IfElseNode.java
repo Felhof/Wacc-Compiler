@@ -2,7 +2,7 @@ package compiler.AST.Nodes;
 
 import compiler.AST.NodeElements.RHS.Expr;
 import compiler.AST.SymbolTable.SymbolTable;
-import compiler.visitors.backend.ASTVisitor;
+import compiler.visitors.backend.NodeVisitor;
 
 public class IfElseNode extends Node {
   private Expr condition;
@@ -30,7 +30,7 @@ public class IfElseNode extends Node {
   }
 
   @Override
-  public void accept(ASTVisitor visitor) {
+  public void accept(NodeVisitor visitor) {
     visitor.visitIfElseNode(this);
   }
 

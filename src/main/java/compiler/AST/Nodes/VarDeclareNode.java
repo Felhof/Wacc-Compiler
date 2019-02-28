@@ -2,7 +2,7 @@ package compiler.AST.Nodes;
 
 import compiler.AST.NodeElements.NodeElem;
 import compiler.AST.Types.Type;
-import compiler.visitors.backend.ASTVisitor;
+import compiler.visitors.backend.NodeVisitor;
 
 public class VarDeclareNode extends Node {
   private Type varType;
@@ -31,7 +31,7 @@ public class VarDeclareNode extends Node {
   }
 
   @Override
-  public void accept(ASTVisitor visitor) {
+  public void accept(NodeVisitor visitor) {
     visitor.visitVarDeclareNode(this);
   }
 }

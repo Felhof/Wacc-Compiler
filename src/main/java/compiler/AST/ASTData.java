@@ -2,7 +2,7 @@ package compiler.AST;
 
 public interface ASTData {
 
-//  default REG accept(ASTVisitor visitor) {
+//  default REG accept(CodeGenerator visitor) {
 //    return null;
 //  }
 

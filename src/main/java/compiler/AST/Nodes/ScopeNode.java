@@ -1,7 +1,7 @@
 package compiler.AST.Nodes;
 
 import compiler.AST.SymbolTable.SymbolTable;
-import compiler.visitors.backend.ASTVisitor;
+import compiler.visitors.backend.NodeVisitor;
 
 public class ScopeNode extends Node {
 
@@ -21,7 +21,7 @@ public class ScopeNode extends Node {
   }
 
   @Override
-  public void accept(ASTVisitor visitor) {
+  public void accept(NodeVisitor visitor) {
     visitor.visitScopeNode(this);
   }
 

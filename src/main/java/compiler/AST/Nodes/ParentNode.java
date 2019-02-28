@@ -1,6 +1,6 @@
 package compiler.AST.Nodes;
 
-import compiler.visitors.backend.ASTVisitor;
+import compiler.visitors.backend.NodeVisitor;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,7 +28,7 @@ public class ParentNode extends Node {
   }
 
   @Override
-  public void accept(ASTVisitor visitor) {
+  public void accept(NodeVisitor visitor) {
     visitor.visitParentNode(this);
   }
 

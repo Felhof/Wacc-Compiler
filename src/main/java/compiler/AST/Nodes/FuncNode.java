@@ -3,7 +3,7 @@ package compiler.AST.Nodes;
 import compiler.AST.NodeElements.ListExpr;
 import compiler.AST.SymbolTable.SymbolTable;
 import compiler.AST.Types.Type;
-import compiler.visitors.backend.ASTVisitor;
+import compiler.visitors.backend.NodeVisitor;
 
 public class FuncNode extends Node {
   private Type returnType;
@@ -32,7 +32,7 @@ public class FuncNode extends Node {
   }
 
   @Override
-  public void accept(ASTVisitor visitor) {
+  public void accept(NodeVisitor visitor) {
     visitor.visitFuncNode(this);
   }
 
