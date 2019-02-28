@@ -1,7 +1,5 @@
 package compiler.visitors.backend;
 
-import static compiler.IR.Operand.REG.PC;
-import static compiler.IR.Operand.REG.R0;
 import static compiler.IR.Operand.REG.allUsableRegs;
 
 import compiler.AST.ASTData;
@@ -9,16 +7,14 @@ import compiler.AST.NodeElements.NodeElem;
 import compiler.AST.Nodes.AST;
 import compiler.AST.Nodes.Node;
 import compiler.IR.IR;
-import compiler.IR.Instructions.LDR;
-import compiler.IR.Instructions.POP;
 import compiler.IR.Instructions.SECTION;
-import compiler.IR.Operand.Imm_INT_MEM;
 import compiler.IR.Operand.REG;
 import compiler.IR.Subroutines;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
+// Class responsible of building the IR of the program by redirecting visit
+// methods to corresponding the AST visitors
 public class ASTVisitor {
 
   private IR program;
@@ -34,10 +30,10 @@ public class ASTVisitor {
     nodeElemVisitor = new NodeElemVisitor(program, subroutines, availableRegs);
   }
 
-  public IR generate(AST root) {
+  // Start visiting AST from root and populate IR
+  public IR generateCode(AST root) {
     constructStartProgram();
     nodeVisitor.visitFuncsAndChildren(root);
-    constructEndProgram();
     return program;
   }
 
@@ -46,13 +42,8 @@ public class ASTVisitor {
     program.addInstr(new SECTION("main", true));
   }
 
-  private void constructEndProgram() {
-    program.addAllInstr(Arrays.asList(
-        new LDR(R0, new Imm_INT_MEM(0)),
-        new POP(PC),
-        new SECTION("ltorg")));
-  }
-
+  // redirect to specific visitor depending if data is a node or a node
+  // element of the AST
   static REG visit(ASTData data) {
     if (data instanceof Node) {
       ((Node) data).accept(nodeVisitor);

@@ -6,7 +6,6 @@ import compiler.AST.Nodes.AST;
 import compiler.IR.IR;
 import compiler.listeners.ErrorListener;
 import compiler.visitors.backend.ASTVisitor;
-import compiler.visitors.backend.CodeGenerator;
 import compiler.visitors.frontend.SemanticVisitor;
 import compiler.visitors.frontend.SyntaxVisitor;
 import java.io.IOException;
@@ -75,13 +74,13 @@ public class Main {
 
   public static int generateCode(AST ast, String filename){
     ASTVisitor astVisitor = new ASTVisitor();
-    IR program = astVisitor.generate(ast);
+    IR program = astVisitor.generateCode(ast);
 
     String assemblyFile = filename + ".s";
     try {
-      // write instructions to assembly file
       PrintWriter writer = new PrintWriter(assemblyFile, String.valueOf(StandardCharsets.UTF_8));
-      writer.write(program.print());
+      writer.write(program.print());  // write program instructions to assembly
+      // file
       writer.close();
     } catch (IOException e) {
       e.printStackTrace();

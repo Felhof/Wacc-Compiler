@@ -6,23 +6,19 @@ import static compiler.IR.Operand.REG.*;
 import compiler.IR.Instructions.*;
 import compiler.IR.Instructions.LDR.COND;
 import compiler.IR.Operand.*;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public class Subroutines {
 
   private IR program;
-  private Set<String> addedSubroutines;
+  private Set<String> addedSubroutines; // keeps track of added subroutines
 
   public Subroutines(IR program) {
     this.program = program;
-    program.addData(new SECTION("data"));
-
-    //this.subroutines = new ArrayList<>();
     this.addedSubroutines = new HashSet<>();
+    program.addData(new SECTION("data"));
   }
 
   public String addPrintString() {

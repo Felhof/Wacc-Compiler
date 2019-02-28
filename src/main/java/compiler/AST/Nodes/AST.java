@@ -6,7 +6,7 @@ import compiler.AST.SymbolTable.SymbolTable;
 public class AST implements ASTData {
   private ParentNode root;
   private SymbolTable symbolTable;
-  private int stackPointerOffset;
+  private int stackPointerOffset; // amount of bytes to be stored in the stack
 
   public AST(ParentNode root, SymbolTable symbolTable, int stackPointerOffset) {
     this.root = root;
@@ -22,7 +22,8 @@ public class AST implements ASTData {
     return symbolTable;
   }
 
-  public String stackOffset() {
-    return String.valueOf(stackPointerOffset);
+  public int stackOffset() {
+    return stackPointerOffset;
   }
+
 }
