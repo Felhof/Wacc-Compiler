@@ -5,7 +5,6 @@ import static compiler.visitors.backend.ASTVisitor.visit;
 
 import compiler.AST.Nodes.*;
 import compiler.AST.SymbolTable.SymbolTable;
-import compiler.AST.Types.*;
 import compiler.IR.IR;
 import compiler.IR.Instructions.*;
 import compiler.IR.Instructions.LDR.COND;
@@ -214,26 +213,26 @@ public class NodeVisitor extends CodeGenerator {
   // Generic method to enter a new scope(eg.while), configure stack
   // and set appropriate symbol Table
   private void visitChildStats(SymbolTable st, ParentNode child) {
-    int[] tempValues = setDynamicFields(st.getStackOffset());
+    int[] tempValues = prepareEnvForNewScope(st);
     configureStack("sub");
-    enterScope(st);
     visit(child);
-    exitScope(currentST);
     configureStack("add");
-    reinstateDynamicsFields(tempValues);
+    reinstatePreviousScope(tempValues, currentST);
   }
 
   //Reassign fields to previous values in the enclosing scope
-  private void reinstateDynamicsFields(int[] tempValues) {
+  private void reinstatePreviousScope(int[] tempValues, SymbolTable currST) {
     totalStackOffset = tempValues[0];
     scopeStackOffset = tempValues[1];
     nextPosInStack = tempValues[2];
+    exitScope(currST);
   }
 
   //Assign fields to values of new scope about to be entered
-  private int[] setDynamicFields(int scopeOffset) {
+  private int[] prepareEnvForNewScope(SymbolTable st) {
+    enterScope(st);
     int[] tempValues = {totalStackOffset, scopeStackOffset, nextPosInStack};
-    scopeStackOffset = scopeOffset;
+    scopeStackOffset = st.getStackOffset();
     totalStackOffset = scopeStackOffset + tempValues[0];
     nextPosInStack = scopeStackOffset;
     return tempValues;
