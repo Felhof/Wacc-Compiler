@@ -9,17 +9,12 @@ public class IR {
   private List<Instr> data;         // list of data fields on top
   private List<Instr> instructions; // list of ARM instructions
   private List<Instr> subroutines;  // list of common labels at the end
-  public static List<Integer> listOfIDs;
   public static int currentId;
 
   public IR() {
     this.data = new ArrayList<>();
     this.instructions = new ArrayList<>();
     this.subroutines = new ArrayList<>();
-    listOfIDs = new ArrayList<>();
-    for (int i = 1; i < 10000; i++) {
-      listOfIDs.add(i);
-    }
     currentId = 0;
   }
 
