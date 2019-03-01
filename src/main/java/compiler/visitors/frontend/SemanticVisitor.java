@@ -586,8 +586,8 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
     ScopeData stat = visitStatInNewScope(ctx.stat());
     stat.symbolTable.setScopeStackOffset(stackPointerOffset);
     currentParentNode.add(
-        new ScopeNode(stat.astNode(), stat.symbolTable(), ctx.start.getLine(),
-            stackPointerOffset));
+        new ScopeNode(stat.astNode(), stat.symbolTable(), ctx.start.getLine()
+        ));
     stackPointerOffset = temp;
     return null;
   }

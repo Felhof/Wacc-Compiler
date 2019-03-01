@@ -34,17 +34,30 @@ public class UnaryExpr extends Expr {
     return null;
   }
 
-  public UNOP operator() {
-    return operator;
-  }
-
   public Expr insideExpr() {
     return expr;
   }
 
   @Override
   public REG accept(NodeElemVisitor visitor) {
-    return visitor.visitUnaryExpr(this);
+    switch (operator) {
+      case MINUS:
+        if (insideExpr() instanceof IntExpr){
+          ((IntExpr) expr).setNegative();
+          return visitor.visitBasicUnaryOp(this);
+        }
+        return visitor.visitUnaryMinus(this);
+      case LEN:
+        return visitor.visitLenExpr(this);
+      case NEG:
+        return visitor.visitNegExpr(this);
+      case ORD:
+      case CHR:
+      case PLUS:
+        return visitor.visitBasicUnaryOp(this);
+      default:
+        return null;
+    }
   }
 
   public enum UNOP {
@@ -66,10 +79,6 @@ public class UnaryExpr extends Expr {
 
     public String op() {
       return op;
-    }
-
-    public Type argType() {
-      return argType;
     }
 
     public Type returnType() { return returnType; }
