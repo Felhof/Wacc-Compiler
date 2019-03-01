@@ -3,7 +3,7 @@ package compiler.IR.Instructions;
 
 import compiler.IR.Instructions.LDR.COND;
 
-public class B implements Instr {
+public class B extends Instr {
 
   private String label;
   private COND cond;

@@ -3,7 +3,7 @@ package compiler.IR.Instructions;
 import compiler.IR.Operand.Operand;
 import compiler.IR.Operand.REG;
 
-public class STR implements Instr {
+public class STR extends Instr {
 
   private REG rd;
   private Operand op2;
