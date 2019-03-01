@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class STRING_FIELD implements Instr {
+public class STRING_FIELD extends Instr {
 
   public static List<String> escape = new ArrayList<>(Arrays.asList("\\0",
       "\\b", "\\t", "\\n", "\\f", "\\r", "\\\"", "\\'"));

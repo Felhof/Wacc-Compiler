@@ -2,7 +2,7 @@ package compiler.IR.Instructions;
 
 import compiler.IR.Operand.REG;
 
-public class MUL implements Instr {
+public class MUL extends Instr {
 
   private REG rdLo;
   private REG rnLi;

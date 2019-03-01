@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class POP implements Instr {
+public class POP extends Instr {
 
   private List<REG> regsToPop;
 

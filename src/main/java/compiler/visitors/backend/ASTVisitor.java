@@ -1,5 +1,6 @@
 package compiler.visitors.backend;
 
+import static compiler.IR.IR.currentId;
 import static compiler.IR.Operand.REG.allUsableRegs;
 
 import compiler.AST.ASTData;
@@ -45,7 +46,10 @@ public class ASTVisitor {
   // element of the AST
   static REG visit(ASTData data) {
     if (data instanceof Node) {
+      int tempId = currentId;
+      currentId++;
       ((Node) data).accept(nodeVisitor);
+      currentId = tempId;
     }
     else if (data instanceof NodeElem) {
       return ((NodeElem) data).accept(nodeElemVisitor);

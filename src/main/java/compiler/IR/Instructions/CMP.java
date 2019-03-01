@@ -4,7 +4,7 @@ import compiler.IR.Operand.Operand;
 import compiler.IR.Operand.REG;
 import compiler.IR.Operand.Shift;
 
-public class CMP implements Instr {
+public class CMP extends Instr {
 
   private REG rd;
   private Operand op;

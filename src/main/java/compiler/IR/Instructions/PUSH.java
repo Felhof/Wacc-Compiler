@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class PUSH implements Instr {
+public class PUSH extends Instr {
 
   private List<REG> regsToPush;
 

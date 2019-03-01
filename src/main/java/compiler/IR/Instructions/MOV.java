@@ -4,7 +4,7 @@ import compiler.IR.Instructions.LDR.COND;
 import compiler.IR.Operand.Operand;
 import compiler.IR.Operand.REG;
 
-public class MOV implements Instr {
+public class MOV extends Instr {
   private REG rd;
   private Operand op2;
   private COND cond = null;

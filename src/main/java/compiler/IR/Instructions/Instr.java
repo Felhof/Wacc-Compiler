@@ -1,7 +1,10 @@
 package compiler.IR.Instructions;
 
-public interface Instr {
+import static compiler.IR.IR.currentId;
 
-  String toString();
+public abstract class Instr {
+
+  private Integer id = currentId;
+  public abstract String toString();
 
 }
