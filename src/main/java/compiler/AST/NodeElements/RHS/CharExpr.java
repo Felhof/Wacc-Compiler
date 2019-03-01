@@ -8,7 +8,7 @@ import compiler.visitors.backend.NodeElemVisitor;
 public class CharExpr extends Expr {
 
   private String value;
-  private boolean isEscapeChar = false;
+  private boolean isEscapeChar;
 
   public CharExpr(String value) {
     super(CharType.getInstance());

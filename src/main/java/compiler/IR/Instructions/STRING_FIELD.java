@@ -19,7 +19,6 @@ public class STRING_FIELD implements Instr {
   }
 
   public static int nbSpecialChar(String s) {
-    // todo refactor
     String temp;
     temp = s.substring(1, s.length() - 1);
     for (String anEscape : escape) {
