@@ -206,8 +206,8 @@ public class NodeElemVisitor extends CodeGenerator {
   public REG visitParams(ListExpr listExpr) {
     List<String> paramNames = listExpr.paramNames();
     List<Expr> exprList = listExpr.exprList();
-    // LR has been pushed and we have some space for the variable declaration
-    // the arguments reside at this offset from the current stack pointer
+    // offset of parameters is 4 (we pushed LR) plus the stack offset
+    // of the scope since space is made for var declarations
     int offset = WORD_SIZE + scopeStackOffset;
     for (int i = 0; i < exprList.size(); i++) {
       currentST.lookUpVarScope(paramNames.get(i)).setLocalOffset(offset);
@@ -243,34 +243,6 @@ public class NodeElemVisitor extends CodeGenerator {
       rn = visit(binExpr.rhs());
     }
     return new REG[]{rd, rn};
-  }
-
-  public REG visitUnaryExpr(UnaryExpr expr) {
-
-    if ((expr.insideExpr() instanceof IntExpr) // Set int value to negative
-        && expr.operator() == UNOP.MINUS) {
-      ((IntExpr) expr.insideExpr()).setNegative();
-      return visit(expr.insideExpr());
-    }
-
-    REG rd = visit(expr.insideExpr());
-    switch (expr.operator()) {
-      case MINUS:
-        String overflowErrLabel = subroutines.addOverflowErr();
-        program.addInstr(new RS(rd, rd, new Imm_INT(0), "BS"));
-        program.addInstr(new B(overflowErrLabel, true, COND.VS));
-        break;
-      case NEG:
-        program.addInstr(new EOR(rd, rd, new Imm_INT(1)));
-        break;
-      case LEN:
-        program.addInstr(new LDR(rd, new Addr(
-            rd))); //load first element at this address, which is the size
-        break;
-      default:
-        break;
-    }
-    return rd;
   }
 
   public REG visitPlusExpr(BinExpr binExpr) {
@@ -347,5 +319,31 @@ public class NodeElemVisitor extends CodeGenerator {
                 BinExpr.BINOP.opposites().get(binExpr.operator()).cond())));
     freeReg(regs[1]);
     return regs[0];
+  }
+
+  public REG visitUnaryMinus(UnaryExpr unaryExpr) {
+    REG rd = visit(unaryExpr.insideExpr());
+    String overflowErrLabel = subroutines.addOverflowErr();
+    program.addInstr(new RS(rd, rd, new Imm_INT(0), "BS"));
+    program.addInstr(new B(overflowErrLabel, true, COND.VS));
+    return rd;
+  }
+
+  public REG visitLenExpr(UnaryExpr unaryExpr) {
+    REG rd = visit(unaryExpr.insideExpr());
+    program.addInstr(new LDR(rd, new Addr(
+        rd))); //load first element at this address, which is the size
+    return rd;
+  }
+
+  public REG visitNegExpr(UnaryExpr unaryExpr) {
+    REG rd = visit(unaryExpr.insideExpr());
+    program.addInstr(new EOR(rd, rd, new Imm_INT(1)));
+
+    return rd;
+  }
+
+  public REG visitBasicUnaryOp(UnaryExpr unaryExpr) {
+    return visit(unaryExpr.insideExpr());
   }
 }

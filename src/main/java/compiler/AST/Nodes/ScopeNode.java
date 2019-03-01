@@ -9,7 +9,7 @@ public class ScopeNode extends Node {
   private ParentNode parentNode;
 
   public ScopeNode(ParentNode parentNode,
-      SymbolTable symbolTable, int lineNumber, int stackOffset) {
+      SymbolTable symbolTable, int lineNumber) {
     super(lineNumber);
     this.parentNode = parentNode;
     this.symbolTable = symbolTable;
@@ -33,7 +33,4 @@ public class ScopeNode extends Node {
     return parentNode;
   }
 
-  public int stackOffset() {
-    return symbolTable.getStackOffset();
-  }
 }

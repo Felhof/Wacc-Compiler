@@ -54,11 +54,4 @@ public class IfElseNode extends Node {
     return elseStat;
   }
 
-  public int thenStackOffset() {
-    return thenST.getStackOffset();
-  }
-
-  public int elseStatOffset() {
-    return elseST.getStackOffset();
-  }
 }
