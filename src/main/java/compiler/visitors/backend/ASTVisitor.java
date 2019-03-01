@@ -25,7 +25,6 @@ public class ASTVisitor {
     this.program = new IR();
     Subroutines subroutines = new Subroutines(program);
     List<REG> availableRegs = new ArrayList<>(allUsableRegs);
-
     nodeVisitor = new NodeVisitor(program, subroutines, availableRegs);
     nodeElemVisitor = new NodeElemVisitor(program, subroutines, availableRegs);
   }
