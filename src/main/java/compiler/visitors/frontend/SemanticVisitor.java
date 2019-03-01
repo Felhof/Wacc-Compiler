@@ -96,6 +96,7 @@ import compiler.AST.Types.GenericType;
 import compiler.AST.Types.IntType;
 import compiler.AST.Types.PairType;
 import compiler.AST.Types.Type;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -116,9 +117,10 @@ public class SemanticVisitor extends BasicParserBaseVisitor<ASTData> {
   public ASTData visitProg(ProgContext ctx) {
     currentParentNode = new ParentNode(ctx.start.getLine());
     addFuncDefToST(ctx);
-    ctx.func().forEach(f -> currentParentNode.add((Node) visit(f)));
+    List<FuncNode> funcNodes = new ArrayList<>();
+    ctx.func().forEach(f -> funcNodes.add((FuncNode) visit(f)));
     visit(ctx.stat());
-    return new AST(currentParentNode, currentST, stackPointerOffset);
+    return new AST(funcNodes, currentParentNode, currentST, stackPointerOffset);
   }
 
   private void addFuncDefToST(ProgContext ctx) {

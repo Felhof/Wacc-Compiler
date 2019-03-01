@@ -30,22 +30,14 @@ public class NodeVisitor extends CodeGenerator {
 
   // AST root visit methods that setup code generation fields and visit all
   // instructions
+
+  //method starts by visiting all functions and proceeds to main
   void visitFuncsAndChildren(AST root) {
-    // visit all functions with corresponding stack offset
-    root.root().children().stream().filter(node -> node instanceof FuncNode)
-        .forEach(f -> {
-          scopeStackOffset = ((FuncNode) f).stackOffset();
-          totalStackOffset = scopeStackOffset;
-          nextPosInStack = scopeStackOffset;
-          visit(f);
-        });
-    // Set up main offsets and symbol table
+    root.funcNodes().forEach(ASTVisitor::visit);
     scopeStackOffset = totalStackOffset = nextPosInStack = root.stackOffset();
     enterScope(root.symbolTable());
-    // Visit all instructions in main
     addMainStart();
-    root.root().children().stream().filter(node -> !(node instanceof FuncNode))
-        .forEach(ASTVisitor::visit);
+    root.root().children().forEach(ASTVisitor::visit);
     addMainEnd();
   }
 
@@ -148,6 +140,8 @@ public class NodeVisitor extends CodeGenerator {
   }
 
   public void visitFuncNode(FuncNode funcNode) {
+    scopeStackOffset = funcNode.stackOffset();
+    totalStackOffset = nextPosInStack = scopeStackOffset;
     enterScope(funcNode.symbolTable());
     program.addInstr(new LABEL("f_" + funcNode.name()));
     program.addInstr(new PUSH(LR));
