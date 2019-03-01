@@ -74,26 +74,26 @@ public class BinExpr extends Expr {
   public REG accept(NodeElemVisitor visitor) {
     switch (operator) {
       case PLUS:
-        return visitor.visitPlusExpr(this);
+        return visitor.visitBinaryPlus(this);
       case MINUS:
-        return visitor.visitMinusExpr(this);
+        return visitor.visitBinaryMinus(this);
       case MUL:
-        return visitor.visitMulExpr(this);
+        return visitor.visitBinaryMul(this);
       case DIV:
-        return visitor.visitDivExpr(this);
+        return visitor.visitBinaryDiv(this);
       case MOD:
-        return visitor.visitModExpr(this);
+        return visitor.visitBinaryMod(this);
       case AND:
-        return visitor.visitAndExpr(this);
+        return visitor.visitBinaryAnd(this);
       case OR:
-        return visitor.visitOrExpr(this);
+        return visitor.visitBinaryOr(this);
       case EQUAL:
       case GE:
       case GT:
       case LE:
       case LT:
       case NOTEQUAL:
-        return visitor.visitBoolBinExpr(this);
+        return visitor.visitBinaryBool(this);
       default:
         return null;
     }

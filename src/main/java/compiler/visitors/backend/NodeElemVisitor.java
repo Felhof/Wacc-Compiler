@@ -245,7 +245,7 @@ public class NodeElemVisitor extends CodeGenerator {
     return new REG[]{rd, rn};
   }
 
-  public REG visitPlusExpr(BinExpr binExpr) {
+  public REG visitBinaryPlus(BinExpr binExpr) {
     REG[] regs = visitBinExpr(binExpr);
     String overflowErrLabel = subroutines.addOverflowErr();
     program.addInstr(new ADD(regs[0], regs[0], regs[1], true));
@@ -254,7 +254,7 @@ public class NodeElemVisitor extends CodeGenerator {
     return regs[0];
   }
 
-  public REG visitMinusExpr(BinExpr binExpr) {
+  public REG visitBinaryMinus(BinExpr binExpr) {
     REG[] regs = visitBinExpr(binExpr);
     String overflowErrLabel = subroutines.addOverflowErr();
     program.addInstr(new SUB(regs[0], regs[0], regs[1], true));
@@ -263,7 +263,7 @@ public class NodeElemVisitor extends CodeGenerator {
     return regs[0];
   }
 
-  public REG visitMulExpr(BinExpr binExpr) {
+  public REG visitBinaryMul(BinExpr binExpr) {
     REG[] regs = visitBinExpr(binExpr);
     String overflowErrLabel = subroutines.addOverflowErr();
     program.addAllInstr(Arrays.asList(
@@ -274,7 +274,7 @@ public class NodeElemVisitor extends CodeGenerator {
     return regs[0];
   }
 
-  public REG visitDivExpr(BinExpr binExpr) {
+  public REG visitBinaryDiv(BinExpr binExpr) {
     REG[] regs = visitBinExpr(binExpr);
     String divByZeroLabel = subroutines.addCheckDivideByZero();
     program.addAllInstr(Arrays.asList(
@@ -285,7 +285,7 @@ public class NodeElemVisitor extends CodeGenerator {
     return regs[0];
   }
 
-  public REG visitModExpr(BinExpr binExpr) {
+  public REG visitBinaryMod(BinExpr binExpr) {
     REG[] regs = visitBinExpr(binExpr);
     String divByZeroLabel = subroutines.addCheckDivideByZero();
     program.addAllInstr(Arrays.asList(
@@ -296,21 +296,21 @@ public class NodeElemVisitor extends CodeGenerator {
     return regs[0];
   }
 
-  public REG visitAndExpr(BinExpr binExpr) {
+  public REG visitBinaryAnd(BinExpr binExpr) {
     REG[] regs = visitBinExpr(binExpr);
     program.addInstr(new AND(regs[0], regs[0], regs[1]));
     freeReg(regs[1]);
     return regs[0];
   }
 
-  public REG visitOrExpr(BinExpr binExpr) {
+  public REG visitBinaryOr(BinExpr binExpr) {
     REG[] regs = visitBinExpr(binExpr);
     program.addInstr(new ORR(regs[0], regs[0], regs[1]));
     freeReg(regs[1]);
     return regs[0];
   }
 
-  public REG visitBoolBinExpr(BinExpr binExpr) {
+  public REG visitBinaryBool(BinExpr binExpr) {
     REG[] regs = visitBinExpr(binExpr);
     program.addAllInstr(Arrays
         .asList(new CMP(regs[0], regs[1], null),
@@ -329,14 +329,14 @@ public class NodeElemVisitor extends CodeGenerator {
     return rd;
   }
 
-  public REG visitLenExpr(UnaryExpr unaryExpr) {
+  public REG visitUnaryLen(UnaryExpr unaryExpr) {
     REG rd = visit(unaryExpr.insideExpr());
     program.addInstr(new LDR(rd, new Addr(
         rd))); //load first element at this address, which is the size
     return rd;
   }
 
-  public REG visitNegExpr(UnaryExpr unaryExpr) {
+  public REG visitUnaryNeg(UnaryExpr unaryExpr) {
     REG rd = visit(unaryExpr.insideExpr());
     program.addInstr(new EOR(rd, rd, new Imm_INT(1)));
 

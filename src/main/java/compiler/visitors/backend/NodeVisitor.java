@@ -152,7 +152,7 @@ public class NodeVisitor extends CodeGenerator {
     visit(funcNode.getParentNode());
     program.addInstr(new POP(PC));
     program.addInstr(new SECTION("ltorg"));
-    exitScope(currentST.getEncSymTable());
+    exitScope(currentST);
   }
 
   public void visitFreeNode(FreeNode freeNode) {
@@ -211,22 +211,26 @@ public class NodeVisitor extends CodeGenerator {
 
   /* Util methods specific to AST Visitor */
 
+  // Generic method to enter a new scope(eg.while), configure stack
+  // and set appropriate symbol Table
   private void visitChildStats(SymbolTable st, ParentNode child) {
     int[] tempValues = setDynamicFields(st.getStackOffset());
     configureStack("sub");
     enterScope(st);
     visit(child);
-    exitScope(currentST.getEncSymTable());
+    exitScope(currentST);
     configureStack("add");
     reinstateDynamicsFields(tempValues);
   }
 
+  //Reassign fields to previous values in the enclosing scope
   private void reinstateDynamicsFields(int[] tempValues) {
     totalStackOffset = tempValues[0];
     scopeStackOffset = tempValues[1];
     nextPosInStack = tempValues[2];
   }
 
+  //Assign fields to values of new scope about to be entered
   private int[] setDynamicFields(int scopeOffset) {
     int[] tempValues = {totalStackOffset, scopeStackOffset, nextPosInStack};
     scopeStackOffset = scopeOffset;
@@ -240,8 +244,8 @@ public class NodeVisitor extends CodeGenerator {
     currentST = symbolTable;
   }
 
-  private void exitScope(SymbolTable encSymTable) {
-    currentST = encSymTable;
+  private void exitScope(SymbolTable symbolTable) {
+    currentST = symbolTable.getEncSymTable();
   }
 
 }

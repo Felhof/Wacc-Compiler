@@ -48,9 +48,9 @@ public class UnaryExpr extends Expr {
         }
         return visitor.visitUnaryMinus(this);
       case LEN:
-        return visitor.visitLenExpr(this);
+        return visitor.visitUnaryLen(this);
       case NEG:
-        return visitor.visitNegExpr(this);
+        return visitor.visitUnaryNeg(this);
       case ORD:
       case CHR:
       case PLUS:
