@@ -151,6 +151,7 @@ public class NodeElemVisitor extends CodeGenerator {
     return rd;
   }
 
+  // generate code for heap storing of pair
   public REG visitPair(Pair pair) {
     loadArg(new Imm_INT_MEM(2 * WORD_SIZE), false);
     program.addInstr(new B("malloc", true));
@@ -158,12 +159,6 @@ public class NodeElemVisitor extends CodeGenerator {
     program.addInstr(new MOV(rd, R0)); // fetch address of pair
     storeExpInHeap(pair.fst(), rd, 0);
     storeExpInHeap(pair.snd(), rd, WORD_SIZE);
-    return rd;
-  }
-
-  public REG visitNullPair() {
-    REG rd = useAvailableReg();
-    program.addInstr(new LDR(rd, new Imm_INT_MEM(0), false));
     return rd;
   }
 
@@ -175,6 +170,12 @@ public class NodeElemVisitor extends CodeGenerator {
     program.addInstr(
         new STR(R0, new Addr(objectAddr, true, new Imm_INT(offset))));
     freeReg(rd);
+  }
+
+  public REG visitNullPair() {
+    REG rd = useAvailableReg();
+    program.addInstr(new LDR(rd, new Imm_INT_MEM(0), false));
+    return rd;
   }
 
   public REG visitIdentLHS(Ident ident) {
@@ -216,6 +217,7 @@ public class NodeElemVisitor extends CodeGenerator {
     return null;
   }
 
+  // push args onto the stack
   public REG visitArgs(ListExpr listExpr) {
     List<Expr> reverseArgs = new ArrayList<>(listExpr.exprList());
     Collections.reverse(reverseArgs);
@@ -229,6 +231,9 @@ public class NodeElemVisitor extends CodeGenerator {
     }
     return null;
   }
+
+  /*----- Various methods for binary and unary instructions -----*/
+
   public REG[] visitBinExpr(BinExpr binExpr) {
     REG rd = visit(binExpr.lhs());
 

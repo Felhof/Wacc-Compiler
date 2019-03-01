@@ -54,6 +54,7 @@ public class NodeVisitor extends CodeGenerator {
         new SECTION("ltorg")));
   }
 
+  // prepare some memory for var declarations
   private void configureStack(String type) {
     if (scopeStackOffset > 0) {
       int temp = scopeStackOffset;
